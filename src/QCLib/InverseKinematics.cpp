@@ -123,6 +123,8 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
     double rl_velocity = thrustToVelocity(rl_thrust);
     double rr_velocity = thrustToVelocity(rr_thrust);
 
+    //Step 4:
+
     return InverseKinematicResult{
         MotorVelocities{fl_velocity, fr_velocity, rl_velocity, rr_velocity},
         QCAcceleration(Rotation3d(), 0,0,0), //TODO: calculate achieved acceleration

@@ -13,12 +13,20 @@
  * and the other will adjust the thrust to best match the *magnitude* of the acceleration vector.
  * I'm not sure which will work better, so I'll implement both and see.
  */
-struct InverseKinematicResult {
+
+/**
+ * @brief Represents the result of an inverse kinematics calculation
+ */
+ struct InverseKinematicResult {
     MotorVelocities motorVelocities;
     QCAcceleration achievedAccel;
     double errorMagnitude;
 };
 
+
+/**
+ * @brief Represents the target state for the quadcopter based on desired acceleration and yaw rate
+ */
 struct TargetQCState {
     Rotation3d targetAngle;
     double targetThrust;
