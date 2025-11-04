@@ -3,6 +3,7 @@
 #include "Kinematics.h"
 
 #include <iostream>
+#include <vector>
 
 int main() {
     QCState currentState = QCState(
@@ -41,4 +42,25 @@ int main() {
     std::cout << "\nAchieved Accel: " << std::endl;
     accel.getAngular().print();
     std::cout << "X: " << accel.getX() << " Y: "<< accel.getY() << " Z: " << accel.getZ() << std::endl;
+
+    //test path generation with util.h
+
+    auto path = Path(
+        {
+            Vector2D{0,0},
+            Vector2D{1,2},
+            Vector2D{3,3},
+            Vector2D{4,0}
+        },
+        50, // max velocity
+        2.0, // max acceleration
+        5.0  // max jerk
+    );
+
+    double dt = 0.1;
+    std::cout << "\nPath Sampling:\n";
+    for(double t = 0.0; t <= path.getTotalTime(); t += dt) {
+        PathPoint pt = path.sample(t);
+        std::cout << "t=" << t << ": Pos(" << pt.pos.x << ", " << pt.pos.y << "), Vel(" << pt.vel.x << ", " << pt.vel.y << "), Acc(" << pt.acc.x << ", " << pt.acc.y << ")\n";
+    }
 }

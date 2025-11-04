@@ -175,7 +175,11 @@ CMakeFiles/test.dir/src/test.cpp.o: \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc \
+ /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/stl_uninitialized.h \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
  /home/seanb/Documents/quadsquad2026/include/Kinematics.h
