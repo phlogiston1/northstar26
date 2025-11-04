@@ -33,8 +33,6 @@ CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o: \
  /usr/include/c++/13/bits/predefined_ops.h /usr/include/c++/13/bit \
  /usr/include/c++/13/bits/range_access.h \
  /home/seanb/Documents/quadsquad2026/include/Util.h \
- /home/seanb/Documents/quadsquad2026/include/Configuration.h \
- /home/seanb/Documents/quadsquad2026/include/Util.h \
  /usr/include/c++/13/cmath /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
@@ -178,4 +176,5 @@ CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o: \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc
+ /usr/include/c++/13/bits/istream.tcc \
+ /home/seanb/Documents/quadsquad2026/include/Configuration.h

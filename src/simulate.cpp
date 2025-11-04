@@ -125,13 +125,13 @@ int main(){
             next = next.predict(now - last);
         }
         last = now;
-        auto rotation = next.getPose().getRotation();
+        auto rotation = next.getPose().rotation;
 
 
         foxglove::schemas::CubePrimitive cube;
         cube.size = foxglove::schemas::Vector3{QUADCOPTER_ROTOR_DISTANCE, QUADCOPTER_ROTOR_DISTANCE, 0.05};
         cube.color = foxglove::schemas::Color{1, 1, 1, 1};
-        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-0.1*next.getPose().getX(), -0.1*next.getPose().getY(), -0.1*next.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.getX(),rotation.getY(),rotation.getZ(),rotation.getW()}};
+        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-0.1*next.getPose().getX(), -0.1*next.getPose().getY(), -0.1*next.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
 
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";

@@ -265,7 +265,6 @@ CMakeFiles/simulate.dir/src/simulate.cpp.o: \
  /usr/include/c++/13/bits/this_thread_sleep.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
  /home/seanb/Documents/quadsquad2026/include/Util.h \
- /home/seanb/Documents/quadsquad2026/include/Util.h \
  /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h

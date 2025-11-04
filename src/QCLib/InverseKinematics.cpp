@@ -26,11 +26,11 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
     // Frame convention: +X forward, +Y right, +Z down (NED)
     //account for gravity and drag:
     targetAccel = targetAccel - Vector3d(0, 0, 9.8);
-    Vector3d dragForce = currentState.getVelocity().getTranslation().componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
+    Vector3d dragForce = currentState.getVelocity().translation.componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
     targetAccel = targetAccel + (dragForce / QUADCOPTER_MASS);
 
     // 1. Get current yaw (assumed to be around Z axis)
-    double fixed_yaw = currentState.getPose().getRotation().getYaw();
+    double fixed_yaw = currentState.getPose().rotation.getYaw();
 
     // 2. Normalize targetAccel to get direction (z_body axis)
     Vector3d z_body = -targetAccel.normalized(); // body Z axis in world frame (aligned with thrust direction)
@@ -61,7 +61,7 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
     // since this will prevent the quadcopter from moving upward or downward while it is moving laterally.
 
     // To do this, we project the target acceleration onto the quadcopter's current Z axis.
-    Vector3d currentZAxis = currentState.getPose().getRotation().getZAxis();
+    Vector3d currentZAxis = currentState.getPose().rotation.getZAxis();
     double z_accel = -targetAccel.dot(currentZAxis);
     double targetThrust = z_accel * QUADCOPTER_MASS;
     // double targetThrust = targetAccel.getZ() * QUADCOPTER_MASS;
@@ -71,8 +71,8 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
 
 InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCState targetState, double timestep) {
     //Step 1: Find the theretical forces at the points (width/2,0) and (0,width/2) that would produce the desired angular acceleration for pitch and roll.
-    double desiredAngularAccelPitch = (targetState.targetAngle.getPitch() - currentState.getPose().getRotation().getPitch()) / timestep;
-    double desiredAngularAccelRoll = (targetState.targetAngle.getRoll() - currentState.getPose().getRotation().getRoll()) / timestep;
+    double desiredAngularAccelPitch = (targetState.targetAngle.getPitch() - currentState.getPose().rotation.getPitch()) / timestep;
+    double desiredAngularAccelRoll = (targetState.targetAngle.getRoll() - currentState.getPose().rotation.getRoll()) / timestep;
 
     /*
     These values give us two formulas that give us the difference in thrust between opposite motors:

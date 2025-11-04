@@ -13,8 +13,8 @@ int main() {
     );
 
     std::cout << "Accel from defined current state:\n";
-    QCAcceleration currentAccel = velocitiesToAccel(currentState.getMotorVelocities(), currentState.getPose().getRotation());
-    currentAccel.getAngular().printDegrees();
+    QCAcceleration currentAccel = velocitiesToAccel(currentState.getMotorVelocities(), currentState.getPose().rotation);
+    currentAccel.getAngular().print();
     std::cout << "X: " << currentAccel.getX() << " Y: "<< currentAccel.getY() << " Z: " << currentAccel.getZ() << std::endl;
 
     Vector3d targetAccel(0,0,1);
@@ -39,6 +39,6 @@ int main() {
 
     auto accel = velocitiesToAccel(ikResult.motorVelocities, targetState.targetAngle);
     std::cout << "\nAchieved Accel: " << std::endl;
-    accel.getAngular().printDegrees();
+    accel.getAngular().print();
     std::cout << "X: " << accel.getX() << " Y: "<< accel.getY() << " Z: " << accel.getZ() << std::endl;
 }
