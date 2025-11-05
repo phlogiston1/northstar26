@@ -7,61 +7,53 @@
 #include <vector>
 
 int main() {
-    QCState currentState = QCState(
-        Pose3d(Vector3d(0,0,0), Rotation3d::fromDegrees(0,5,0)),
-        Pose3d(Vector3d(0,0,0), Rotation3d::fromDegrees(0,0,0)),
-        MotorVelocities(1331,1331,1331,1331),
-        0
-    );
-
-    std::cout << "Accel from defined current state:\n";
-    QCAcceleration currentAccel = velocitiesToAccel(currentState.getMotorVelocities(), currentState.getPose().rotation);
-    currentAccel.getAngular().print();
-    std::cout << "X: " << currentAccel.getX() << " Y: "<< currentAccel.getY() << " Z: " << currentAccel.getZ() << std::endl;
-
-    Vector3d targetAccel(0,0,1);
-    double targetYawRate = 0.05;
-
-    
-
-    TargetQCState targetState = calculateTargetState(currentState, targetAccel, targetYawRate);
-
-    std::cout << "\nIdeal State Rotation: " << std::endl;
-    targetState.targetAngle.print();
+    std::cout << "Welcome to the all inclusive QCLib test suite!" << std::endl;
+    std::cout << std::endl;
 
 
-    std::cout << "Ideal State Thrust:" <<targetState.targetThrust << std::endl;
+    std::cout << "--------TEST: Kinematics sanity check--------" << std::endl;
 
-    InverseKinematicResult ikResult = optimizeMotorVelocities(currentState, targetState, 1);
-    std::cout << "\nInverse Kinematics Motor Velocities:\n\tFront Left: "
-              << ikResult.motorVelocities.getFrontLeft() << ", \n\tFront Right: "
-              << ikResult.motorVelocities.getFrontRight() << ", \n\tRear Left: "
-              << ikResult.motorVelocities.getRearLeft() << ", \n\tRear Right: "
-              << ikResult.motorVelocities.getRearRight() << std::endl;
-
-    auto accel = velocitiesToAccel(ikResult.motorVelocities, targetState.targetAngle);
-    std::cout << "\nAchieved Accel: " << std::endl;
+    std::cout << "motor velocities fl:0 fr:0 rl:0 rr:0, should result in +Z acceleration due to gravity" << std::endl;
+    MotorVelocities testVels(00.0, 00.0, 00.0, 00.0);
+    Rotation3d testRotation = Rotation3d::fromDegrees(0.0, 0.0, 0.0);
+    QCAcceleration accel = velocitiesToAccel(testVels, testRotation);
+    std::cout << "\tAccel X: " << accel.getX() << " Y: " << accel.getY() << " Z: " << accel.getZ() <<  std::endl << "\tAngular Accel: ";
     accel.getAngular().print();
-    std::cout << "X: " << accel.getX() << " Y: "<< accel.getY() << " Z: " << accel.getZ() << std::endl;
 
-    //test path generation with util.h
+    std::cout << "motor velocities fl:2000 fr:2000 rl:2000 rr:2000, should result in -Z acceleration overcoming gravity" << std::endl;
+    MotorVelocities testVels2(2000.0, 2000.0, 2000.0, 2000.0);
+    QCAcceleration accel2 = velocitiesToAccel(testVels2, testRotation);
+    std::cout << "\tAccel X: " << accel2.getX() << " Y: " << accel2.getY() << " Z: " << accel2.getZ() <<  std::endl << "\tAngular Accel: ";
+    accel2.getAngular().print();
 
-    auto path = Path(
-        {
-            Vector2D{0,0},
-            Vector2D{1,2},
-            Vector2D{3,3},
-            Vector2D{4,0}
-        },
-        50, // max velocity
-        2.0, // max acceleration
-        5.0  // max jerk
+    std::cout << "motor velocities fl:2000 fr:2000 rl:1500 rr:1500, \n roll -45deg, should result in negative pitch accel (which is actually the copter angling forward) and -Z and Y axis acceleration" << std::endl;
+    MotorVelocities testVels3(2000.0, 2000.0, 1500.0, 1500.0);
+    Rotation3d testRotation3 = Rotation3d::fromDegrees(0.0, 0.0, -45.0);
+    QCAcceleration accel3 = velocitiesToAccel(testVels3, testRotation3);
+    std::cout << "\tAccel X: " << accel3.getX() << " Y: " << accel3.getY() << " Z: " << accel3.getZ() <<  std::endl << "\tAngular Accel: ";
+    accel3.getAngular().print();
+
+
+    std::cout << "\n\n--------TEST: Inverse Kinematics/Forward Kinematics consistency--------" << std::endl;
+    MotorVelocities testVels4(1800.0, 1900.0, 2000.0, 2100.0);
+    Rotation3d testRotation4 = Rotation3d::fromDegrees(10.0, -5.0, 15.0);
+    QCAcceleration accel4 = velocitiesToAccel(testVels4, testRotation4);
+    std::cout << "Given Motor Velocities fl:" << testVels4.getFrontLeft() << " fr:" << testVels4.getFrontRight()
+              << " rl:" << testVels4.getRearLeft() << " rr:" << testVels4.getRearRight() << std::endl;
+    std::cout << "\tCalculated Accel X: " << accel4.getX() << " Y: " << accel4.getY() << " Z: " << accel4.getZ() <<  std::endl << "\tAngular Accel: ";
+    accel4.getAngular().print();
+    TargetQCState tstate = calculateTargetState(
+        QCState(Pose3d(), Pose3d(), testVels4, 0.0),
+        Vector3d(accel4.getX(), accel4.getY(), accel4.getZ() + 9.8), //add gravity back in
+        0.0 //no yaw rate
     );
+    InverseKinematicResult ikResult = optimizeMotorVelocities(
+        QCState(Pose3d(), Pose3d(), MotorVelocities(0,0,0,0), 0.0),
+        tstate,
+        0.001 //20ms timestep
+    );
+    std::cout << "Inverse Kinematics Resulting Motor Velocities fl:" << ikResult.motorVelocities.getFrontLeft() << " fr:" << ikResult.motorVelocities.getFrontRight()
+              << " rl:" << ikResult.motorVelocities.getRearLeft() << " rr:" << ikResult.motorVelocities.getRearRight() << std::endl;
+    std::cout << "note: these values will not match due to motor acceleration limits, and discretization of acceleration in InverseKinematics" << std::endl;
 
-    double dt = 0.1;
-    std::cout << "\nPath Sampling:\n";
-    for(double t = 0.0; t <= path.getTotalTime(); t += dt) {
-        PathPoint pt = path.sample(t);
-        std::cout << "t=" << t << ": Pos(" << pt.pos.x << ", " << pt.pos.y << "), Vel(" << pt.vel.x << ", " << pt.vel.y << "), Acc(" << pt.acc.x << ", " << pt.acc.y << ")\n";
-    }
 }

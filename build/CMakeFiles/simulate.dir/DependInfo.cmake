@@ -22,7 +22,6 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/seanb/Documents/quadsquad2026/src/QCLib/InverseKinematics.cpp" "CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Kinematics.cpp" "CMakeFiles/simulate.dir/src/QCLib/Kinematics.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/Kinematics.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp" "CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.o.d"
-  "/home/seanb/Documents/quadsquad2026/src/QCLib/Odometry.cpp" "CMakeFiles/simulate.dir/src/QCLib/Odometry.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/Odometry.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp" "CMakeFiles/simulate.dir/src/QCLib/Path.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/Path.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp" "CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Util.cpp" "CMakeFiles/simulate.dir/src/QCLib/Util.cpp.o" "gcc" "CMakeFiles/simulate.dir/src/QCLib/Util.cpp.o.d"

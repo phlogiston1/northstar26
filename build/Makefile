@@ -521,33 +521,6 @@ src/QCLib/MotionController.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/MotionController.cpp.s
 .PHONY : src/QCLib/MotionController.cpp.s
 
-src/QCLib/Odometry.o: src/QCLib/Odometry.cpp.o
-.PHONY : src/QCLib/Odometry.o
-
-# target to build an object file
-src/QCLib/Odometry.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Odometry.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Odometry.cpp.o
-.PHONY : src/QCLib/Odometry.cpp.o
-
-src/QCLib/Odometry.i: src/QCLib/Odometry.cpp.i
-.PHONY : src/QCLib/Odometry.i
-
-# target to preprocess a source file
-src/QCLib/Odometry.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Odometry.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Odometry.cpp.i
-.PHONY : src/QCLib/Odometry.cpp.i
-
-src/QCLib/Odometry.s: src/QCLib/Odometry.cpp.s
-.PHONY : src/QCLib/Odometry.s
-
-# target to generate assembly for a file
-src/QCLib/Odometry.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Odometry.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Odometry.cpp.s
-.PHONY : src/QCLib/Odometry.cpp.s
-
 src/QCLib/Path.o: src/QCLib/Path.cpp.o
 .PHONY : src/QCLib/Path.o
 
@@ -729,9 +702,6 @@ help:
 	@echo "... src/QCLib/MotionController.o"
 	@echo "... src/QCLib/MotionController.i"
 	@echo "... src/QCLib/MotionController.s"
-	@echo "... src/QCLib/Odometry.o"
-	@echo "... src/QCLib/Odometry.i"
-	@echo "... src/QCLib/Odometry.s"
 	@echo "... src/QCLib/Path.o"
 	@echo "... src/QCLib/Path.i"
 	@echo "... src/QCLib/Path.s"

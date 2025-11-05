@@ -123,7 +123,22 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
     double rl_velocity = thrustToVelocity(rl_thrust);
     double rr_velocity = thrustToVelocity(rr_thrust);
 
-    //Step 4:
+    //Step 4: If motor acceleration exceeds the motor ramp rate, scale the difference between the current and target velocities accordingly.
+    double maxAllowedDeltaV = MOTOR_VELOCITY_RAMP_RATE * timestep;
+    double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getFrontLeft();
+    double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFrontRight();
+    double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRearLeft();
+    double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRearRight();
+    double maxAbsDeltaV = std::max(std::max(std::abs(fl_deltaV), std::abs(fr_deltaV)), std::max(std::abs(rl_deltaV), std::abs(rr_deltaV)));
+    if(maxAbsDeltaV > maxAllowedDeltaV) {
+        double scale = maxAllowedDeltaV / maxAbsDeltaV;
+        fl_velocity = currentState.getMotorVelocities().getFrontLeft() + fl_deltaV * scale;
+        fr_velocity = currentState.getMotorVelocities().getFrontRight() + fr_deltaV * scale;
+        rl_velocity = currentState.getMotorVelocities().getRearLeft() + rl_deltaV * scale;
+        rr_velocity = currentState.getMotorVelocities().getRearRight() + rr_deltaV * scale;
+    }
+
+    //Step 5:
 
     return InverseKinematicResult{
         MotorVelocities{fl_velocity, fr_velocity, rl_velocity, rr_velocity},

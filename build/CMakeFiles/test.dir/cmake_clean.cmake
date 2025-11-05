@@ -27,8 +27,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o.d"
   "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o"
   "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o.d"
-  "CMakeFiles/test.dir/src/QCLib/Odometry.cpp.o"
-  "CMakeFiles/test.dir/src/QCLib/Odometry.cpp.o.d"
   "CMakeFiles/test.dir/src/QCLib/Path.cpp.o"
   "CMakeFiles/test.dir/src/QCLib/Path.cpp.o.d"
   "CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o"
