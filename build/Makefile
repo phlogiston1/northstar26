@@ -548,6 +548,33 @@ src/QCLib/Odometry.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Odometry.cpp.s
 .PHONY : src/QCLib/Odometry.cpp.s
 
+src/QCLib/Path.o: src/QCLib/Path.cpp.o
+.PHONY : src/QCLib/Path.o
+
+# target to build an object file
+src/QCLib/Path.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Path.cpp.o
+.PHONY : src/QCLib/Path.cpp.o
+
+src/QCLib/Path.i: src/QCLib/Path.cpp.i
+.PHONY : src/QCLib/Path.i
+
+# target to preprocess a source file
+src/QCLib/Path.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Path.cpp.i
+.PHONY : src/QCLib/Path.cpp.i
+
+src/QCLib/Path.s: src/QCLib/Path.cpp.s
+.PHONY : src/QCLib/Path.s
+
+# target to generate assembly for a file
+src/QCLib/Path.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Path.cpp.s
+.PHONY : src/QCLib/Path.cpp.s
+
 src/QCLib/Quadcopter.o: src/QCLib/Quadcopter.cpp.o
 .PHONY : src/QCLib/Quadcopter.o
 
@@ -705,6 +732,9 @@ help:
 	@echo "... src/QCLib/Odometry.o"
 	@echo "... src/QCLib/Odometry.i"
 	@echo "... src/QCLib/Odometry.s"
+	@echo "... src/QCLib/Path.o"
+	@echo "... src/QCLib/Path.i"
+	@echo "... src/QCLib/Path.s"
 	@echo "... src/QCLib/Quadcopter.o"
 	@echo "... src/QCLib/Quadcopter.i"
 	@echo "... src/QCLib/Quadcopter.s"

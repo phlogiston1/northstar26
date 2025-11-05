@@ -182,4 +182,5 @@ CMakeFiles/test.dir/src/test.cpp.o: \
  /usr/include/c++/13/bits/vector.tcc \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
- /home/seanb/Documents/quadsquad2026/include/Kinematics.h
+ /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
+ /home/seanb/Documents/quadsquad2026/include/Path.h

@@ -1,6 +1,7 @@
 #include "Quadcopter.h"
 #include "InverseKinematics.h"
 #include "Kinematics.h"
+#include "Path.h"
 
 #include <iostream>
 #include <vector>

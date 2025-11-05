@@ -3500,6 +3500,7 @@ CMakeFiles/test.dir/src/QCLib/Util.cpp.o: /home/seanb/Documents/quadsquad2026/sr
 CMakeFiles/test.dir/src/test.cpp.o: /home/seanb/Documents/quadsquad2026/src/test.cpp \
   /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
   /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
+  /home/seanb/Documents/quadsquad2026/include/Path.h \
   /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
   /home/seanb/Documents/quadsquad2026/include/Util.h \
   /usr/include/alloca.h \
@@ -3720,6 +3721,8 @@ CMakeFiles/test.dir/src/test.cpp.o: /home/seanb/Documents/quadsquad2026/src/test
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h
 
+
+/home/seanb/Documents/quadsquad2026/include/Path.h:
 
 /home/seanb/Documents/quadsquad2026/src/test.cpp:
 

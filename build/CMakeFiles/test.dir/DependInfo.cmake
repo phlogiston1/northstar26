@@ -23,6 +23,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Kinematics.cpp" "CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp" "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Odometry.cpp" "CMakeFiles/test.dir/src/QCLib/Odometry.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Odometry.cpp.o.d"
+  "/home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp" "CMakeFiles/test.dir/src/QCLib/Path.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Path.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp" "CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Util.cpp" "CMakeFiles/test.dir/src/QCLib/Util.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Util.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/test.cpp" "CMakeFiles/test.dir/src/test.cpp.o" "gcc" "CMakeFiles/test.dir/src/test.cpp.o.d"
