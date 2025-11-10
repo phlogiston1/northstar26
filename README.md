@@ -1,4 +1,4 @@
-# HI QUAD SQUAD
+# HI NORTHSTAR
 Lets make some cool stuff!
 
 # COORDINATE SYSTEM!!
@@ -33,6 +33,7 @@ base_station.cpp - the control loop for the base computer
  - Kinematics: This file is responsible for calculating the acceleration of the quadcopter given the known information about it's state (the quadcopter's angle and motor speeds)
  - InverseKinematics: Does the opposite of Kinematics - calculates the quadcopter's state needed to attain a desired acceleration.
  - MotionController: This file is responsible for figuring out what the desired acceleration of the quadcopter is based on the desired velocity or position of the quadcopter.
+ - 
 
 ## Eventually:
 ## FlightController - eventually connects QCLib to the hardware on the quadcopter

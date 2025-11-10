@@ -6,6 +6,14 @@
 
 struct Rotation3d; // forward declaration
 
+struct Vector2D {
+    double x, y;
+    Vector2D operator+(const Vector2D& o) const { return {x + o.x, y + o.y}; }
+    Vector2D operator-(const Vector2D& o) const { return {x - o.x, y - o.y}; }
+    Vector2D operator*(double s) const { return {x * s, y * s}; }
+    Vector2D operator/(double s) const { return {x / s, y / s}; }
+    double norm() const { return std::sqrt(x * x + y * y); }
+};
 
 // ============================
 // Vector3d
@@ -37,6 +45,10 @@ struct Vector3d {
             z*o.x - x*o.z,
             x*o.y - y*o.x
         };
+    }
+
+    Vector2D toVector2D() const {
+        return Vector2D{x, y};
     }
 
     Vector3d operator+(const Vector3d& o) const { return {x+o.x, y+o.y, z+o.z}; }
@@ -151,11 +163,3 @@ struct Pose3d {
 // ============================
 // 2D types remain unchanged
 // ============================
-struct Vector2D {
-    double x, y;
-    Vector2D operator+(const Vector2D& o) const { return {x + o.x, y + o.y}; }
-    Vector2D operator-(const Vector2D& o) const { return {x - o.x, y - o.y}; }
-    Vector2D operator*(double s) const { return {x * s, y * s}; }
-    Vector2D operator/(double s) const { return {x / s, y / s}; }
-    double norm() const { return std::sqrt(x * x + y * y); }
-};

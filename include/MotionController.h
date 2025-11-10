@@ -1,35 +1,43 @@
 #include "Quadcopter.h"
-class MotionController {
-    public:
-        virtual ~MotionController() = default;
-        virtual MotorVelocities calculateMotorVelocities(const QCState& currentState, const Vector3d& targetVelocity, double targetYaw) = 0;
-};
+#include "Path.h"
+#include "InverseKinematics.h"
+#include <chrono>
 
-class ManualController : public MotionController {
+class VelocityController{
     public:
-        ManualController(MotorVelocities initialVels);
-        MotorVelocities calculateMotorVelocities(const QCState& currentState, const Vector3d& targetVelocity, double targetYaw ) override;
-        void setMotorVelocities(MotorVelocities newVels);
+        VelocityController();
+        Vector3d getTargetAcceleration(QCState& currentState, const Vector3d& targetVelocity);
     private:
-        MotorVelocities motorVels;
+        Vector3d lastTargetAcceleration = Vector3d(0,0,0);
 };
 
-class PIDController : public MotionController {
+class PathController{
     public:
-        PIDController(Pose3d kp, Pose3d ki, Pose3d kd, MotorVelocities hoverVels);
-        MotorVelocities calculateMotorVelocities(const QCState& currentState, const Vector3d& targetVelocity, double targetYaw) override;
+        PathController(Vector2D position_kp, Vector2D velocity_kp, double cruiseHeight_kP);
+        void beginPath(const Path& newPath, double cruiseHeight);
+        Vector3d getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
     private:
-        Pose3d kp;
-        Pose3d ki;
-        Pose3d kd;
-        MotorVelocities hoverVels;
-
-        Pose3d integralError;
-        Pose3d lastError;
+        Path path;
+        double cruiseHeight;
+        std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+        Vector2D position_kp;
+        Vector2D velocity_kp;
+        double cruiseHeight_kP;
 };
 
-class QuadSquadController : public MotionController {
+//uses trapeoidal motion profile to smoothly take off to a target height
+class TakeoffController{
     public:
-        QuadSquadController(MotorVelocities hoverVels);
-        MotorVelocities calculateMotorVelocities(const QCState& currentState, const Vector3d& targetVelocity, double targetYaw) override;
+        TakeoffController(double kP, double maxVelocity, double maxAcceleration);
+        void setTargetHeight(double height, double currentHeight);
+        Vector3d getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
+    private:
+        double targetHeight;
+        double maxVelocity;
+        double maxAcceleration;
+        std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+        double acceleration_time; //time spent accelerating
+        double cruise_time; //time spent at constant velocity
+        double deceleration_time; //time spent decelerating
+        double kP;
 };

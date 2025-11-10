@@ -25,6 +25,7 @@
 #define MAX_VELOCITY_Z 3.0 //max vertical velocity in m/s
 #define MAX_ACCELERATION_XY 2.0 //max horizontal acceleration in m/s^2
 #define MAX_ACCELERATION_Z 2.0 //max vertical acceleration in m/s^2
+#define MAX_JERK_XY 5.0 //max horizontal jerk in m/s^3
 #define MAX_YAW_RATE 1.0 //max yaw rate in rad/s
 #define MAX_YAW_ACCELERATION 1.0 //max yaw acceleration in rad/s^2
 
