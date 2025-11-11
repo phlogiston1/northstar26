@@ -30,7 +30,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-TakeoffController takeoffController = TakeoffController(0,0.5,1);
+TakeoffController takeoffController = TakeoffController(0.5,0.5,1);
 MotorVelocities initialVels = MotorVelocities(0,0,0,0);
 QCState initialState = QCState(
     Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)),
@@ -41,7 +41,7 @@ QCState currentState = initialState;
 
 void initSimulation() {
     currentState = initialState;
-    takeoffController.setTargetHeight(5,0);
+    takeoffController.setTargetHeight(1,0);
 }
 
 
@@ -139,7 +139,7 @@ int main(){
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
 
-        runSimulation(numIters, 0.1);
+        runSimulation(numIters, 0.05);
 
         last = now;
         auto rotation = currentState.getPose().rotation;
@@ -148,7 +148,7 @@ int main(){
         foxglove::schemas::CubePrimitive cube;
         cube.size = foxglove::schemas::Vector3{QUADCOPTER_ROTOR_DISTANCE, QUADCOPTER_ROTOR_DISTANCE, 0.05};
         cube.color = foxglove::schemas::Color{1, 1, 1, 1};
-        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-0.1*currentState.getPose().getX(), -0.1*currentState.getPose().getY(), -0.1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-1*currentState.getPose().getX(), -1*currentState.getPose().getY(), -1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
 
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";

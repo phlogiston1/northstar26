@@ -68,7 +68,7 @@ QCAcceleration velocitiesToAccel (QCState currentState) {
     Vector3d dragForce = velocity_squared.componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
 
     Vector3d acceleration = (force - dragForce) / QUADCOPTER_MASS;
-    // acceleration.z += 9.8;
+    acceleration.z += 9.8;
 
     return QCAcceleration(
         angularAccel,

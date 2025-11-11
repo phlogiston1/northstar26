@@ -104,7 +104,7 @@ TargetQCState calculateTargetState_robust(QCState currentState, Vector3d targetA
 TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, double targetYawRate) {
     // Frame convention: +X forward, +Y right, +Z down (NED)
     //account for gravity and drag:
-    // targetAccel = targetAccel - Vector3d(0, 0, 9.8);
+    targetAccel = targetAccel - Vector3d(0, 0, 9.8);
     auto vel = currentState.getVelocity().translation;
     auto velocity_squared  = Vector3d(
         vel.x * std::abs(vel.x),

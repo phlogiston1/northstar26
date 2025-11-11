@@ -124,11 +124,13 @@ Vector3d TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d 
         targetHeightAtTime = targetHeight;
     }
 
-    double heightError = targetHeightAtTime - currentPosition.getZ();
+    std::cout << "Target Height: " << targetHeightAtTime << std::endl;
+
+    double heightError = targetHeightAtTime + currentPosition.getZ();
     Vector3d targetAcceleration = Vector3d{
         0.0,
         0.0,
-        targetAccelerationZ + heightError * kP
+        (targetAccelerationZ) + heightError * kP
     };
     return -targetAcceleration;
 }
