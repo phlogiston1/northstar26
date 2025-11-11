@@ -79,7 +79,7 @@ Vector3d PathController::getTargetAcceleration(QCState& currentState, Pose3d cur
     return targetAcceleration;
 }
 
-TakeoffController::TakeoffController(double kP, double velocity, double acceleration) : kP(kP), maxVelocity(velocity), maxAcceleration(maxAcceleration) {
+TakeoffController::TakeoffController(double kP, double velocity, double acceleration) : kP(kP), maxVelocity(velocity), maxAcceleration(acceleration) {
     setTargetHeight(0.0, 0.0);
 }
 
@@ -105,7 +105,6 @@ void TakeoffController::setTargetHeight(double height, double currentHeight) {
 Vector3d TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d currentPosition) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - startTime).count();
-
     //calculate target height based on motion profile
     double targetHeightAtTime;
     double targetAccelerationZ = 0.0;
@@ -121,7 +120,7 @@ Vector3d TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d 
                                 + maxVelocity * cruise_time
                                 + maxVelocity * t - 0.5 * maxAcceleration * t * t;
         targetAccelerationZ = -maxAcceleration;
-                            } else {
+    } else {
         targetHeightAtTime = targetHeight;
     }
 
@@ -131,5 +130,5 @@ Vector3d TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d 
         0.0,
         targetAccelerationZ + heightError * kP
     };
-    return targetAcceleration;
+    return -targetAcceleration;
 }

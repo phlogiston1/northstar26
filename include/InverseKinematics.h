@@ -33,6 +33,7 @@ struct TargetQCState {
     double targetYawRate;
 };
 
+TargetQCState calculateTargetState_robust(QCState currentState, Vector3d targetAccel, double targetYawRate);
 TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, double targetYaw);
 
 InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCState targetState, double timestep);

@@ -22,11 +22,11 @@ double velocityToThrust(double velocity) {
     return THRUST_COEFF * velocity * velocity;
 }
 
-QCAcceleration velocitiesToAccel (MotorVelocities velocities, Rotation3d measuredAngle) {
-    double thrust_fl = velocityToThrust(velocities.getFrontLeft());
-    double thrust_rl = velocityToThrust(velocities.getRearLeft());
-    double thrust_fr = velocityToThrust(velocities.getFrontRight());
-    double thrust_rr = velocityToThrust(velocities.getRearRight());
+QCAcceleration velocitiesToAccel (QCState currentState) {
+    double thrust_fl = velocityToThrust(currentState.getMotorVelocities().getFrontLeft());
+    double thrust_rl = velocityToThrust(currentState.getMotorVelocities().getRearLeft());
+    double thrust_fr = velocityToThrust(currentState.getMotorVelocities().getFrontRight());
+    double thrust_rr = velocityToThrust(currentState.getMotorVelocities().getRearRight());
 
     //note: torque_x means torque about the x axis, etc.
     //since the rotors are opposing each other's torques, we can simply consider the difference between opposite rotors.
@@ -34,10 +34,10 @@ QCAcceleration velocitiesToAccel (MotorVelocities velocities, Rotation3d measure
     double torque_y = ((thrust_rl - thrust_fr) + (thrust_rr - thrust_fl)) * rotor_pos;
 
     //calculate torque about the z axis due to drag from rotors:
-    double drag_torque_fl = (velocities.getFrontLeft() * velocities.getFrontLeft()) * ROTOR_DRAG_COEFF;
-    double drag_torque_rl = (velocities.getRearLeft() * velocities.getRearLeft()) * ROTOR_DRAG_COEFF;
-    double drag_torque_fr = (velocities.getFrontRight() * velocities.getFrontRight()) * ROTOR_DRAG_COEFF;
-    double drag_torque_rr = (velocities.getRearRight() * velocities.getRearRight()) * ROTOR_DRAG_COEFF;
+    double drag_torque_fl = (currentState.getMotorVelocities().getFrontLeft() * currentState.getMotorVelocities().getFrontLeft()) * ROTOR_DRAG_COEFF;
+    double drag_torque_rl = (currentState.getMotorVelocities().getRearLeft() * currentState.getMotorVelocities().getRearLeft()) * ROTOR_DRAG_COEFF;
+    double drag_torque_fr = (currentState.getMotorVelocities().getFrontRight() * currentState.getMotorVelocities().getFrontRight()) * ROTOR_DRAG_COEFF;
+    double drag_torque_rr = (currentState.getMotorVelocities().getRearRight() * currentState.getMotorVelocities().getRearRight()) * ROTOR_DRAG_COEFF;
 
     double drag_torque_a = drag_torque_fl + drag_torque_rr;
     double drag_torque_b = drag_torque_fr + drag_torque_rl;
@@ -51,13 +51,25 @@ QCAcceleration velocitiesToAccel (MotorVelocities velocities, Rotation3d measure
 
     //finally, calculate overall thrust and then rotate it to align with the measured quadcopter angle. Using spherical coordinates.
     double thrust = thrust_fl + thrust_rl + thrust_fr + thrust_rr;
-    std::array thrustDirection = measuredAngle.thrustDirection();
+    std::array thrustDirection = currentState.getPose().rotation.thrustDirection();
+
+    Vector3d force = Vector3d(
+        thrust*thrustDirection[0],
+        thrust*thrustDirection[1],
+        thrust*thrustDirection[2]
+    );
+
+    auto velocity_squared = currentState.getVelocity().translation.componentWiseMultiply(currentState.getVelocity().translation);
+    Vector3d dragForce = velocity_squared.componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
+
+    Vector3d acceleration = (force - dragForce) / QUADCOPTER_MASS;
+    // acceleration.z += 9.8;
 
     return QCAcceleration(
         angularAccel,
-        (thrust * thrustDirection[0]) / QUADCOPTER_MASS,
-        (thrust * thrustDirection[1]) / QUADCOPTER_MASS,
-        ((thrust * thrustDirection[2]) + 9.8) / QUADCOPTER_MASS //account for gravity of course
+        acceleration.x,
+        acceleration.y,
+        acceleration.z
     );
 
 }

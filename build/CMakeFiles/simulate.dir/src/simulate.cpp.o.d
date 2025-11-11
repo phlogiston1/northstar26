@@ -267,4 +267,7 @@ CMakeFiles/simulate.dir/src/simulate.cpp.o: \
  /home/seanb/Documents/quadsquad2026/include/Util.h \
  /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
+ /home/seanb/Documents/quadsquad2026/include/MotionController.h \
+ /home/seanb/Documents/quadsquad2026/include/Path.h \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h

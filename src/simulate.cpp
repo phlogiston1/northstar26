@@ -18,6 +18,7 @@
 #include "Util.h"
 #include "Kinematics.h"
 #include "InverseKinematics.h"
+#include "MotionController.h"
 
 using namespace std::chrono_literals;
 
@@ -29,19 +30,48 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
+TakeoffController takeoffController = TakeoffController(0,0.5,1);
+MotorVelocities initialVels = MotorVelocities(0,0,0,0);
+QCState initialState = QCState(
+    Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)),
+    Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)), initialVels, 0);
+
+
+QCState currentState = initialState;
+
+void initSimulation() {
+    currentState = initialState;
+    takeoffController.setTargetHeight(5,0);
+}
+
+
+void runSimulation(int numIters, double dt) {
+    //test takeoff controller:
+    std::cout << "\n\ncurrent state velocity: ";
+    currentState.getVelocity().print();
+        Vector3d accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose());
+        std::cout << "controller req accel: ";
+        accel.print();
+        auto newVels = optimizeMotorVelocities(
+            currentState,
+            calculateTargetState(
+                currentState,
+                accel,
+                0
+            ),
+            dt
+        );
+        std::cout << newVels.motorVelocities.getFrontLeft() << " " << currentState.getVelocity().getZ() << "\n";
+        currentState.setMotorVelocities(newVels.motorVelocities);
+
+
+        if(numIters > 0){
+            currentState = currentState.predict(dt);
+        }
+}
+
 int main(){
     std::cout << "hi" << std::endl;
-    MotorVelocities testV = MotorVelocities(2000,2000,2000,2000);
-    QCAcceleration test = velocitiesToAccel(testV, Rotation3d(0,0,0));
-    QCState testSt = QCState(
-        Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)),
-        Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)), testV, 0);
-
-    QCState next = testSt;
-    for(int i = 0; i < 50; i++) {
-        next = next.predict(0.01);
-        next.getPose().print();
-    }
 
     static std::function<void()> sigint_handler;
 
@@ -97,41 +127,28 @@ int main(){
 
     int numIters = 0;
     double last = 0;
+    initSimulation();
 
     while (!done) {
         if(numIters > 500) {
-            next = testSt;
             numIters = 0;
+            initSimulation();
         }
 
         auto now = std::chrono::duration_cast<std::chrono::duration<double>>(
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
 
+        runSimulation(numIters, now-last);
 
-        if(numIters > 100) {
-            auto ikinres = optimizeMotorVelocities(
-                next,
-                calculateTargetState(
-                    next,
-                    Vector3d(1,0,-next.getVelocity().getZ() /2),
-                    0.1
-                ),
-                (now - last)
-            );
-            next.setMotorVelocities(ikinres.motorVelocities);
-        }
-        if(numIters > 0){
-            next = next.predict(now - last);
-        }
         last = now;
-        auto rotation = next.getPose().rotation;
+        auto rotation = currentState.getPose().rotation;
 
 
         foxglove::schemas::CubePrimitive cube;
         cube.size = foxglove::schemas::Vector3{QUADCOPTER_ROTOR_DISTANCE, QUADCOPTER_ROTOR_DISTANCE, 0.05};
         cube.color = foxglove::schemas::Color{1, 1, 1, 1};
-        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-0.1*next.getPose().getX(), -0.1*next.getPose().getY(), -0.1*next.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-0.1*currentState.getPose().getX(), -0.1*currentState.getPose().getY(), -0.1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
 
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";

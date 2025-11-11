@@ -2830,7 +2830,10 @@ CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o: /home/seanb/Documents/quadsquad2
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h
 
 CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp \
+  /home/seanb/Documents/quadsquad2026/include/Configuration.h \
+  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
   /home/seanb/Documents/quadsquad2026/include/MotionController.h \
+  /home/seanb/Documents/quadsquad2026/include/Path.h \
   /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
   /home/seanb/Documents/quadsquad2026/include/Util.h \
   /usr/include/alloca.h \
@@ -2847,6 +2850,7 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/c++/13/bits/basic_string.tcc \
   /usr/include/c++/13/bits/char_traits.h \
   /usr/include/c++/13/bits/charconv.h \
+  /usr/include/c++/13/bits/chrono.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
@@ -2872,6 +2876,7 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/c++/13/bits/new_allocator.h \
   /usr/include/c++/13/bits/ostream.tcc \
   /usr/include/c++/13/bits/ostream_insert.h \
+  /usr/include/c++/13/bits/parse_numbers.h \
   /usr/include/c++/13/bits/postypes.h \
   /usr/include/c++/13/bits/predefined_ops.h \
   /usr/include/c++/13/bits/ptr_traits.h \
@@ -2900,12 +2905,15 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/c++/13/bits/vector.tcc \
   /usr/include/c++/13/cctype \
   /usr/include/c++/13/cerrno \
+  /usr/include/c++/13/chrono \
   /usr/include/c++/13/clocale \
   /usr/include/c++/13/cmath \
   /usr/include/c++/13/compare \
   /usr/include/c++/13/cstddef \
+  /usr/include/c++/13/cstdint \
   /usr/include/c++/13/cstdio \
   /usr/include/c++/13/cstdlib \
+  /usr/include/c++/13/ctime \
   /usr/include/c++/13/cwchar \
   /usr/include/c++/13/cwctype \
   /usr/include/c++/13/debug/assertions.h \
@@ -2925,6 +2933,7 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/c++/13/new \
   /usr/include/c++/13/ostream \
   /usr/include/c++/13/pstl/pstl_config.h \
+  /usr/include/c++/13/ratio \
   /usr/include/c++/13/stdexcept \
   /usr/include/c++/13/streambuf \
   /usr/include/c++/13/string \
@@ -2957,6 +2966,7 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/pthread.h \
   /usr/include/sched.h \
   /usr/include/stdc-predef.h \
+  /usr/include/stdint.h \
   /usr/include/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/time.h \
@@ -2990,6 +3000,8 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/setjmp.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
@@ -3049,7 +3061,8 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quad
   /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
   /usr/include/x86_64-linux-gnu/sys/types.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
-  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h
+  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
+  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
 CMakeFiles/test.dir/src/QCLib/Path.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp \
   /home/seanb/Documents/quadsquad2026/include/Path.h \
@@ -3946,9 +3959,15 @@ CMakeFiles/test.dir/src/test.cpp.o: /home/seanb/Documents/quadsquad2026/src/test
 
 /home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp:
 
-/home/seanb/Documents/quadsquad2026/include/Path.h:
-
 /home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp:
+
+/usr/include/c++/13/ratio:
+
+/usr/include/c++/13/ctime:
+
+/usr/include/c++/13/chrono:
+
+/home/seanb/Documents/quadsquad2026/include/Path.h:
 
 /home/seanb/Documents/quadsquad2026/include/MotionController.h:
 
@@ -4243,6 +4262,8 @@ _deps/foxglove-src/include/foxglove/server.hpp:
 _deps/foxglove-src/include/foxglove/expected.hpp:
 
 /usr/include/c++/13/bits/basic_string.h:
+
+/usr/include/c++/13/bits/chrono.h:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 

@@ -16,18 +16,123 @@
 #include <cmath>
 #include <iostream>
 
+static double wrapPi(double a) {
+    while (a > M_PI) a -= 2.0*M_PI;
+    while (a < -M_PI) a += 2.0*M_PI;
+    return a;
+}
+
+static Rotation3d fromAxisAngle(const Vector3d& axis_in, double angle) {
+    Vector3d axis = axis_in.normalized();
+    double half = angle * 0.5;
+    double s = std::sin(half);
+    return Rotation3d(std::cos(half), axis.x*s, axis.y*s, axis.z*s);
+}
+
+// Minimal rotation that sends a -> b
+static Rotation3d rotationFromAToB(const Vector3d& a_in, const Vector3d& b_in) {
+    Vector3d a = a_in.normalized();
+    Vector3d b = b_in.normalized();
+    double cosTheta = a.dot(b);
+
+    if (cosTheta > 1.0 - 1e-12) {
+        return Rotation3d(); // identity
+    }
+    if (cosTheta < -1.0 + 1e-12) {
+        // 180° rotation: choose arbitrary perpendicular axis
+        Vector3d ortho = Vector3d(1,0,0).cross(a);
+        if (ortho.getMagnitude() < 1e-6) ortho = Vector3d(0,1,0).cross(a);
+        ortho = ortho.normalized();
+        return fromAxisAngle(ortho, M_PI);
+    }
+
+    Vector3d axis = a.cross(b).normalized();
+    double angle = std::acos(std::max(-1.0, std::min(1.0, cosTheta)));
+    return fromAxisAngle(axis, angle);
+}
+
+
+
 
 double thrustToVelocity(double thrust) {
     if(thrust < 0) return 0;
-    return std::sqrt(thrust / THRUST_COEFF) * std::copysign(1.0, thrust);
+    return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
 }
+
+TargetQCState calculateTargetState_robust(QCState currentState, Vector3d targetAccel, double targetYawRate) {
+    const double MASS = QUADCOPTER_MASS;
+    const double EPS = 1e-9;
+
+    // You removed gravity for debugging, so leave this unchanged.
+    Vector3d a_total = targetAccel;
+
+    // Desired body Z axis in world frame
+    // NED convention: thrust is along negative world Z direction if falling, so we take (-a)
+    Vector3d z_des;
+    if (a_total.getMagnitude() < EPS) {
+        // If no acceleration requested, keep orientation stable
+        z_des = currentState.getPose().rotation.getZAxis().normalized();
+    } else {
+        z_des = (-a_total).normalized();
+    }
+
+    // Current Z axis
+    Vector3d z_cur = currentState.getPose().rotation.getZAxis().normalized();
+
+    // Minimal rotation from z_cur → z_des (NO YAW COMPONENT HERE)
+    Rotation3d R_align = rotationFromAToB(z_cur, z_des);
+
+    // Apply alignment to current orientation
+    Rotation3d R_target = currentState.getPose().rotation;
+    R_target.rotateBy(R_align);
+    R_target = R_target.normalized();
+
+    // Compute required thrust along new Z axis
+    double requiredAlongZ = -a_total.dot(R_target.getZAxis());
+    double targetThrust = MASS * requiredAlongZ;
+
+    // Prevent inverted thrust solution
+    if (targetThrust < 0.0) {
+        targetThrust = 0.0;
+    }
+
+    // Return yaw *rate*, NOT yaw angle
+    return TargetQCState{R_target, targetThrust, targetYawRate};
+}
+
 
 TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, double targetYawRate) {
     // Frame convention: +X forward, +Y right, +Z down (NED)
     //account for gravity and drag:
-    targetAccel = targetAccel - Vector3d(0, 0, 9.8);
-    Vector3d dragForce = currentState.getVelocity().translation.componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
+    // targetAccel = targetAccel - Vector3d(0, 0, 9.8);
+    auto vel = currentState.getVelocity().translation;
+    auto velocity_squared  = Vector3d(
+        vel.x * std::abs(vel.x),
+        vel.y * std::abs(vel.y),
+        vel.z * std::abs(vel.z)
+    );
+    Vector3d dragForce = velocity_squared.componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
+    std::cout << "\ndrag: ";
+    dragForce.print();
+    
     targetAccel = targetAccel + (dragForce / QUADCOPTER_MASS);
+
+    // Compute thrust (F = ma)
+    // Rather than computing thrust based off of the target acceleration magnitude,
+    // We want to compute the thrust based off of what is required to get the desired Z acceleration,
+    // *At the quadcopters current orientation*,
+    // since this will prevent the quadcopter from moving upward or downward while it is moving laterally.
+
+    // To do this, we project the target acceleration onto the quadcopter's current Z axis.
+    Vector3d currentZAxis = currentState.getPose().rotation.getZAxis().normalized();
+
+    double z_accel = -targetAccel.dot(currentZAxis);
+    double targetThrust = z_accel * QUADCOPTER_MASS; //F=ma
+
+    if(targetThrust < 0) {
+        targetThrust = 0;
+    }
+
 
     // 1. Get current yaw (assumed to be around Z axis)
     double fixed_yaw = currentState.getPose().rotation.getYaw();
@@ -49,21 +154,27 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
     }
 
     y_body = y_body.normalized();
-    Vector3d x_body = y_body.cross(z_body).normalized();
+    // Project x_c into plane orthogonal to z_body
+    Vector3d x_body = x_c - z_body * x_c.dot(z_body);
+    if (x_body.getMagnitude() < 1e-6) {
+        // Degenerate case: choose any horizontal vector orthogonal to z_body
+        x_body = Vector3d(1, 0, 0) - z_body * z_body.x;
+    }
 
+    x_body = x_body.normalized();
+
+// Now y_body is guaranteed right-handed
     // 5. Build rotation from body axes
     Rotation3d targetAngle = Rotation3d::fromRotationMatrix(x_body, y_body, z_body);
+    // targetAngle.rotateBy(Rotation3d::fromDegrees(0,0,-180));
 
-    // 6. Compute thrust (F = ma)
+    // Compute thrust (F = ma)
     // Rather than computing thrust based off of the target acceleration magnitude,
     // We want to compute the thrust based off of what is required to get the desired Z acceleration,
     // *At the quadcopters current orientation*,
     // since this will prevent the quadcopter from moving upward or downward while it is moving laterally.
 
     // To do this, we project the target acceleration onto the quadcopter's current Z axis.
-    Vector3d currentZAxis = currentState.getPose().rotation.getZAxis();
-    double z_accel = -targetAccel.dot(currentZAxis);
-    double targetThrust = z_accel * QUADCOPTER_MASS;
     // double targetThrust = targetAccel.getZ() * QUADCOPTER_MASS;
 
     return TargetQCState{targetAngle, targetThrust, targetYawRate};
@@ -112,6 +223,7 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
     rl = (totalThrust + torque_x + torque_y - equivalentThrustDifferenceYaw) / 4;
     rr = (totalThrust - torque_x + torque_y + equivalentThrustDifferenceYaw) / 4;
     */
+    // std::cout << "\n\ntorque x: " << torque_x << "\n";
 
     double fl_thrust = (targetState.targetThrust + torque_x - torque_y + equivalentThrustDifferenceYaw) / 4.0;
     double fr_thrust = (targetState.targetThrust - torque_x - torque_y - equivalentThrustDifferenceYaw) / 4.0;
@@ -124,18 +236,20 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
     double rr_velocity = thrustToVelocity(rr_thrust);
 
     //Step 4: If motor acceleration exceeds the motor ramp rate, scale the difference between the current and target velocities accordingly.
-    double maxAllowedDeltaV = MOTOR_VELOCITY_RAMP_RATE * timestep;
-    double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getFrontLeft();
-    double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFrontRight();
-    double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRearLeft();
-    double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRearRight();
-    double maxAbsDeltaV = std::max(std::max(std::abs(fl_deltaV), std::abs(fr_deltaV)), std::max(std::abs(rl_deltaV), std::abs(rr_deltaV)));
-    if(maxAbsDeltaV > maxAllowedDeltaV) {
-        double scale = maxAllowedDeltaV / maxAbsDeltaV;
-        fl_velocity = currentState.getMotorVelocities().getFrontLeft() + fl_deltaV * scale;
-        fr_velocity = currentState.getMotorVelocities().getFrontRight() + fr_deltaV * scale;
-        rl_velocity = currentState.getMotorVelocities().getRearLeft() + rl_deltaV * scale;
-        rr_velocity = currentState.getMotorVelocities().getRearRight() + rr_deltaV * scale;
+    if(ENABLE_INV_KIN_MOTOR_CONTSTRAINTS) {
+        double maxAllowedDeltaV = MOTOR_VELOCITY_RAMP_RATE * timestep;
+        double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getFrontLeft();
+        double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFrontRight();
+        double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRearLeft();
+        double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRearRight();
+        double maxAbsDeltaV = std::max(std::max(std::abs(fl_deltaV), std::abs(fr_deltaV)), std::max(std::abs(rl_deltaV), std::abs(rr_deltaV)));
+        if(maxAbsDeltaV > maxAllowedDeltaV) {
+            double scale = maxAllowedDeltaV / maxAbsDeltaV;
+            fl_velocity = currentState.getMotorVelocities().getFrontLeft() + fl_deltaV * scale;
+            fr_velocity = currentState.getMotorVelocities().getFrontRight() + fr_deltaV * scale;
+            rl_velocity = currentState.getMotorVelocities().getRearLeft() + rl_deltaV * scale;
+            rr_velocity = currentState.getMotorVelocities().getRearRight() + rr_deltaV * scale;
+        }
     }
 
     //Step 5:

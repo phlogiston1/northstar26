@@ -86,7 +86,7 @@ double QCState::getTime(){
 }
 
 QCState QCState::predict(double timestep) {
-    QCAcceleration accel = velocitiesToAccel(motorVelocities, pose.rotation);
+    QCAcceleration accel = velocitiesToAccel(*this);
     double drag_x = -velocity.getX() * LINEAR_DRAG_COEFF_XY;
     double drag_y = -velocity.getY() * LINEAR_DRAG_COEFF_XY;
     double drag_z = -velocity.getZ() * LINEAR_DRAG_COEFF_Z;
@@ -112,7 +112,7 @@ QCState QCState::predict(double timestep) {
     double newPAY = pose.rotation.getPitch() + (newAY * timestep);
     double newPAX = pose.rotation.getRoll() + (newAX * timestep);
 
-    if(newPZ > 0) newPZ = 0; //don't go underground
+    // if(newPZ > 0) newPZ = 0; //don't go underground
 
     return QCState(
         Pose3d(Vector3d(newPX,newPY,newPZ), Rotation3d(newPAZ,newPAY,newPAX)),

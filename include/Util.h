@@ -131,6 +131,9 @@ struct Rotation3d {
                   << ", roll=" << getRoll() << ")\n";
     }
 
+    //operators:
+    
+
     static Rotation3d fromDegrees(double yaw, double pitch, double roll);
     static Rotation3d fromRotationMatrix(const Vector3d& xa, const Vector3d& ya, const Vector3d& za);
 };
