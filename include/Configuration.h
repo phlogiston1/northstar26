@@ -36,7 +36,7 @@
 // These constants are used in the physics calculations for the quadcopter model.
 // Most of these should be empirically determined for the specific quadcopter design.
 //Thrust calculation:
-#define THRUST_COEFF 0.00000011 //constant used to calculate rotor thrust. units: N per Rad/S.
+#define THRUST_COEFF 0.000007 //constant used to calculate rotor thrust. units: N per Rad/S.
 //thrust calculation based on the formula: Thrust = THRUST_COEFF * AIR_DENSITY * ROTOR_AREA * (rotor velocity * ROTOR_RADIUS)^2
 //which can be simplified to Thrust = THRUST_COEFF * rotor velocity^2 (where thrust coeff is empirically measured)
 

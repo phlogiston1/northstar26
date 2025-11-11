@@ -47,27 +47,27 @@ void initSimulation() {
 
 void runSimulation(int numIters, double dt) {
     //test takeoff controller:
-    std::cout << "\n\ncurrent state velocity: ";
-    currentState.getVelocity().print();
-        Vector3d accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose());
-        std::cout << "controller req accel: ";
-        accel.print();
-        auto newVels = optimizeMotorVelocities(
+    // std::cout << "\n\ncurrent state velocity: ";
+    // currentState.getVelocity().print();
+    currentState.print();
+    Vector3d accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose());
+    std::cout << "controller req accel: ";
+    accel.print();
+    auto newVels = optimizeMotorVelocities(
+        currentState,
+        calculateTargetState(
             currentState,
-            calculateTargetState(
-                currentState,
-                accel,
-                0
-            ),
-            dt
-        );
-        std::cout << newVels.motorVelocities.getFrontLeft() << " " << currentState.getVelocity().getZ() << "\n";
-        currentState.setMotorVelocities(newVels.motorVelocities);
+            accel,
+            0
+        ),
+        dt
+    );
+    currentState.setMotorVelocities(newVels.motorVelocities);
 
 
-        if(numIters > 0){
-            currentState = currentState.predict(dt);
-        }
+    if(numIters > 0){
+        currentState = currentState.predict(dt);
+    }
 }
 
 int main(){
@@ -139,7 +139,7 @@ int main(){
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
 
-        runSimulation(numIters, now-last);
+        runSimulation(numIters, 0.1);
 
         last = now;
         auto rotation = currentState.getPose().rotation;

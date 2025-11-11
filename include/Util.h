@@ -156,8 +156,9 @@ struct Pose3d {
     double getZ() const { return translation.z; }
 
     void print() const {
-        std::cout << "Pose3d:\n  ";
+        std::cout << "Pose3d:\n\t";
         translation.print();
+        std::cout << "\t";
         rotation.print();
     }
 };

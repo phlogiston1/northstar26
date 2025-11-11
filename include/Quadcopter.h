@@ -54,6 +54,7 @@ class QCState {
         MotorVelocities getMotorVelocities();
         void setMotorVelocities(MotorVelocities newVels);
         double getTime();
+        void print();
         QCState predict(double timestep);
 };
 

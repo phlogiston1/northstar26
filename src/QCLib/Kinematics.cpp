@@ -59,7 +59,12 @@ QCAcceleration velocitiesToAccel (QCState currentState) {
         thrust*thrustDirection[2]
     );
 
-    auto velocity_squared = currentState.getVelocity().translation.componentWiseMultiply(currentState.getVelocity().translation);
+    auto vel = currentState.getVelocity().translation;
+    auto velocity_squared  = Vector3d(
+        vel.x * std::abs(vel.x),
+        vel.y * std::abs(vel.y),
+        vel.z * std::abs(vel.z)
+    );
     Vector3d dragForce = velocity_squared.componentWiseMultiply(Vector3d(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
 
     Vector3d acceleration = (force - dragForce) / QUADCOPTER_MASS;

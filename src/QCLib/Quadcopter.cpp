@@ -87,9 +87,11 @@ double QCState::getTime(){
 
 QCState QCState::predict(double timestep) {
     QCAcceleration accel = velocitiesToAccel(*this);
-    double drag_x = -velocity.getX() * LINEAR_DRAG_COEFF_XY;
-    double drag_y = -velocity.getY() * LINEAR_DRAG_COEFF_XY;
-    double drag_z = -velocity.getZ() * LINEAR_DRAG_COEFF_Z;
+    std::cout << "PREDITED ACCEL - x: " << accel.getX() << " y: " << accel.getY() << " z: " << accel.getZ() << std::endl;
+
+    // double drag_x = -velocity.getX() * LINEAR_DRAG_COEFF_XY;
+    // double drag_y = -velocity.getY() * LINEAR_DRAG_COEFF_XY;
+    // double drag_z = -velocity.getZ() * LINEAR_DRAG_COEFF_Z;
 
     // std::cout << "Drag: " << drag_z << " Z Velocity: " << velocity.getZ() << "\n";
 
@@ -97,9 +99,9 @@ QCState QCState::predict(double timestep) {
     double ang_drag_y = -velocity.rotation.getPitch() * ANGULAR_DRAG_COEFF_XY;
     double ang_drag_z = -velocity.rotation.getYaw() * ANGULAR_DRAG_COEFF_Z;
 
-    double newVX = (velocity.getX() + ((accel.getX() + drag_x) * timestep));
-    double newVY = (velocity.getY() + ((accel.getY() + drag_y) * timestep));
-    double newVZ = (velocity.getZ() + ((accel.getZ() + drag_z) * timestep));
+    double newVX = (velocity.getX() + ((accel.getX()/* + drag_x*/) * timestep));
+    double newVY = (velocity.getY() + ((accel.getY()/* + drag_y*/) * timestep));
+    double newVZ = (velocity.getZ() + ((accel.getZ()/* + drag_z*/) * timestep));
 
     double newAZ = velocity.rotation.getYaw() + ((accel.getAngular().getYaw() + ang_drag_z) * timestep);
     double newAY = velocity.rotation.getPitch() + ((accel.getAngular().getPitch() + ang_drag_y) * timestep);
@@ -120,4 +122,15 @@ QCState QCState::predict(double timestep) {
         motorVelocities,
         time+timestep
     );
+}
+
+void QCState::print() {
+    std::cout << "\n\nQuadcopter State at t=" << time << "\n";
+    std::cout << "POSE - "; pose.print();
+    std::cout << "VELOCITY - "; velocity.print();
+    std::cout << "MOTOR VELS - fl: " << motorVelocities.getFrontLeft() 
+                          << " fr: " << motorVelocities.getFrontRight()
+                          << " rl: " << motorVelocities.getRearLeft()
+                          << " rr: " << motorVelocities.getRearRight();
+    std::cout << "\n\n";
 }
