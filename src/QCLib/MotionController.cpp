@@ -2,6 +2,13 @@
 #include "Configuration.h"
 #include "Util.h"
 #include <cmath>
+/*
+NOTE: BUGS TO FIX:
+- double distance bug in this file
+- starting position not accounted bug in this file
+- requestiong negative motor velocity causing infinite motor speed blowup bug (somewhere)
+*/
+
 
 /**
  * @file MotionController.cpp

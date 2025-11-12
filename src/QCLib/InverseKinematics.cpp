@@ -117,22 +117,6 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
     
     targetAccel = targetAccel + (dragForce / QUADCOPTER_MASS);
 
-    // Compute thrust (F = ma)
-    // Rather than computing thrust based off of the target acceleration magnitude,
-    // We want to compute the thrust based off of what is required to get the desired Z acceleration,
-    // *At the quadcopters current orientation*,
-    // since this will prevent the quadcopter from moving upward or downward while it is moving laterally.
-
-    // To do this, we project the target acceleration onto the quadcopter's current Z axis.
-    Vector3d currentZAxis = currentState.getPose().rotation.getZAxis().normalized();
-
-    double z_accel = -targetAccel.dot(currentZAxis);
-    double targetThrust = z_accel * QUADCOPTER_MASS; //F=ma
-
-    if(targetThrust < 0) {
-        targetThrust = 0;
-    }
-
 
     // 1. Get current yaw (assumed to be around Z axis)
     double fixed_yaw = currentState.getPose().rotation.getYaw();
@@ -166,8 +150,10 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
 // Now y_body is guaranteed right-handed
     // 5. Build rotation from body axes
     Rotation3d targetAngle = Rotation3d::fromRotationMatrix(x_body, y_body, z_body);
-    // targetAngle.rotateBy(Rotation3d::fromDegrees(0,0,-180));
 
+
+    // To do this, we project the target acceleration onto the quadcopter's current Z axis.
+    // double targetThrust = targetAccel.getZ() * QUADCOPTER_MASS;
     // Compute thrust (F = ma)
     // Rather than computing thrust based off of the target acceleration magnitude,
     // We want to compute the thrust based off of what is required to get the desired Z acceleration,
@@ -175,15 +161,27 @@ TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, d
     // since this will prevent the quadcopter from moving upward or downward while it is moving laterally.
 
     // To do this, we project the target acceleration onto the quadcopter's current Z axis.
-    // double targetThrust = targetAccel.getZ() * QUADCOPTER_MASS;
+    // Vector3d currentZAxis = currentState.getPose().rotation.getZAxis().normalized();
+    Vector3d currentZAxis = targetAngle.getZAxis().normalized();
+
+    double z_accel = -targetAccel.dot(currentZAxis);
+    double targetThrust = z_accel * QUADCOPTER_MASS; //F=ma
+    std::cout << "targetThrust: " << targetThrust << std::endl;
+
+    if(targetThrust < 0) {
+        targetThrust = 0;
+    }
 
     return TargetQCState{targetAngle, targetThrust, targetYawRate};
 }
 
 InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCState targetState, double timestep) {
     //Step 1: Find the theretical forces at the points (width/2,0) and (0,width/2) that would produce the desired angular acceleration for pitch and roll.
-    double desiredAngularAccelPitch = (targetState.targetAngle.getPitch() - currentState.getPose().rotation.getPitch()) / timestep;
-    double desiredAngularAccelRoll = (targetState.targetAngle.getRoll() - currentState.getPose().rotation.getRoll()) / timestep;
+    double desiredAngularVelPitch = (targetState.targetAngle.getPitch() - currentState.getPose().rotation.getPitch()) / timestep;
+    double desiredAngularVelRoll = (targetState.targetAngle.getRoll() - currentState.getPose().rotation.getRoll()) / timestep;
+
+    double desiredAngularAccelPitch = (desiredAngularVelPitch - currentState.getVelocity().rotation.getPitch()) / timestep;
+    double desiredAngularAccelRoll = (desiredAngularVelRoll - currentState.getVelocity().rotation.getRoll()) / timestep;
 
     /*
     These values give us two formulas that give us the difference in thrust between opposite motors:
@@ -224,11 +222,34 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
     rr = (totalThrust - torque_x + torque_y + equivalentThrustDifferenceYaw) / 4;
     */
     // std::cout << "\n\ntorque x: " << torque_x << "\n";
+    double fl_adjustment = (+ torque_x - torque_y + equivalentThrustDifferenceYaw);
+    double fr_adjustment = (- torque_x - torque_y - equivalentThrustDifferenceYaw);
+    double rl_adjustment = (+ torque_x + torque_y - equivalentThrustDifferenceYaw);
+    double rr_adjustment = (- torque_x + torque_y + equivalentThrustDifferenceYaw);
 
-    double fl_thrust = (targetState.targetThrust + torque_x - torque_y + equivalentThrustDifferenceYaw) / 4.0;
-    double fr_thrust = (targetState.targetThrust - torque_x - torque_y - equivalentThrustDifferenceYaw) / 4.0;
-    double rl_thrust = (targetState.targetThrust + torque_x + torque_y - equivalentThrustDifferenceYaw) / 4.0;
-    double rr_thrust = (targetState.targetThrust - torque_x + torque_y + equivalentThrustDifferenceYaw) / 4.0;
+    // if(targetState.targetThrust + fl_adjustment < 0){
+
+    // }
+
+
+    double fl_thrust = (targetState.targetThrust + fl_adjustment) / 4.0;
+    double fr_thrust = (targetState.targetThrust + fr_adjustment) / 4.0;
+    double rl_thrust = (targetState.targetThrust + rl_adjustment) / 4.0;
+    double rr_thrust = (targetState.targetThrust + rr_adjustment) / 4.0;
+
+    double overdrive = 0;
+
+    if(fl_thrust < 0) {
+        overdrive = -fl_thrust;
+        fl_thrust = 0;
+    }
+    if(fr_thrust < 0) {
+        overdrive = std::max(overdrive, -fr_thrust);
+    }
+    if(rl_thrust < 0) {
+
+    }
+
     //Step 3: Convert thrusts to velocities
     double fl_velocity = thrustToVelocity(fl_thrust);
     double fr_velocity = thrustToVelocity(fr_thrust);

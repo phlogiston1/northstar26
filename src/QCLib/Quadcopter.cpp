@@ -114,7 +114,10 @@ QCState QCState::predict(double timestep) {
     double newPAY = pose.rotation.getPitch() + (newAY * timestep);
     double newPAX = pose.rotation.getRoll() + (newAX * timestep);
 
-    // if(newPZ > 0) newPZ = 0; //don't go underground
+    if(ENABLE_FLOOR && newPZ > 0) {
+        newPZ = 0; //don't go underground
+        if(newVZ > 0) newVZ = 0;
+    }
 
     return QCState(
         Pose3d(Vector3d(newPX,newPY,newPZ), Rotation3d(newPAZ,newPAY,newPAX)),

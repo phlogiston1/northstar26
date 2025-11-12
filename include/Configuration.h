@@ -44,7 +44,7 @@
 //again the formula is DRAG_COEFF * rotor velocity^2
 
 //super simple drag formula F = -kv^2. Simple, but might require manual tuning.
-#define LINEAR_DRAG_COEFF_XY 0//0.25
+#define LINEAR_DRAG_COEFF_XY 0.5//0.25
 #define LINEAR_DRAG_COEFF_Z 0.5//0.25
 #define ANGULAR_DRAG_COEFF_XY 0.005
 #define ANGULAR_DRAG_COEFF_Z 0.005
@@ -61,9 +61,11 @@
 #define MOTOR_KI 0.0 //motor velocity integral control constant
 #define MOTOR_KD 0.0 //motor velocity derivative control constant
 #define MOTOR_INTEGRAL_WINDUP_LIMIT 100.0 //limit for motor velocity PID integral term to prevent windup
-#define MOTOR_VELOCITY_RAMP_RATE 2000000.0 //max change in motor velocity per second
-#define MAX_MOTOR_VELOCITY 10000.0 //max motor velocity in Rad/s
+#define MOTOR_VELOCITY_RAMP_RATE 1000.0 //max change in motor velocity per second
+#define MAX_MOTOR_VELOCITY 1000.0 //max motor velocity in Rad/s
 #define ENABLE_INV_KIN_MOTOR_CONTSTRAINTS false
+
+#define ENABLE_FLOOR true
 
 
 /*

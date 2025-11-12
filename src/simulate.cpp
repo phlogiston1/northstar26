@@ -30,7 +30,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-TakeoffController takeoffController = TakeoffController(0.5,0.5,1);
+TakeoffController takeoffController = TakeoffController(1.5,1,1);
 MotorVelocities initialVels = MotorVelocities(0,0,0,0);
 QCState initialState = QCState(
     Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)),
@@ -41,16 +41,17 @@ QCState currentState = initialState;
 
 void initSimulation() {
     currentState = initialState;
-    takeoffController.setTargetHeight(1,0);
+    takeoffController.setTargetHeight(3,0);
 }
 
 
 void runSimulation(int numIters, double dt) {
+    std::cout << "Loop time: " << dt << std::endl;
     //test takeoff controller:
     // std::cout << "\n\ncurrent state velocity: ";
     // currentState.getVelocity().print();
     currentState.print();
-    Vector3d accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose());
+    Vector3d accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose()) + Vector3d(0.01,0,0);
     std::cout << "controller req accel: ";
     accel.print();
     auto newVels = optimizeMotorVelocities(
@@ -60,7 +61,7 @@ void runSimulation(int numIters, double dt) {
             accel,
             0
         ),
-        dt
+        1
     );
     currentState.setMotorVelocities(newVels.motorVelocities);
 
@@ -139,7 +140,7 @@ int main(){
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
 
-        runSimulation(numIters, 0.05);
+        runSimulation(numIters, now-last);
 
         last = now;
         auto rotation = currentState.getPose().rotation;
