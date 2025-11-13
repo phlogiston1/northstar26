@@ -26,8 +26,8 @@ NOTE: BUGS TO FIX:
 VelocityController::VelocityController(){
 }
 
-Vector3d VelocityController::getTargetAcceleration(QCState& currentState, const Vector3d& targetVelocity) {
-    Vector3d targetAcceleration = targetVelocity - currentState.getVelocity().translation;
+Vector3D VelocityController::getTargetAcceleration(QCState& currentState, const Vector3D& targetVelocity) {
+    Vector3D targetAcceleration = targetVelocity - currentState.getVelocity().translation;
     //limit acceleration based on max acceleration constants
     //it would be theoretically better to use polar coordinates here, but this is less computationally intensive
     if (targetAcceleration.x > MAX_ACCELERATION_XY) targetAcceleration.x = MAX_ACCELERATION_XY;
@@ -37,7 +37,7 @@ Vector3d VelocityController::getTargetAcceleration(QCState& currentState, const 
     if (targetAcceleration.z > MAX_ACCELERATION_Z) targetAcceleration.z = MAX_ACCELERATION_Z;
     if (targetAcceleration.z < -MAX_ACCELERATION_Z) targetAcceleration.z = -MAX_ACCELERATION_Z;
     //smooth acceleration changes based on max jerk constants. Z axis doesn't need jerk constraint.
-    Vector3d jerk = targetAcceleration - lastTargetAcceleration;
+    Vector3D jerk = targetAcceleration - lastTargetAcceleration;
     if (jerk.x > MAX_JERK_XY) jerk.x = MAX_JERK_XY;
     if (jerk.x < -MAX_JERK_XY) jerk.x = -MAX_JERK_XY;
     if (jerk.y > MAX_JERK_XY) jerk.y = MAX_JERK_XY;
@@ -57,7 +57,7 @@ void PathController::beginPath(const Path& newPath, double cruiseHeight) {
     startTime = std::chrono::high_resolution_clock::now();
 }
 
-Vector3d PathController::getTargetAcceleration(QCState& currentState, Pose3d currentPosition) {
+Vector3D PathController::getTargetAcceleration(QCState& currentState, Pose3d currentPosition) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - startTime).count();
     PathPoint targetPoint = path.sample(elapsed);
@@ -70,7 +70,7 @@ Vector3d PathController::getTargetAcceleration(QCState& currentState, Pose3d cur
         positionError.y * position_kp.y
     };
 
-    Vector3d targetAcceleration = Vector3d{
+    Vector3D targetAcceleration = Vector3D{
         velocityError.x * velocity_kp.x + targetPoint.acc.x,
         velocityError.y * velocity_kp.y + targetPoint.acc.y,
         (cruiseHeight - currentPosition.getZ()) * cruiseHeight_kP
@@ -109,7 +109,7 @@ void TakeoffController::setTargetHeight(double height, double currentHeight) {
     }
 }
 
-Vector3d TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d currentPosition) {
+Vector3D TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d currentPosition) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - startTime).count();
     //calculate target height based on motion profile
@@ -134,7 +134,7 @@ Vector3d TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d 
     std::cout << "Target Height: " << targetHeightAtTime << std::endl;
 
     double heightError = targetHeightAtTime + currentPosition.getZ();
-    Vector3d targetAcceleration = Vector3d{
+    Vector3D targetAcceleration = Vector3D{
         0.0,
         0.0,
         (targetAccelerationZ) + heightError * kP

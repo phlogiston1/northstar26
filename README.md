@@ -39,3 +39,4 @@ base_station.cpp - the control loop for the base computer
 ## FlightController - eventually connects QCLib to the hardware on the quadcopter
 ## MissionControl - software that runs on the control computer
 ## Misisons - defines the actual autonomous/manual behaviors of the quadcopter
+

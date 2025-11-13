@@ -120,8 +120,8 @@ QCState QCState::predict(double timestep) {
     }
 
     return QCState(
-        Pose3d(Vector3d(newPX,newPY,newPZ), Rotation3d(newPAZ,newPAY,newPAX)),
-        Pose3d(Vector3d(newVX,newVY,newVZ), Rotation3d(newAZ, newAY, newAX)),
+        Pose3d(Vector3D(newPX,newPY,newPZ), Rotation3d(newPAZ,newPAY,newPAX)),
+        Pose3d(Vector3D(newVX,newVY,newVZ), Rotation3d(newAZ, newAY, newAX)),
         motorVelocities,
         time+timestep
     );

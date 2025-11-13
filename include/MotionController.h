@@ -6,16 +6,16 @@
 class VelocityController{
     public:
         VelocityController();
-        Vector3d getTargetAcceleration(QCState& currentState, const Vector3d& targetVelocity);
+        Vector3D getTargetAcceleration(QCState& currentState, const Vector3D& targetVelocity);
     private:
-        Vector3d lastTargetAcceleration = Vector3d(0,0,0);
+        Vector3D lastTargetAcceleration = Vector3D(0,0,0);
 };
 
 class PathController{
     public:
         PathController(Vector2D position_kp, Vector2D velocity_kp, double cruiseHeight_kP);
         void beginPath(const Path& newPath, double cruiseHeight);
-        Vector3d getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
+        Vector3D getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
     private:
         Path path;
         double cruiseHeight;
@@ -30,7 +30,7 @@ class TakeoffController{
     public:
         TakeoffController(double kP, double maxVelocity, double maxAcceleration);
         void setTargetHeight(double height, double currentHeight);
-        Vector3d getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
+        Vector3D getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
     private:
         double targetHeight;
         double maxVelocity;

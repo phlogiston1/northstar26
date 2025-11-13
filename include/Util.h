@@ -16,31 +16,31 @@ struct Vector2D {
 };
 
 // ============================
-// Vector3d
+// Vector3D
 // ============================
-struct Vector3d {
+struct Vector3D {
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
 
-    Vector3d() = default;
-    Vector3d(double x, double y, double z) : x(x), y(y), z(z) {}
+    Vector3D() = default;
+    Vector3D(double x, double y, double z) : x(x), y(y), z(z) {}
 
     double getMagnitude() const {
         return std::sqrt(x*x + y*y + z*z);
     }
 
-    Vector3d normalized() const {
+    Vector3D normalized() const {
         double mag = getMagnitude();
-        return (mag == 0) ? Vector3d{} : Vector3d{x/mag, y/mag, z/mag};
+        return (mag == 0) ? Vector3D{} : Vector3D{x/mag, y/mag, z/mag};
     }
 
-    double dot(const Vector3d& o) const {
+    double dot(const Vector3D& o) const {
         return x*o.x + y*o.y + z*o.z;
     }
 
-    Vector3d cross(const Vector3d& o) const {
-        return Vector3d{
+    Vector3D cross(const Vector3D& o) const {
+        return Vector3D{
             y*o.z - z*o.y,
             z*o.x - x*o.z,
             x*o.y - y*o.x
@@ -51,19 +51,19 @@ struct Vector3d {
         return Vector2D{x, y};
     }
 
-    Vector3d operator+(const Vector3d& o) const { return {x+o.x, y+o.y, z+o.z}; }
-    Vector3d operator-(const Vector3d& o) const { return {x-o.x, y-o.y, z-o.z}; }
-    Vector3d operator*(double s) const { return {x*s, y*s, z*s}; }
-    Vector3d operator/(double s) const { return {x/s, y/s, z/s}; }
-    Vector3d operator-() const { return {-x, -y, -z}; }
-    Vector3d componentWiseMultiply(const Vector3d& o) const { return {x*o.x, y*o.y, z*o.z}; }
+    Vector3D operator+(const Vector3D& o) const { return {x+o.x, y+o.y, z+o.z}; }
+    Vector3D operator-(const Vector3D& o) const { return {x-o.x, y-o.y, z-o.z}; }
+    Vector3D operator*(double s) const { return {x*s, y*s, z*s}; }
+    Vector3D operator/(double s) const { return {x/s, y/s, z/s}; }
+    Vector3D operator-() const { return {-x, -y, -z}; }
+    Vector3D componentWiseMultiply(const Vector3D& o) const { return {x*o.x, y*o.y, z*o.z}; }
 
-    bool operator==(const Vector3d& o) const {
+    bool operator==(const Vector3D& o) const {
         return x==o.x && y==o.y && z==o.z;
     }
 
     void print() const {
-        std::cout << "Vector3d(" << x << ", " << y << ", " << z << ")\n";
+        std::cout << "Vector3D(" << x << ", " << y << ", " << z << ")\n";
     }
 };
 
@@ -118,9 +118,9 @@ struct Rotation3d {
         return std::atan2( 2*(w*x + y*z), 1 - 2*(x*x + y*y) );
     }
 
-    Vector3d getZAxis() const; // implemented in .cpp
-    Vector3d getXAxis() const;
-    Vector3d getYAxis() const;
+    Vector3D getZAxis() const; // implemented in .cpp
+    Vector3D getXAxis() const;
+    Vector3D getYAxis() const;
 
     std::array<double, 3> thrustDirection() const; // implemented in .cpp
     std::array<double, 3> thrustVector(double thrustMagnitude) const;
@@ -135,7 +135,7 @@ struct Rotation3d {
     
 
     static Rotation3d fromDegrees(double yaw, double pitch, double roll);
-    static Rotation3d fromRotationMatrix(const Vector3d& xa, const Vector3d& ya, const Vector3d& za);
+    static Rotation3d fromRotationMatrix(const Vector3D& xa, const Vector3D& ya, const Vector3D& za);
 };
 
 
@@ -143,11 +143,11 @@ struct Rotation3d {
 // Pose3d
 // ============================
 struct Pose3d {
-    Vector3d translation;
+    Vector3D translation;
     Rotation3d rotation;
 
     Pose3d() = default;
-    Pose3d(Vector3d t, Rotation3d r) : translation(t), rotation(r) {}
+    Pose3d(Vector3D t, Rotation3d r) : translation(t), rotation(r) {}
     Pose3d(double x, double y, double z, Rotation3d r) : translation(x,y,z), rotation(r) {}
     Pose3d(double x, double y, double z) : translation(x,y,z), rotation() {}
 

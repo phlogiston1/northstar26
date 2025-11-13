@@ -1,8 +1,12 @@
+#include <vector>
+
 /**
  * @brief All the constants needed to characterize the quadcopter physics and controls
  */
 
 #define LOOP_TIME 0.01 //main loop time in seconds
+
+#define G 9.81
 
 // ----------- QUADCOPTER PHYSICAL CONSTANTS -------------
 #define QUADCOPTER_ROTOR_DISTANCE 0.2 //quadcopter rotor center distance, in meters
@@ -66,6 +70,13 @@
 #define ENABLE_INV_KIN_MOTOR_CONTSTRAINTS false
 
 #define ENABLE_FLOOR true
+
+static const std::vector<std::vector<double>> LQR_K = {
+    {0.1, 0, 0, 0.05, 0, 0, 1.2, 0, 0, 0.1, 0, 0},   // thrust channel
+    {0, 0, 0, 0, 0, 0, 0, 1.1, 0, 0, 0.9, 0},       // roll torque
+    {0, 0, 0, 0, 0, 0, -1.1, 0, 0, -0.9, 0, 0},     // pitch torque
+    {0, 0, 0, 0, 0, 0, 0, 0, 1.2, 0, 0, 0.8}        // yaw torque
+};
 
 
 /*

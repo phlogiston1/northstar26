@@ -48,7 +48,7 @@ int main() {
     accel4.getAngular().print();
     TargetQCState tstate = calculateTargetState(
         initialState,
-        Vector3d(accel4.getX(),accel4.getY(),accel4.getZ()),
+        Vector3D(accel4.getX(),accel4.getY(),accel4.getZ()),
         // Vector3d(0,0,-1),
         0.0 //no yaw rate
     );
