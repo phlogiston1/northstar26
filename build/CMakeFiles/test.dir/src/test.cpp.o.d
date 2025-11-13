@@ -183,4 +183,13 @@ CMakeFiles/test.dir/src/test.cpp.o: \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
  /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
- /home/seanb/Documents/quadsquad2026/include/Path.h
+ /home/seanb/Documents/quadsquad2026/include/Path.h \
+ /home/seanb/Documents/quadsquad2026/include/LQR.h \
+ /home/seanb/Documents/quadsquad2026/include/MotionController.h \
+ /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
+ /usr/include/c++/13/chrono /usr/include/c++/13/bits/chrono.h \
+ /usr/include/c++/13/ratio /usr/include/c++/13/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+ /usr/include/c++/13/ctime /usr/include/c++/13/bits/parse_numbers.h

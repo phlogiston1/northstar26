@@ -59,47 +59,6 @@ double thrustToVelocity(double thrust) {
     return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
 }
 
-TargetQCState calculateTargetState_robust(QCState currentState, Vector3D targetAccel, double targetYawRate) {
-    const double MASS = QUADCOPTER_MASS;
-    const double EPS = 1e-9;
-
-    // You removed gravity for debugging, so leave this unchanged.
-    Vector3D a_total = targetAccel;
-
-    // Desired body Z axis in world frame
-    // NED convention: thrust is along negative world Z direction if falling, so we take (-a)
-    Vector3D z_des;
-    if (a_total.getMagnitude() < EPS) {
-        // If no acceleration requested, keep orientation stable
-        z_des = currentState.getPose().rotation.getZAxis().normalized();
-    } else {
-        z_des = (-a_total).normalized();
-    }
-
-    // Current Z axis
-    Vector3D z_cur = currentState.getPose().rotation.getZAxis().normalized();
-
-    // Minimal rotation from z_cur → z_des (NO YAW COMPONENT HERE)
-    Rotation3d R_align = rotationFromAToB(z_cur, z_des);
-
-    // Apply alignment to current orientation
-    Rotation3d R_target = currentState.getPose().rotation;
-    R_target.rotateBy(R_align);
-    R_target = R_target.normalized();
-
-    // Compute required thrust along new Z axis
-    double requiredAlongZ = -a_total.dot(R_target.getZAxis());
-    double targetThrust = MASS * requiredAlongZ;
-
-    // Prevent inverted thrust solution
-    if (targetThrust < 0.0) {
-        targetThrust = 0.0;
-    }
-
-    // Return yaw *rate*, NOT yaw angle
-    return TargetQCState{R_target, targetThrust, targetYawRate};
-}
-
 
 TargetQCState calculateTargetState(QCState currentState, Vector3D targetAccel, double targetYawRate) {
     // Frame convention: +X forward, +Y right, +Z down (NED)
@@ -280,4 +239,89 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
         QCAcceleration(Rotation3d(), 0,0,0), //TODO: calculate achieved acceleration
         0.0 //TODO: calculate error magnitude
     };
+}
+
+MotorVelocities optimizeMotorVelocities(QCState currentState, double thrust, double pitch_torque, double roll_torque, double yaw_torque) {
+    double torque_x = roll_torque;
+    double torque_y = pitch_torque;
+
+
+    /*
+    Step 2: Find the *equivalent thrust difference* needed to produce the desired yaw rate, from rotor drag torque=v^2 * DRAG_COEFF
+    The reason I'm calculign them equivalent thrusts is so that we can just add them to the other thrust equations above.
+    This gives the formula:
+    equivalentThrustDifferenceYaw = (fl+rr) - (fr+rl) assuming front left rotor spins CW (negated for CCW)
+    */
+    double equivalentThrustDifferenceYaw = yaw_torque / (ROTOR_DRAG_COEFF / THRUST_COEFF);
+    if(FRONT_LEFT_SPINS_CCW) equivalentThrustDifferenceYaw = -equivalentThrustDifferenceYaw;
+
+
+    /*
+    our final formulas for the thrusts are:
+    fl + fr + rl + rr = totalThrust
+    (rl - fr) - (rr - fl) = torque_x
+    (rl - fr) + (rr - fl) = torque_y
+    (fl + rr) - (fr + rl) = equivalentThrustDifferenceYaw
+
+    Solving these gives:
+    fl = (totalThrust + torque_x - torque_y + equivalentThrustDifferenceYaw) / 4;
+    fr = (totalThrust - torque_x - torque_y - equivalentThrustDifferenceYaw) / 4;
+    rl = (totalThrust + torque_x + torque_y - equivalentThrustDifferenceYaw) / 4;
+    rr = (totalThrust - torque_x + torque_y + equivalentThrustDifferenceYaw) / 4;
+    */
+    // std::cout << "\n\ntorque x: " << torque_x << "\n";
+    double fl_adjustment = (+ torque_x - torque_y + equivalentThrustDifferenceYaw);
+    double fr_adjustment = (- torque_x - torque_y - equivalentThrustDifferenceYaw);
+    double rl_adjustment = (+ torque_x + torque_y - equivalentThrustDifferenceYaw);
+    double rr_adjustment = (- torque_x + torque_y + equivalentThrustDifferenceYaw);
+
+    // if(targetState.targetThrust + fl_adjustment < 0){
+
+    // }
+
+
+    double fl_thrust = (thrust + fl_adjustment) / 4.0;
+    double fr_thrust = (thrust + fr_adjustment) / 4.0;
+    double rl_thrust = (thrust + rl_adjustment) / 4.0;
+    double rr_thrust = (thrust + rr_adjustment) / 4.0;
+
+    double overdrive = 0;
+
+    if(fl_thrust < 0) {
+        overdrive = -fl_thrust;
+        fl_thrust = 0;
+    }
+    if(fr_thrust < 0) {
+        overdrive = std::max(overdrive, -fr_thrust);
+    }
+    if(rl_thrust < 0) {
+
+    }
+
+    //Step 3: Convert thrusts to velocities
+    double fl_velocity = thrustToVelocity(fl_thrust);
+    double fr_velocity = thrustToVelocity(fr_thrust);
+    double rl_velocity = thrustToVelocity(rl_thrust);
+    double rr_velocity = thrustToVelocity(rr_thrust);
+
+    //Step 4: If motor acceleration exceeds the motor ramp rate, scale the difference between the current and target velocities accordingly.
+    if(ENABLE_INV_KIN_MOTOR_CONTSTRAINTS) {
+        double maxAllowedDeltaV = MOTOR_VELOCITY_RAMP_RATE * LOOP_TIME;
+        double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getFrontLeft();
+        double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFrontRight();
+        double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRearLeft();
+        double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRearRight();
+        double maxAbsDeltaV = std::max(std::max(std::abs(fl_deltaV), std::abs(fr_deltaV)), std::max(std::abs(rl_deltaV), std::abs(rr_deltaV)));
+        if(maxAbsDeltaV > maxAllowedDeltaV) {
+            double scale = maxAllowedDeltaV / maxAbsDeltaV;
+            fl_velocity = currentState.getMotorVelocities().getFrontLeft() + fl_deltaV * scale;
+            fr_velocity = currentState.getMotorVelocities().getFrontRight() + fr_deltaV * scale;
+            rl_velocity = currentState.getMotorVelocities().getRearLeft() + rl_deltaV * scale;
+            rr_velocity = currentState.getMotorVelocities().getRearRight() + rr_deltaV * scale;
+        }
+    }
+
+    //Step 5:
+
+    return MotorVelocities{fl_velocity, fr_velocity, rl_velocity, rr_velocity};
 }

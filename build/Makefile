@@ -494,6 +494,33 @@ src/QCLib/Kinematics.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.s
 .PHONY : src/QCLib/Kinematics.cpp.s
 
+src/QCLib/LQR.o: src/QCLib/LQR.cpp.o
+.PHONY : src/QCLib/LQR.o
+
+# target to build an object file
+src/QCLib/LQR.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/LQR.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/LQR.cpp.o
+.PHONY : src/QCLib/LQR.cpp.o
+
+src/QCLib/LQR.i: src/QCLib/LQR.cpp.i
+.PHONY : src/QCLib/LQR.i
+
+# target to preprocess a source file
+src/QCLib/LQR.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/LQR.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/LQR.cpp.i
+.PHONY : src/QCLib/LQR.cpp.i
+
+src/QCLib/LQR.s: src/QCLib/LQR.cpp.s
+.PHONY : src/QCLib/LQR.s
+
+# target to generate assembly for a file
+src/QCLib/LQR.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/LQR.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/QCLib/LQR.cpp.s
+.PHONY : src/QCLib/LQR.cpp.s
+
 src/QCLib/MotionController.o: src/QCLib/MotionController.cpp.o
 .PHONY : src/QCLib/MotionController.o
 
@@ -699,6 +726,9 @@ help:
 	@echo "... src/QCLib/Kinematics.o"
 	@echo "... src/QCLib/Kinematics.i"
 	@echo "... src/QCLib/Kinematics.s"
+	@echo "... src/QCLib/LQR.o"
+	@echo "... src/QCLib/LQR.i"
+	@echo "... src/QCLib/LQR.s"
 	@echo "... src/QCLib/MotionController.o"
 	@echo "... src/QCLib/MotionController.i"
 	@echo "... src/QCLib/MotionController.s"

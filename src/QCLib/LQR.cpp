@@ -1,5 +1,12 @@
 #include "Util.h"
 #include "Configuration.h"
+#include "Quadcopter.h"
+
+double thrustToVel(double thrust) {
+    if(thrust < 0) return 0;
+    return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
+}
+
 
 std::vector<std::vector<double>> negateArray(const std::vector<std::vector<double>>& input) {
     std::vector<std::vector<double>> result(input.size(), std::vector<double>());
@@ -65,6 +72,67 @@ std::vector<double> add_vectors_elementwise(const std::vector<double>& v1, const
     return result;
 }
 
+/*
+    NOTE: thrust order is in this coordinate frame:
+         2Y
+         |
+     1---O---3X
+         |
+         4
+
+    OURS:
+    1 X 2
+      X Y
+    4   3
+
+    Steps to convert:
+    1. invert Z axis
+    2. 
+*/
+
+std::vector<double> getStateVector(QCState state) {
+    // auto position_adj = state.getPose().rotateBy(Rotation3d::fromDegrees(45,0,180));
+    // auto velocity_adj = state.getVelocity().rotateBy(Rotation3d::fromDegrees(45,0,180));
+    auto position_adj = Pose3d(0,0,-state.getPose().getZ());
+    auto velocity_adj = Pose3d(0,0,-state.getVelocity().getZ());
+
+    auto pos = position_adj.translation;
+    auto vel = velocity_adj.translation;
+    auto ang_pos = position_adj.rotation;
+    auto ang_vel = velocity_adj.rotation;
+    return {
+        pos.x, pos.y, pos.z,
+        vel.x, vel.y, vel.z,
+        ang_pos.getPitch(), ang_pos.getRoll(), ang_pos.getYaw(),
+        ang_vel.getPitch(), ang_vel.getRoll(), ang_vel.getYaw()
+    };
+}
+
+std::vector<double> getStateVector(Pose3d position, Pose3d velocity) {
+    // auto position_adj = position.rotateBy(Rotation3d::fromDegrees(45,0,180));
+    // auto velocity_adj = velocity.rotateBy(Rotation3d::fromDegrees(45,0,180));
+     auto position_adj = Pose3d(0,0,-position.getZ());
+    auto velocity_adj = Pose3d(0,0,-velocity.getZ());
+
+    auto pos = position_adj.translation;
+    auto vel = velocity_adj.translation;
+    auto ang_pos = position_adj.rotation;
+    auto ang_vel = velocity_adj.rotation;
+    return {
+        pos.x, pos.y, pos.z,
+        vel.x, vel.y, vel.z,
+        ang_pos.getPitch(), ang_pos.getRoll(), ang_pos.getYaw(),
+        ang_vel.getPitch(), ang_vel.getRoll(), ang_vel.getYaw()
+    };
+}
+
+/**
+ * @brief Get the output of an LQR control step.
+ * 
+ * @param current vector countaining: {position x, position y, position z, velocity x, velocity y, velocity z, pitch, roll, yaw, pitch rate, roll rate, yaw rate}
+ * @param reference vector countaining: {position x, position y, position z, velocity x, velocity y, velocity z, pitch, roll, yaw, pitch rate, roll rate, yaw rate}
+ * @return std::vector<double> containing: {total force (thrust), pitch torque, roll torque, yaw torque}
+ */
 std::vector<double> lqrControlStep(std::vector<double> current, std::vector<double> reference) {
     std::vector<double> error = subtract_vectors_elementwise(current, reference);
     std::vector<double> feedback = matrix_vector_multiply(negateArray(LQR_K), error);
@@ -77,4 +145,29 @@ std::vector<double> lqrControlStep(std::vector<double> current, std::vector<doub
     };
 
     return add_vectors_elementwise(feedback, steady_state);
+}
+
+MotorVelocities applyMixer(std::vector<double> control_vector) {
+    auto thrusts = matrix_vector_multiply(LQR_MIXER, control_vector);
+
+    /*
+    NOTE: thrust order is in this coordinate frame:
+         2
+         |
+     1---O---3
+         |
+         4
+    +Y is aligned with rotor 2,
+    +X is aligned with rotor 3,
+    +Z is upward.
+
+    We will/should have (depending on when you read this)
+    convert the incoming coordinates so that 1 is FL, 2 is FR, 3 is RR, 4 is RL.
+    */
+    return MotorVelocities(
+        thrustToVel(thrusts[0]),
+        thrustToVel(thrusts[1]),
+        thrustToVel(thrusts[3]),
+        thrustToVel(thrusts[2])
+    );
 }

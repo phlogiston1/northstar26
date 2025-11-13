@@ -141,3 +141,40 @@ Vector3D TakeoffController::getTargetAcceleration(QCState& currentState, Pose3d 
     };
     return -targetAcceleration;
 }
+
+QCRequest TakeoffController::getTarget(QCState& currentState, Pose3d currentPosition) {
+    auto now = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double>(now - startTime).count();
+    //calculate target height based on motion profile
+    double targetHeightAtTime;
+    double targetVelocityAtTime;
+    double targetAccelerationZ = 0.0;
+    if (elapsed < acceleration_time) {
+        targetHeightAtTime = 0.5 * maxAcceleration * elapsed * elapsed;
+        targetVelocityAtTime = maxAcceleration*elapsed;
+        targetAccelerationZ = maxAcceleration;
+    } else if (elapsed < acceleration_time + cruise_time) {
+        targetHeightAtTime = 0.5 * maxAcceleration * acceleration_time * acceleration_time
+                                + maxVelocity * (elapsed - acceleration_time);
+        targetVelocityAtTime = maxVelocity;
+    } else if (elapsed < acceleration_time + cruise_time + deceleration_time) {
+        double t = elapsed - (acceleration_time + cruise_time);
+        targetHeightAtTime = 0.5 * maxAcceleration * acceleration_time * acceleration_time
+                                + maxVelocity * cruise_time
+                                + maxVelocity * t - 0.5 * maxAcceleration * t * t;
+        targetVelocityAtTime = maxVelocity - (elapsed - (acceleration_time + cruise_time + deceleration_time))*maxAcceleration;
+        targetAccelerationZ = -maxAcceleration;
+    } else {
+        targetHeightAtTime = targetHeight;
+        targetVelocityAtTime = 0;
+    }
+
+    std::cout << "Target Height: " << targetHeightAtTime << std::endl;
+
+    double heightError = targetHeightAtTime + currentPosition.getZ();
+
+    return QCRequest(
+        Pose3d(0,0,-targetHeightAtTime),
+        Pose3d(0,0,0)//-targetVelocityAtTime)
+    );
+}

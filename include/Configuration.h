@@ -11,8 +11,8 @@
 // ----------- QUADCOPTER PHYSICAL CONSTANTS -------------
 #define QUADCOPTER_ROTOR_DISTANCE 0.2 //quadcopter rotor center distance, in meters
 
-#define QUADCOPTER_MASS 0.1 //mass in kg
-#define QUADCOPTER_MOI 1 //moment of intertia of the quadcopter
+#define QUADCOPTER_MASS 1.2 //mass in kg
+#define QUADCOPTER_MOI 0.02 //moment of intertia of the quadcopter
 
 #define FRONT_LEFT_SPINS_CCW false //allows inverting assumed rotor spin directions to make it more flexible
 
@@ -71,11 +71,28 @@
 
 #define ENABLE_FLOOR true
 
+// static const std::vector<std::vector<double>> LQR_K = {
+//     {0.1, 0, 0, 0.05, 0, 0, 1.2, 0, 0, 0.1, 0, 0},   // thrust channel
+//     {0, 0, 0, 0, 0, 0, 0, 1.1, 0, 0, 0.9, 0},       // roll torque
+//     {0, 0, 0, 0, 0, 0, -1.1, 0, 0, -0.9, 0, 0},     // pitch torque
+//     {0, 0, 0, 0, 0, 0, 0, 0, 1.2, 0, 0, 0.8}        // yaw torque
+// };
+
+
+//GET USING compute_K.py
 static const std::vector<std::vector<double>> LQR_K = {
-    {0.1, 0, 0, 0.05, 0, 0, 1.2, 0, 0, 0.1, 0, 0},   // thrust channel
-    {0, 0, 0, 0, 0, 0, 0, 1.1, 0, 0, 0.9, 0},       // roll torque
-    {0, 0, 0, 0, 0, 0, -1.1, 0, 0, -0.9, 0, 0},     // pitch torque
-    {0, 0, 0, 0, 0, 0, 0, 0, 1.2, 0, 0, 0.8}        // yaw torque
+{-0.000000,0.000000,9.759979,0.000000,0.000000,5.740180,-0.000000,-0.000000,0.000000,-0.000000,-0.000000,0.000000},
+{-0.000000,-4.554316,0.000000,-0.000000,-4.412166,-0.000000,18.732296,-0.000000,0.000000,1.678106,-0.000000,0.000000},
+{4.554316,0.000000,-0.000000,4.412166,0.000000,0.000000,-0.000000,18.732296,0.000000,-0.000000,1.678106,-0.000000},
+{-0.000000,-0.000000,-0.000000,-0.000000,-0.000000,0.000000,0.000000,-0.000000,6.695574,0.000000,-0.000000,2.240249}
+};
+
+//GET USING compute_mixer.py
+static const std::vector<std::vector<double>> LQR_MIXER = {
+{0.250000,3.535534,0.000000,-25.000000},
+{0.250000,-0.000000,-3.535534,25.000000},
+{0.250000,-3.535534,0.000000,-25.000000},
+{0.250000,0.000000,3.535534,25.000000},
 };
 
 

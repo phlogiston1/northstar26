@@ -2,6 +2,8 @@
 #include "InverseKinematics.h"
 #include "Kinematics.h"
 #include "Path.h"
+#include "LQR.h"
+#include "MotionController.h"
 
 #include <iostream>
 #include <vector>
@@ -64,4 +66,44 @@ int main() {
               << " rl:" << ikResult.motorVelocities.getRearLeft() << " rr:" << ikResult.motorVelocities.getRearRight() << std::endl;
     std::cout << "note: these values may not match exactly due to motor acceleration limits, and discretization of acceleration in InverseKinematics" << std::endl;
 
-}
+
+
+
+
+    std::cout << "\n\n\n\n\n\n LQR INITIAL TESTING:" << std::endl;
+    QCState current = QCState(
+        Pose3d(0,0,0,Rotation3d(0,0,0)),
+        Pose3d(0,0,0,Rotation3d(0,0,0)),
+        MotorVelocities(0,0,0,0),
+        0
+    );
+    QCState reference = QCState(
+        Pose3d(0,0,-1,Rotation3d(0,0,0)),
+        Pose3d(0,0,0,Rotation3d(0,0,0)),
+        MotorVelocities(0,0,0,0),
+        0
+    );
+    auto result = lqrControlStep(getStateVector(current), getStateVector(reference));
+    std::cout << "thrust: " << result[0] << std::endl;
+    std::cout << "pitch torque: " << result[1] << std::endl;
+    std::cout << "roll torque: " << result[2] << std::endl;
+    std::cout << "yaw torque: " << result[3] << std::endl;
+
+    auto motorvels = optimizeMotorVelocities(current, result[0], result[1], result[2], result[3]);
+    // std::cout << "Motor Velocities fl:" << motorvels.getFrontLeft() << " fr:" << motorvels.getFrontRight()
+    //           << " rl:" << motorvels.getRearLeft() << " rr:" << motorvels.getRearRight() << std::endl;
+    motorvels = applyMixer(result);
+    std::cout << "Motor Velocities fl:" << motorvels.getFrontLeft() << " fr:" << motorvels.getFrontRight()
+              << " rl:" << motorvels.getRearLeft() << " rr:" << motorvels.getRearRight() << std::endl;
+
+    Pose3d(0,0,1).rotateBy(Rotation3d::fromDegrees(45,0,180)).print();
+
+    TakeoffController test = TakeoffController(0,1,5);
+
+    test.setTargetHeight(5,0);
+
+    for(double i = 0; i < 3; i+=0.1) {
+        test.getTarget(current, current.getPose());
+    }
+
+}//Motor Velocities fl:648.405 fr:0 rl:1649.46 rr:648.405

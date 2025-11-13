@@ -19,6 +19,7 @@
 #include "Kinematics.h"
 #include "InverseKinematics.h"
 #include "MotionController.h"
+#include "LQR.h"
 
 using namespace std::chrono_literals;
 
@@ -51,19 +52,30 @@ void runSimulation(int numIters, double dt) {
     // std::cout << "\n\ncurrent state velocity: ";
     // currentState.getVelocity().print();
     currentState.print();
-    Vector3D accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose()) + Vector3D(0.01,0,0);
-    std::cout << "controller req accel: ";
-    accel.print();
-    auto newVels = optimizeMotorVelocities(
-        currentState,
-        calculateTargetState(
-            currentState,
-            accel,
-            0
-        ),
-        1
-    );
-    currentState.setMotorVelocities(newVels.motorVelocities);
+    // Vector3D accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose()) + Vector3D(0.01,0,0);
+    // std::cout << "controller req accel: ";
+    // accel.print();
+    // auto newVels = optimizeMotorVelocities(
+    //     currentState,
+    //     calculateTargetState(
+    //         currentState,
+    //         accel,
+    //         0
+    //     ),
+    //     1
+    // );
+    QCRequest req = takeoffController.getTarget(currentState, currentState.getPose());
+    std::cout << "controller req vel: ";
+    req.position.print();
+    auto motorvels = applyMixer(lqrControlStep(
+        getStateVector(currentState),
+        getStateVector(req.position, req.velocity)
+    ));
+
+    std::cout << "Motor Velocities fl:" << motorvels.getFrontLeft() << " fr:" << motorvels.getFrontRight()
+              << " rl:" << motorvels.getRearLeft() << " rr:" << motorvels.getRearRight() << std::endl;
+
+    currentState.setMotorVelocities(motorvels);
 
 
     if(numIters > 0){

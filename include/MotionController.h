@@ -3,6 +3,13 @@
 #include "InverseKinematics.h"
 #include <chrono>
 
+struct QCRequest{
+    Pose3d position, velocity;
+    QCRequest(Pose3d position, Pose3d velocity): position(position), velocity(velocity) {
+        
+    }
+};
+
 class VelocityController{
     public:
         VelocityController();
@@ -31,6 +38,7 @@ class TakeoffController{
         TakeoffController(double kP, double maxVelocity, double maxAcceleration);
         void setTargetHeight(double height, double currentHeight);
         Vector3D getTargetAcceleration(QCState& currentState, Pose3d currentPosition);
+        QCRequest getTarget(QCState& currentState, Pose3d currentPosition);
     private:
         double targetHeight;
         double maxVelocity;

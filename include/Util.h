@@ -155,6 +155,38 @@ struct Pose3d {
     double getY() const { return translation.y; }
     double getZ() const { return translation.z; }
 
+    Pose3d rotateBy(Rotation3d r) {
+        // Rotate translation vector using quaternion
+        // Convert translation to a quaternion (0, v)
+        Rotation3d tQuat(0.0, translation.x, translation.y, translation.z);
+
+        // q * v * q_conjugate
+        Rotation3d q = r.normalized();
+        Rotation3d qConj(q.w, -q.x, -q.y, -q.z);
+
+        // First multiply q * tQuat
+        Rotation3d temp;
+        temp.w = q.w * tQuat.w - q.x * tQuat.x - q.y * tQuat.y - q.z * tQuat.z;
+        temp.x = q.w * tQuat.x + q.x * tQuat.w + q.y * tQuat.z - q.z * tQuat.y;
+        temp.y = q.w * tQuat.y - q.x * tQuat.z + q.y * tQuat.w + q.z * tQuat.x;
+        temp.z = q.w * tQuat.z + q.x * tQuat.y - q.y * tQuat.x + q.z * tQuat.w;
+
+        // Now multiply (q * v) * q_conjugate
+        Rotation3d rotated;
+        rotated.w = temp.w * qConj.w - temp.x * qConj.x - temp.y * qConj.y - temp.z * qConj.z;
+        rotated.x = temp.w * qConj.x + temp.x * qConj.w + temp.y * qConj.z - temp.z * qConj.y;
+        rotated.y = temp.w * qConj.y - temp.x * qConj.z + temp.y * qConj.w + temp.z * qConj.x;
+        rotated.z = temp.w * qConj.z + temp.x * qConj.y - temp.y * qConj.x + temp.z * qConj.w;
+
+        Vector3D newTranslation(rotated.x, rotated.y, rotated.z);
+
+        // Compose orientations: new = r ∘ old
+        Rotation3d newRotation = r;
+        newRotation.rotateBy(rotation); // multiply r * oldRotation
+
+        return Pose3d(newTranslation, newRotation);
+    }
+
     void print() const {
         std::cout << "Pose3d:\n\t";
         translation.print();
