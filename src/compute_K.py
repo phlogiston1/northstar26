@@ -9,13 +9,13 @@ Ts = 0.035  # Loop Time Seconds
 #These determine the agressiveness of the controller:
 #Q: penalizes state error. Higher values correct more aggresively
 Q = np.diag([
-    60,60,60,      # position (x,y,z)
-    50,50,50,         # velocity (x,y,z)
-    30,30,30,    # angles (p,r,y)
+    50,50,50,      # position (x,y,z)
+    30,30,30,         # velocity (x,y,z)
+    80,80,80,    # angles (p,r,y)
     30,30,30          # angular velocities (p,r,y)
 ])
 #R: penalize control effort. Higher values reduce control effort, correcting less aggresively.
-R = np.diag([1, 1, 1, 1]) * 10
+R = np.diag([1, 1, 1, 1]) * 1
 
 
 

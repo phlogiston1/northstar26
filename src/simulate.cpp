@@ -71,16 +71,16 @@ State initialState = State(
 State currentState = initialState;
 
 int runtime = 1000;
-int noise = 2;
-double ramp = 40000;
+int noise = 100;
+double ramp = 1000;
 
 void initSimulation() {
     currentState = initialState;
     takeoffController.setTargetHeight(3,0);
     testPath = Path(waypoints,
-        1, //vel
-        2, //accel
-        4, //jerk
+        0.3, //vel
+        7, //accel
+        10, //jerk
         1000
     );
     srand(time(0));
