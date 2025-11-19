@@ -34,21 +34,28 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-TakeoffController takeoffController = TakeoffController(1.5,2,0.3);
+TakeoffController takeoffController = TakeoffController(1.5,2,1);
 
 PathController pathController = PathController(Vector2D(),Vector2D(),0);
 
 std::vector<Vector2D> waypoints = {
     Vector2D{0,0},
     Vector2D{1,0},
-    Vector2D{2,2},
-    Vector2D{0,1}
+    Vector2D{1,1},
+    Vector2D{0,1},
+    Vector2D{-1,1},
+    Vector2D{-1,0},
+    Vector2D{-1,-1},
+    Vector2D{0,-1},
+    Vector2D{1,-1},
+    Vector2D{1,0},
+    Vector2D{0,0}
 };
 Path testPath = Path(waypoints,
     1, //vel
-    1, //accel
-    1, //jerk
-    20
+    2, //accel
+    5, //jerk
+    200
 );
 
 MotorVelocities initialVels = MotorVelocities(0,0,0,0);
@@ -64,17 +71,17 @@ State initialState = State(
 State currentState = initialState;
 
 int runtime = 1000;
-int noise = 100;
-double ramp = 2000;
+int noise = 2;
+double ramp = 40000;
 
 void initSimulation() {
     currentState = initialState;
     takeoffController.setTargetHeight(3,0);
     testPath = Path(waypoints,
         1, //vel
-        0.5, //accel
-        0.1, //jerk
-        200
+        2, //accel
+        4, //jerk
+        1000
     );
     srand(time(0));
 }
@@ -92,9 +99,9 @@ void runSimulation(int numIters, double dt) {
     QCRequest req = takeoffController.getTarget(currentState, currentState.getPose());
     if(numIters > 150) {
         req = pathController.getTarget(currentState);
-        std::cout << "controller req position: ";
-        req.position.print();
     }
+    std::cout << "controller req position: ";
+    req.position.print();
 
     auto currentStateNoVel = State(
         currentState.getPose(),
@@ -121,7 +128,6 @@ void runSimulation(int numIters, double dt) {
         double rightdv = right - currentState.getMotorVelocities().getRight();
         double reardv = rear - currentState.getMotorVelocities().getRear();
         double maxAbsDeltaV = std::max(std::max(std::abs(leftdv), std::abs(frontdv)), std::max(std::abs(rightdv), std::abs(reardv)));
-        std::cout << maxAbsDeltaV << "\n";
         if(maxAbsDeltaV > maxAllowedDeltaV) {
             double scale = maxAllowedDeltaV / maxAbsDeltaV;
             left = currentState.getMotorVelocities().getLeft() + leftdv * scale;
@@ -131,8 +137,6 @@ void runSimulation(int numIters, double dt) {
         }
     }
     motorvels = MotorVelocities(left + rand() % noise -(noise/2), front+ rand() % noise -(noise/2), right+ rand() % noise -(noise/2), rear+ rand() % noise -(noise/2));
-    std::cout << "Motor Velocities Left:" << motorvels.getLeft() << " Front:" << motorvels.getFront()
-              << " Right:" << motorvels.getRight() << " Rear:" << motorvels.getRear() << std::endl;
     currentState.setMotorVelocities(motorvels);
 
 
@@ -219,7 +223,12 @@ int main(){
         runSimulation(numIters, now-last);
 
         last = now;
-        auto rotation = currentState.getPose().rotation;
+        auto qcrotation = currentState.getPose().rotation;
+        auto rotation = Quaternion(
+            qcrotation.getYaw() + M_PI_4,
+            qcrotation.getPitch(),
+            qcrotation.getRoll()
+        );
 
 
         foxglove::schemas::CubePrimitive cube;
@@ -230,6 +239,14 @@ int main(){
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";
         entity.cubes.push_back(cube);
+
+        for(int i = 0; i < waypoints.size(); i++) {
+            foxglove::schemas::CubePrimitive waypt;
+            waypt.size = foxglove::schemas::Vector3{0.05, 0.05, 0.05};
+            waypt.color = foxglove::schemas::Color{2, 255, 1, 255};
+            waypt.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{waypoints[i].x, waypoints[i].y, currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+            entity.cubes.push_back(waypt);
+        }
 
         foxglove::schemas::SceneUpdate scene_update;
         scene_update.entities.push_back(entity);

@@ -4,7 +4,7 @@
  * @brief All the constants needed to characterize the quadcopter physics and controls
  */
 
-#define LOOP_TIME 0.01 //main loop time in seconds
+#define LOOP_TIME 0.034 //main loop time in seconds
 
 #define G 9.81
 
@@ -51,10 +51,10 @@
 //again the formula is DRAG_COEFF * rotor velocity^2
 
 //super simple drag formula F = -kv^2. Simple, but might require manual tuning.
-#define LINEAR_DRAG_COEFF_XY 0.1//0.25
-#define LINEAR_DRAG_COEFF_Z 0.1//0.25
-#define ANGULAR_DRAG_COEFF_XY 0.005
-#define ANGULAR_DRAG_COEFF_Z 0.005
+#define LINEAR_DRAG_COEFF_XY 0.5//0.25
+#define LINEAR_DRAG_COEFF_Z 0.5//0.25
+#define ANGULAR_DRAG_COEFF_XY 0.5
+#define ANGULAR_DRAG_COEFF_Z 0.5
 
 
 

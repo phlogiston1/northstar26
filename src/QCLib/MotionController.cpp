@@ -62,9 +62,16 @@ QCRequest PathController::getTarget(State current) {
     double elapsed = std::chrono::duration<double>(now - startTime).count();
     std::cout << "DEBUG ELAPSED: " << elapsed << std::endl;
     auto sample = path.sample(elapsed);
+    auto next = path.sample(elapsed + LOOP_TIME);
 
     auto angle = calculateTargetState(current, Vector3D(sample.acc.x, sample.acc.y, 0), 0);
-    angle.targetAngle.z = sample.pos.x/5;
+    auto accel = calculateTargetState(current, Vector3D(next.acc.x, next.acc.y, 0), 0);
+    // angle.targetAngle.z = M_PI_4/2;
+    // accel.targetAngle.z = M_PI_4/2;
+
+    accel.targetAngle.rotateBy(angle.targetAngle.inverse());
+
+    accel.targetAngle.print();
 
     return QCRequest(Pose3D(
         sample.pos.x,
@@ -74,7 +81,8 @@ QCRequest PathController::getTarget(State current) {
     ), Pose3D(
         sample.vel.x,// * 0.5,
         sample.vel.y,// * 0.5,
-        0
+        0,
+        accel.targetAngle
     ));
 }
 
@@ -195,7 +203,7 @@ QCRequest TakeoffController::getTarget(State& currentState, Pose3D currentPositi
     double heightError = targetHeightAtTime + currentPosition.getZ();
 
     return QCRequest(
-        Pose3D(0,0,targetHeightAtTime),
+        Pose3D(0,0,targetHeightAtTime, Quaternion(M_PI_4/2,0,0)),
         Pose3D(0,0,targetVelocityAtTime*0.5)//-targetVelocityAtTime)
     );
 }
