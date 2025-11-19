@@ -3,7 +3,7 @@
 #include "Quadcopter.h"
 
 double thrustToVel(double thrust) {
-    if(thrust < 0) return 0;
+    // if(thrust < 0) return 0;
     return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
 }
 
@@ -90,29 +90,36 @@ std::vector<double> add_vectors_elementwise(const std::vector<double>& v1, const
     2. 
 */
 
-std::vector<double> getStateVector(QCState state) {
+// Pose3d convertPoseFrame(Pose3d original){
+//     auto rotated = original.rotateBy(Rotation3d::fromDegrees(-45,0,0));
+//     return Pose3d(
+//         rotated.getY(),
+//     )
+// }
+
+std::vector<double> getStateVector(State state) {
     // auto position_adj = state.getPose().rotateBy(Rotation3d::fromDegrees(45,0,180));
     // auto velocity_adj = state.getVelocity().rotateBy(Rotation3d::fromDegrees(45,0,180));
-    auto position_adj = Pose3d(0,0,-state.getPose().getZ());
-    auto velocity_adj = Pose3d(0,0,-state.getVelocity().getZ());
+    auto position_adj = state.getPose();
+    auto velocity_adj = state.getLinearVelocity();
 
     auto pos = position_adj.translation;
-    auto vel = velocity_adj.translation;
+    auto vel = state.getLinearVelocity();
     auto ang_pos = position_adj.rotation;
-    auto ang_vel = velocity_adj.rotation;
+    auto ang_vel = state.getAngularVelocity();
     return {
         pos.x, pos.y, pos.z,
         vel.x, vel.y, vel.z,
-        ang_pos.getPitch(), ang_pos.getRoll(), ang_pos.getYaw(),
-        ang_vel.getPitch(), ang_vel.getRoll(), ang_vel.getYaw()
+        ang_pos.getRoll(), ang_pos.getPitch(), ang_pos.getYaw(),
+        ang_vel.x, ang_vel.y, ang_vel.z
     };
 }
 
-std::vector<double> getStateVector(Pose3d position, Pose3d velocity) {
+std::vector<double> getStateVector(Pose3D position, Pose3D velocity) {
     // auto position_adj = position.rotateBy(Rotation3d::fromDegrees(45,0,180));
     // auto velocity_adj = velocity.rotateBy(Rotation3d::fromDegrees(45,0,180));
-     auto position_adj = Pose3d(0,0,-position.getZ());
-    auto velocity_adj = Pose3d(0,0,-velocity.getZ());
+     auto position_adj = position;
+    auto velocity_adj = velocity;
 
     auto pos = position_adj.translation;
     auto vel = velocity_adj.translation;
@@ -121,24 +128,24 @@ std::vector<double> getStateVector(Pose3d position, Pose3d velocity) {
     return {
         pos.x, pos.y, pos.z,
         vel.x, vel.y, vel.z,
-        ang_pos.getPitch(), ang_pos.getRoll(), ang_pos.getYaw(),
-        ang_vel.getPitch(), ang_vel.getRoll(), ang_vel.getYaw()
+        ang_pos.getRoll(), ang_pos.getPitch(), ang_pos.getYaw(),
+        ang_vel.getRoll(), ang_vel.getPitch(), ang_vel.getYaw()
     };
 }
 
 /**
  * @brief Get the output of an LQR control step.
  * 
- * @param current vector countaining: {position x, position y, position z, velocity x, velocity y, velocity z, pitch, roll, yaw, pitch rate, roll rate, yaw rate}
- * @param reference vector countaining: {position x, position y, position z, velocity x, velocity y, velocity z, pitch, roll, yaw, pitch rate, roll rate, yaw rate}
- * @return std::vector<double> containing: {total force (thrust), pitch torque, roll torque, yaw torque}
+ * @param current vector countaining: {position x, position y, position z, velocity x, velocity y, velocity z, roll, pitch, yaw, roll rate, pitch rate, yaw rate}
+ * @param reference vector countaining: {position x, position y, position z, velocity x, velocity y, velocity z, roll, pitch, yaw, roll rate, pitch rate, yaw rate}
+ * @return std::vector<double> containing: {total force (thrust), roll torque, pitch torque, yaw torque}
  */
 std::vector<double> lqrControlStep(std::vector<double> current, std::vector<double> reference) {
     std::vector<double> error = subtract_vectors_elementwise(current, reference);
     std::vector<double> feedback = matrix_vector_multiply(negateArray(LQR_K), error);
 
     std::vector<double> steady_state = {
-        QUADCOPTER_MASS * G,
+        QUADCOPTER_MASS * G * cos(current[7]) * cos(current[8]),
         0,
         0,
         0
@@ -148,25 +155,20 @@ std::vector<double> lqrControlStep(std::vector<double> current, std::vector<doub
 }
 
 MotorVelocities applyMixer(std::vector<double> control_vector) {
+    //gives {front, left, back, right}
     auto thrusts = matrix_vector_multiply(LQR_MIXER, control_vector);
 
     /*
-    NOTE: thrust order is in this coordinate frame:
-         2
-         |
-     1---O---3
-         |
-         4
-    +Y is aligned with rotor 2,
-    +X is aligned with rotor 3,
-    +Z is upward.
-
-    We will/should have (depending on when you read this)
-    convert the incoming coordinates so that 1 is FL, 2 is FR, 3 is RR, 4 is RL.
+    front = 0
+    left = 1
+    back = 2
+    right = 3
     */
+
+
     return MotorVelocities(
-        thrustToVel(thrusts[0]),
         thrustToVel(thrusts[1]),
+        thrustToVel(thrusts[0]),
         thrustToVel(thrusts[3]),
         thrustToVel(thrusts[2])
     );

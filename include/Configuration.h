@@ -12,7 +12,10 @@
 #define QUADCOPTER_ROTOR_DISTANCE 0.2 //quadcopter rotor center distance, in meters
 
 #define QUADCOPTER_MASS 1.2 //mass in kg
-#define QUADCOPTER_MOI 0.02 //moment of intertia of the quadcopter
+#define QUADCOPTER_MOI 0.02 //moment of intertia of the quadcopter - OLD
+#define QUADCOPTER_IXY 0.02 //moment of intertia of the quadcopter about X and Y axes, used for pitch and roll
+#define QUADCOPTER_IZ 0.02 //moment of intertia of the quadcopter about Z axis, used for yaw
+
 
 #define FRONT_LEFT_SPINS_CCW false //allows inverting assumed rotor spin directions to make it more flexible
 
@@ -40,16 +43,16 @@
 // These constants are used in the physics calculations for the quadcopter model.
 // Most of these should be empirically determined for the specific quadcopter design.
 //Thrust calculation:
-#define THRUST_COEFF 0.000007 //constant used to calculate rotor thrust. units: N per Rad/S.
+#define THRUST_COEFF 0.01 //constant used to calculate rotor thrust. units: N per Rad/S.
 //thrust calculation based on the formula: Thrust = THRUST_COEFF * AIR_DENSITY * ROTOR_AREA * (rotor velocity * ROTOR_RADIUS)^2
 //which can be simplified to Thrust = THRUST_COEFF * rotor velocity^2 (where thrust coeff is empirically measured)
 
-#define ROTOR_DRAG_COEFF 0.000000011 //This is used to calculate the angular force produced by the rotors about the Z axis.
+#define ROTOR_DRAG_COEFF 0.01 //This is used to calculate the angular force produced by the rotors about the Z axis.
 //again the formula is DRAG_COEFF * rotor velocity^2
 
 //super simple drag formula F = -kv^2. Simple, but might require manual tuning.
-#define LINEAR_DRAG_COEFF_XY 0.5//0.25
-#define LINEAR_DRAG_COEFF_Z 0.5//0.25
+#define LINEAR_DRAG_COEFF_XY 0.1//0.25
+#define LINEAR_DRAG_COEFF_Z 0.1//0.25
 #define ANGULAR_DRAG_COEFF_XY 0.005
 #define ANGULAR_DRAG_COEFF_Z 0.005
 
@@ -81,18 +84,18 @@
 
 //GET USING compute_K.py
 static const std::vector<std::vector<double>> LQR_K = {
-{-0.000000,0.000000,9.759979,0.000000,0.000000,5.740180,-0.000000,-0.000000,0.000000,-0.000000,-0.000000,0.000000},
-{-0.000000,-4.554316,0.000000,-0.000000,-4.412166,-0.000000,18.732296,-0.000000,0.000000,1.678106,-0.000000,0.000000},
-{4.554316,0.000000,-0.000000,4.412166,0.000000,0.000000,-0.000000,18.732296,0.000000,-0.000000,1.678106,-0.000000},
-{-0.000000,-0.000000,-0.000000,-0.000000,-0.000000,0.000000,0.000000,-0.000000,6.695574,0.000000,-0.000000,2.240249}
+{0.000000,-0.000000,0.691986,0.000000,-0.000000,1.462741,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000},
+{0.000000,-0.622421,0.000000,0.000000,-0.896531,0.000000,3.281138,0.000000,-0.000000,0.405688,0.000000,-0.000000},
+{0.622421,-0.000000,0.000000,0.896531,-0.000000,-0.000000,0.000000,3.281138,-0.000000,0.000000,0.405688,-0.000000},
+{-0.000000,0.000000,0.000000,-0.000000,0.000000,0.000000,-0.000000,-0.000000,0.831016,-0.000000,-0.000000,0.368158},
 };
 
 //GET USING compute_mixer.py
 static const std::vector<std::vector<double>> LQR_MIXER = {
 {0.250000,3.535534,0.000000,-25.000000},
-{0.250000,-0.000000,-3.535534,25.000000},
-{0.250000,-3.535534,0.000000,-25.000000},
-{0.250000,0.000000,3.535534,25.000000},
+{0.250000,-0.000000,3.535534,25.000000},
+{0.250000,-3.535534,-0.000000,-25.000000},
+{0.250000,0.000000,-3.535534,25.000000}
 };
 
 

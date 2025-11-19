@@ -6,56 +6,58 @@
 //ALL POSITIVE VALUES, IGNORING DIRECTION
 class MotorVelocities {
     private:
-        double frontLeft;
-        double frontRight;
-        double rearLeft;
-        double rearRight;
+        double left;
+        double front;
+        double right;
+        double rear;
 
     public:
-        MotorVelocities(double frontLeft, double frontRight, double rearLeft, double rearRight);
+        MotorVelocities(double left, double front, double right, double rear);
 
-        double getFrontLeft() const;
-        double getFrontRight() const;
-        double getRearLeft() const;
-        double getRearRight() const;
+        double getLeft() const;
+        double getFront() const;
+        double getRight() const;
+        double getRear() const;
 
         MotorVelocities limit(double maxVelocity) const;
 };
 
 
 
-class QCAcceleration {
+class Acceleration {
     private:
-        Rotation3d angular_accel;
-        double accel_x;
-        double accel_y;
-        double accel_z;
+        double x, y, z, yaw, pitch, roll;
 
     public:
-        QCAcceleration(Rotation3d angular_accel, double accel_x, double accel_y, double accel_z);
+        Acceleration(double x, double y, double z, double yaw, double pitch, double roll);
 
-        Rotation3d getAngular();
         double getX();
         double getY();
         double getZ();
+        double getYaw();
+        double getPitch();
+        double getRoll();
 };
 
-class QCState {
+class State {
     private:
-        Pose3d pose;
-        Pose3d velocity;
+        Pose3D pose;
+        Vector3D velocity;
+        Vector3D angular_velocity;
         MotorVelocities motorVelocities;
         double time;
 
     public:
-        QCState(Pose3d pose, Pose3d velocity, MotorVelocities motorVelocities, double time);
-        Pose3d getPose();
-        Pose3d getVelocity();
+        State(Pose3D pose, Vector3D velocity, Vector3D angular_velocity, MotorVelocities motorVelocities, double time);
+        Pose3D getPose();
+        Vector3D getLinearVelocity();
+        Vector3D getAngularVelocity();
+        Vector3D getAngularVelocityLocal();
         MotorVelocities getMotorVelocities();
         void setMotorVelocities(MotorVelocities newVels);
         double getTime();
         void print();
-        QCState predict(double timestep);
+        State predict(double timestep);
 };
 
 #endif

@@ -4,18 +4,18 @@ import numpy as np
 m = 1.2      # mass kg
 g = 9.81    # gravity constant
 Ix, Iy, Iz = 0.02, 0.02, 0.04 # moments of inertia
-Ts = 0.01  # Loop Time Seconds
+Ts = 0.035  # Loop Time Seconds
 
 #These determine the agressiveness of the controller:
 #Q: penalizes state error. Higher values correct more aggresively
 Q = np.diag([
     10,10,10,      # position (x,y,z)
-    1,1,1,         # velocity (x,y,z)
+    10,10,10,         # velocity (x,y,z)
     100,100,10,    # angles (p,r,y)
     1,1,1          # angular velocities (p,r,y)
 ])
 #R: penalize control effort. Higher values reduce control effort, correcting less aggresively.
-R = np.diag([1, 1, 1, 1]) * 0.1
+R = np.diag([2, 1, 1, 1]) * 10
 
 
 

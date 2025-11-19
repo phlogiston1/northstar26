@@ -31,14 +31,18 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-TakeoffController takeoffController = TakeoffController(1.5,1,1);
+TakeoffController takeoffController = TakeoffController(1.5,1,0.4);
 MotorVelocities initialVels = MotorVelocities(0,0,0,0);
-QCState initialState = QCState(
-    Pose3d(Vector3D(0,0,0), Rotation3d(0,0,0)),
-    Pose3d(Vector3D(0,0,0), Rotation3d(0,0,0)), initialVels, 0);
+State initialState = State(
+    Pose3D(Vector3D(0,0,0), Quaternion(0,0,0)),
+    Vector3D(0,0,0), 
+    Vector3D(0,0,0), 
+    initialVels, 
+    0
+);
 
 
-QCState currentState = initialState;
+State currentState = initialState;
 
 void initSimulation() {
     currentState = initialState;
@@ -65,15 +69,22 @@ void runSimulation(int numIters, double dt) {
     //     1
     // );
     QCRequest req = takeoffController.getTarget(currentState, currentState.getPose());
-    std::cout << "controller req vel: ";
-    req.position.print();
+    // std::cout << "controller req vel: ";
+    // req.position.print();
+    auto currentStateNoVel = State(
+        currentState.getPose(),
+        Vector3D(),
+        Vector3D(),
+        currentState.getMotorVelocities(),
+        currentState.getTime()
+    );
     auto motorvels = applyMixer(lqrControlStep(
         getStateVector(currentState),
         getStateVector(req.position, req.velocity)
     ));
 
-    std::cout << "Motor Velocities fl:" << motorvels.getFrontLeft() << " fr:" << motorvels.getFrontRight()
-              << " rl:" << motorvels.getRearLeft() << " rr:" << motorvels.getRearRight() << std::endl;
+    std::cout << "Motor Velocities Left:" << motorvels.getLeft() << " Front:" << motorvels.getFront()
+              << " Right:" << motorvels.getRight() << " Rear:" << motorvels.getRear() << std::endl;
 
     currentState.setMotorVelocities(motorvels);
 
@@ -81,6 +92,8 @@ void runSimulation(int numIters, double dt) {
     if(numIters > 0){
         currentState = currentState.predict(dt);
     }
+
+    std::cout << "DT: " << dt << std::endl;
 }
 
 int main(){
@@ -161,7 +174,7 @@ int main(){
         foxglove::schemas::CubePrimitive cube;
         cube.size = foxglove::schemas::Vector3{QUADCOPTER_ROTOR_DISTANCE, QUADCOPTER_ROTOR_DISTANCE, 0.05};
         cube.color = foxglove::schemas::Color{1, 1, 1, 1};
-        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-1*currentState.getPose().getX(), -1*currentState.getPose().getY(), -1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{1*currentState.getPose().getX(), 1*currentState.getPose().getY(), 1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
 
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";

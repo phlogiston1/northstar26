@@ -22,21 +22,21 @@ static double wrapPi(double a) {
     return a;
 }
 
-static Rotation3d fromAxisAngle(const Vector3D& axis_in, double angle) {
+static Quaternion fromAxisAngle(const Vector3D& axis_in, double angle) {
     Vector3D axis = axis_in.normalized();
     double half = angle * 0.5;
     double s = std::sin(half);
-    return Rotation3d(std::cos(half), axis.x*s, axis.y*s, axis.z*s);
+    return Quaternion(std::cos(half), axis.x*s, axis.y*s, axis.z*s);
 }
 
 // Minimal rotation that sends a -> b
-static Rotation3d rotationFromAToB(const Vector3D& a_in, const Vector3D& b_in) {
+static Quaternion rotationFromAToB(const Vector3D& a_in, const Vector3D& b_in) {
     Vector3D a = a_in.normalized();
     Vector3D b = b_in.normalized();
     double cosTheta = a.dot(b);
 
     if (cosTheta > 1.0 - 1e-12) {
-        return Rotation3d(); // identity
+        return Quaternion(); // identity
     }
     if (cosTheta < -1.0 + 1e-12) {
         // 180° rotation: choose arbitrary perpendicular axis
@@ -60,11 +60,11 @@ double thrustToVelocity(double thrust) {
 }
 
 
-TargetQCState calculateTargetState(QCState currentState, Vector3D targetAccel, double targetYawRate) {
+TargetQCState calculateTargetState(State currentState, Vector3D targetAccel, double targetYawRate) {
     // Frame convention: +X forward, +Y right, +Z down (NED)
     //account for gravity and drag:
     targetAccel = targetAccel - Vector3D(0, 0, G);
-    auto vel = currentState.getVelocity().translation;
+    auto vel = currentState.getLinearVelocity();
     auto velocity_squared  = Vector3D(
         vel.x * std::abs(vel.x),
         vel.y * std::abs(vel.y),
@@ -108,7 +108,7 @@ TargetQCState calculateTargetState(QCState currentState, Vector3D targetAccel, d
 
 // Now y_body is guaranteed right-handed
     // 5. Build rotation from body axes
-    Rotation3d targetAngle = Rotation3d::fromRotationMatrix(x_body, y_body, z_body);
+    Quaternion targetAngle = Quaternion::fromRotationMatrix(x_body, y_body, z_body);
 
 
     // To do this, we project the target acceleration onto the quadcopter's current Z axis.
@@ -134,13 +134,13 @@ TargetQCState calculateTargetState(QCState currentState, Vector3D targetAccel, d
     return TargetQCState{targetAngle, targetThrust, targetYawRate};
 }
 
-InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCState targetState, double timestep) {
+InverseKinematicResult optimizeMotorVelocities(State currentState, TargetQCState targetState, double timestep) {
     //Step 1: Find the theretical forces at the points (width/2,0) and (0,width/2) that would produce the desired angular acceleration for pitch and roll.
     double desiredAngularVelPitch = (targetState.targetAngle.getPitch() - currentState.getPose().rotation.getPitch()) / timestep;
     double desiredAngularVelRoll = (targetState.targetAngle.getRoll() - currentState.getPose().rotation.getRoll()) / timestep;
 
-    double desiredAngularAccelPitch = (desiredAngularVelPitch - currentState.getVelocity().rotation.getPitch()) / timestep;
-    double desiredAngularAccelRoll = (desiredAngularVelRoll - currentState.getVelocity().rotation.getRoll()) / timestep;
+    double desiredAngularAccelPitch = (desiredAngularVelPitch - currentState.getAngularVelocity().y) / timestep;
+    double desiredAngularAccelRoll = (desiredAngularVelRoll - currentState.getAngularVelocity().x) / timestep;
 
     /*
     These values give us two formulas that give us the difference in thrust between opposite motors:
@@ -218,17 +218,17 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
     //Step 4: If motor acceleration exceeds the motor ramp rate, scale the difference between the current and target velocities accordingly.
     if(ENABLE_INV_KIN_MOTOR_CONTSTRAINTS) {
         double maxAllowedDeltaV = MOTOR_VELOCITY_RAMP_RATE * timestep;
-        double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getFrontLeft();
-        double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFrontRight();
-        double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRearLeft();
-        double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRearRight();
+        double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getLeft();
+        double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFront();
+        double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRight();
+        double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRear();
         double maxAbsDeltaV = std::max(std::max(std::abs(fl_deltaV), std::abs(fr_deltaV)), std::max(std::abs(rl_deltaV), std::abs(rr_deltaV)));
         if(maxAbsDeltaV > maxAllowedDeltaV) {
             double scale = maxAllowedDeltaV / maxAbsDeltaV;
-            fl_velocity = currentState.getMotorVelocities().getFrontLeft() + fl_deltaV * scale;
-            fr_velocity = currentState.getMotorVelocities().getFrontRight() + fr_deltaV * scale;
-            rl_velocity = currentState.getMotorVelocities().getRearLeft() + rl_deltaV * scale;
-            rr_velocity = currentState.getMotorVelocities().getRearRight() + rr_deltaV * scale;
+            fl_velocity = currentState.getMotorVelocities().getLeft() + fl_deltaV * scale;
+            fr_velocity = currentState.getMotorVelocities().getFront() + fr_deltaV * scale;
+            rl_velocity = currentState.getMotorVelocities().getRight() + rl_deltaV * scale;
+            rr_velocity = currentState.getMotorVelocities().getRear() + rr_deltaV * scale;
         }
     }
 
@@ -236,12 +236,12 @@ InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCSta
 
     return InverseKinematicResult{
         MotorVelocities{fl_velocity, fr_velocity, rl_velocity, rr_velocity},
-        QCAcceleration(Rotation3d(), 0,0,0), //TODO: calculate achieved acceleration
+        Acceleration(0,0,0,0,0,0), //TODO: calculate achieved acceleration
         0.0 //TODO: calculate error magnitude
     };
 }
 
-MotorVelocities optimizeMotorVelocities(QCState currentState, double thrust, double pitch_torque, double roll_torque, double yaw_torque) {
+MotorVelocities optimizeMotorVelocities(State currentState, double thrust, double pitch_torque, double roll_torque, double yaw_torque) {
     double torque_x = roll_torque;
     double torque_y = pitch_torque;
 
@@ -307,17 +307,17 @@ MotorVelocities optimizeMotorVelocities(QCState currentState, double thrust, dou
     //Step 4: If motor acceleration exceeds the motor ramp rate, scale the difference between the current and target velocities accordingly.
     if(ENABLE_INV_KIN_MOTOR_CONTSTRAINTS) {
         double maxAllowedDeltaV = MOTOR_VELOCITY_RAMP_RATE * LOOP_TIME;
-        double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getFrontLeft();
-        double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFrontRight();
-        double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRearLeft();
-        double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRearRight();
+        double fl_deltaV = fl_velocity - currentState.getMotorVelocities().getLeft();
+        double fr_deltaV = fr_velocity - currentState.getMotorVelocities().getFront();
+        double rl_deltaV = rl_velocity - currentState.getMotorVelocities().getRight();
+        double rr_deltaV = rr_velocity - currentState.getMotorVelocities().getRear();
         double maxAbsDeltaV = std::max(std::max(std::abs(fl_deltaV), std::abs(fr_deltaV)), std::max(std::abs(rl_deltaV), std::abs(rr_deltaV)));
         if(maxAbsDeltaV > maxAllowedDeltaV) {
             double scale = maxAllowedDeltaV / maxAbsDeltaV;
-            fl_velocity = currentState.getMotorVelocities().getFrontLeft() + fl_deltaV * scale;
-            fr_velocity = currentState.getMotorVelocities().getFrontRight() + fr_deltaV * scale;
-            rl_velocity = currentState.getMotorVelocities().getRearLeft() + rl_deltaV * scale;
-            rr_velocity = currentState.getMotorVelocities().getRearRight() + rr_deltaV * scale;
+            fl_velocity = currentState.getMotorVelocities().getLeft() + fl_deltaV * scale;
+            fr_velocity = currentState.getMotorVelocities().getFront() + fr_deltaV * scale;
+            rl_velocity = currentState.getMotorVelocities().getRight() + rl_deltaV * scale;
+            rr_velocity = currentState.getMotorVelocities().getRear() + rr_deltaV * scale;
         }
     }
 

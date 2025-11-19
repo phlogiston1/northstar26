@@ -19,7 +19,7 @@
  */
  struct InverseKinematicResult {
     MotorVelocities motorVelocities;
-    QCAcceleration achievedAccel;
+    Acceleration achievedAccel;
     double errorMagnitude;
 };
 
@@ -28,15 +28,15 @@
  * @brief Represents the target state for the quadcopter based on desired acceleration and yaw rate
  */
 struct TargetQCState {
-    Rotation3d targetAngle;
+    Quaternion targetAngle;
     double targetThrust;
     double targetYawRate;
 };
 
-TargetQCState calculateTargetState(QCState currentState, Vector3D targetAccel, double targetYaw);
+TargetQCState calculateTargetState(State currentState, Vector3D targetAccel, double targetYaw);
 
-InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCState targetState, double timestep);
-MotorVelocities optimizeMotorVelocities(QCState currentState, double thrust, double pitch_torque, double roll_torque, double yaw_torque);
+InverseKinematicResult optimizeMotorVelocities(State currentState, TargetQCState targetState, double timestep);
+MotorVelocities optimizeMotorVelocities(State currentState, double thrust, double pitch_torque, double roll_torque, double yaw_torque);
 
 
 #endif
