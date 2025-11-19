@@ -1,4 +1,4 @@
-#include "Quadcopter.h"
+#include "Physics.h"
 #include "InverseKinematics.h"
 #include "Kinematics.h"
 #include "Path.h"
@@ -39,7 +39,7 @@ int main() {
               << " Right:" << motorvels.getRight() << " Rear:" << motorvels.getRear() << std::endl;
 
     std::cout << "\n\nKINEMATICS ACCELERATION: \n";
-    current.setMotorVelocities(motorvels);
+    current.motor_velocities = motorvels;
     auto acc = velocitiesToAccel(current);
     std::cout << "\tCalculated Accel X: " << acc.getX() << " Y: " << acc.getY() << " Z: " << acc.getZ() <<  std::endl << "\tAngular Accel: ";
     std::cout << "Yaw: " << acc.getYaw() << " Pitch: " << acc.getPitch() << " Roll: " << acc.getRoll();

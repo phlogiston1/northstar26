@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Quadcopter.h"
+#include "Physics.h"
 
 std::vector<double> getStateVector(State state);
 std::vector<double> getStateVector(Pose3D position, Pose3D velocity);

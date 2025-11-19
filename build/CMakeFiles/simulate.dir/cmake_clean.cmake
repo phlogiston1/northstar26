@@ -31,6 +31,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.o.d"
   "CMakeFiles/simulate.dir/src/QCLib/Path.cpp.o"
   "CMakeFiles/simulate.dir/src/QCLib/Path.cpp.o.d"
+  "CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.o"
+  "CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.o.d"
   "CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o"
   "CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o.d"
   "CMakeFiles/simulate.dir/src/QCLib/Util.cpp.o"

@@ -2,7 +2,7 @@ CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.o: \
  /home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp \
  /usr/include/stdc-predef.h \
  /home/seanb/Documents/quadsquad2026/include/MotionController.h \
- /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/Physics.h \
  /usr/include/c++/13/array /usr/include/c++/13/compare \
  /usr/include/c++/13/initializer_list \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \

@@ -26,17 +26,17 @@ VelocityController::VelocityController(double max_velocity, double max_accelerat
 }
 
 void VelocityController::setInitialPose(State current) {
-    pose = current.getPose().translation;
+    pose = current.pose.translation;
 }
 
 QCRequest VelocityController::getTarget(State current, Vector3D target_velocity) {
-    Vector3D accel = (target_velocity - current.getLinearVelocity())/LOOP_TIME;
-    if(accel.getMagnitude() > max_acceleration) accel = accel / (accel.getMagnitude() - max_acceleration);
-    Vector3D velocity = current.getLinearVelocity() + (accel * LOOP_TIME);
-    if(velocity.getMagnitude() > max_velocity) velocity = velocity /(velocity.getMagnitude() - max_velocity);
+    // Vector3D accel = (target_velocity - current.linear_velocity)/LOOP_TIME;
+    // if(accel.getMagnitude() > max_acceleration) accel = accel / (accel.getMagnitude() - max_acceleration);
+    // Vector3D velocity = current.linear_velocity + (accel * LOOP_TIME);
+    // if(velocity.getMagnitude() > max_velocity) velocity = velocity /(velocity.getMagnitude() - max_velocity);
 
-    velocity.z = target_velocity.z; //no accel limit on z velocity
-
+    // velocity.z = target_velocity.z; //no accel limit on z velocity
+    auto velocty = target_velocity;
 
     pose  = pose + (velocity * LOOP_TIME);
 
@@ -46,8 +46,8 @@ QCRequest VelocityController::getTarget(State current, Vector3D target_velocity)
     );
 }
 
-PathController::PathController(Vector2D position_kp, Vector2D velocity_kp, double cruiseHeight_kP)
-    : position_kp(position_kp), velocity_kp(velocity_kp), cruiseHeight_kP(cruiseHeight_kP), path(Path({Vector2D{0,0}}, MAX_VELOCITY_XY, MAX_ACCELERATION_XY, MAX_JERK_XY, 2)) {
+PathController::PathController()
+    :path(Path({Vector2D{0,0},Vector2D{0,0}}, MAX_VELOCITY_XY, MAX_ACCELERATION_XY, MAX_JERK_XY, 2)) {
 }
 
 void PathController::beginPath(const Path& newPath, double cruiseHeight) {
@@ -112,46 +112,27 @@ QCRequest PathController::getTarget(State current, double yaw) {
     ));
 }
 
-
-Vector3D PathController::getTargetAcceleration(State& currentState, Pose3D currentPosition) {
+bool PathController::complete() {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - startTime).count();
-    PathPoint targetPoint = path.sample(elapsed);
-    Vector2D positionError = targetPoint.pos - currentPosition.translation.toVector2D();
-    Vector2D velocityError = targetPoint.vel - currentState.getLinearVelocity().toVector2D();
-
-    //modify velocity error based on position error and position kp
-    velocityError = velocityError + Vector2D{
-        positionError.x * position_kp.x,
-        positionError.y * position_kp.y
-    };
-
-    Vector3D targetAcceleration = Vector3D{
-        velocityError.x * velocity_kp.x + targetPoint.acc.x,
-        velocityError.y * velocity_kp.y + targetPoint.acc.y,
-        (cruiseHeight - currentPosition.getZ()) * cruiseHeight_kP
-    };
-
-    //limit acceleration based on max acceleration constants
-    if (targetAcceleration.x > MAX_ACCELERATION_XY) targetAcceleration.x = MAX_ACCELERATION_XY;
-    if (targetAcceleration.x < -MAX_ACCELERATION_XY) targetAcceleration.x = -MAX_ACCELERATION_XY;
-    if (targetAcceleration.y > MAX_ACCELERATION_XY) targetAcceleration.y = MAX_ACCELERATION_XY;
-    if (targetAcceleration.y < -MAX_ACCELERATION_XY) targetAcceleration.y = -MAX_ACCELERATION_XY;
-    if (targetAcceleration.z > MAX_ACCELERATION_Z) targetAcceleration.z = MAX_ACCELERATION_Z;
-    if (targetAcceleration.z < -MAX_ACCELERATION_Z) targetAcceleration.z = -MAX_ACCELERATION_Z;
-    return targetAcceleration;
+    return elapsed > path.getTotalTime();
 }
 
-TakeoffController::TakeoffController(double kP, double velocity, double acceleration) : kP(kP), max_velocity(velocity), max_accel(acceleration) {
+
+HeightController::HeightController(double velocity, double acceleration) : max_velocity(velocity), max_accel(acceleration) {
     setTargetHeight(0.0, 0.0);
 }
 
-void TakeoffController::setTargetHeight(double height, double current_height) {
-    end_height = height;
+void HeightController::setTargetHeight(double height, double current_height) {
+    delta_height = height - current_height;
+
+    inverted = (delta_height < 0);
+    if(inverted) delta_height = -delta_height;
+
     start_height = current_height;
     start_time = std::chrono::high_resolution_clock::now();
     //calculate motion profile times based on max acceleration and velocity
-    double distance = end_height - current_height;
+    double distance = delta_height;
     accel_time = max_velocity / max_accel;
     double accel_distance = 0.5 * max_accel * accel_time * accel_time;
     if (2 * accel_distance > std::abs(distance)) {
@@ -166,9 +147,10 @@ void TakeoffController::setTargetHeight(double height, double current_height) {
     }
 }
 
-QCRequest TakeoffController::getTarget(State& currentState, Pose3D currentPosition) {
+QCRequest HeightController::getTarget(State& currentState) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - start_time).count();
+    std::cout << elapsed << std::endl;
     //calculate target height based on motion profile
     double target_height;
     double target_vel;
@@ -191,14 +173,25 @@ QCRequest TakeoffController::getTarget(State& currentState, Pose3D currentPositi
         target_vel = max_velocity - (elapsed - (accel_time + cruise_time))*max_accel;
         target_accel = -max_accel;
     } else {
-        target_height = end_height;
+        target_height = delta_height;
         target_vel = 0;
     }
 
-    double heightError = target_height + currentPosition.getZ();
+    if(inverted) {
+        target_height = -target_height;
+        target_vel = -target_vel;
+    }
+
+    std::cout << "\n\nHEIGHT " << start_height + target_height << " VEL " << target_vel << std::endl;
 
     return QCRequest(
-        Pose3D(0,0,target_height, Quaternion(M_PI_4/2,0,0)),
+        Pose3D(0,0,start_height + target_height, Quaternion(M_PI_4/2,0,0)),
         Pose3D(0,0,target_vel)
     );
+}
+
+bool HeightController::complete(){
+    auto now = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double>(now - start_time).count();
+    return elapsed > accel_time + cruise_time + deceleration_time;
 }

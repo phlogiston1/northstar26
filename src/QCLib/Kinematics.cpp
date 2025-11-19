@@ -82,10 +82,10 @@ double velocityToThrust(double velocity) {
 
 Acceleration velocitiesToAccel (State currentState) {
     //Motor velocities
-    double v_front = currentState.getMotorVelocities().getFront();
-    double v_rear = currentState.getMotorVelocities().getRear();
-    double v_left = currentState.getMotorVelocities().getLeft();
-    double v_right = currentState.getMotorVelocities().getRight();
+    double v_front = currentState.motor_velocities.getFront();
+    double v_rear = currentState.motor_velocities.getRear();
+    double v_left = currentState.motor_velocities.getLeft();
+    double v_right = currentState.motor_velocities.getRight();
 
     //Thrusts from each rotor
     double thrust_front = velocityToThrust(v_front);
@@ -113,9 +113,9 @@ Acceleration velocitiesToAccel (State currentState) {
 
     //drag due to current quadcopter rotation
     Vector3D drag_torque = Vector3D(
-        currentState.getAngularVelocity().x * ANGULAR_DRAG_COEFF_XY,
-        currentState.getAngularVelocity().y * ANGULAR_DRAG_COEFF_XY,
-        currentState.getAngularVelocity().z * ANGULAR_DRAG_COEFF_Z
+        currentState.angular_velocity.x * ANGULAR_DRAG_COEFF_XY,
+        currentState.angular_velocity.y * ANGULAR_DRAG_COEFF_XY,
+        currentState.angular_velocity.z * ANGULAR_DRAG_COEFF_Z
     );
 
     //divide my MOI to get acceleration
@@ -124,10 +124,8 @@ Acceleration velocitiesToAccel (State currentState) {
     double accel_pitch = (torque_pitch - drag_torque.y) / QUADCOPTER_IXY;
     double accel_roll = (torque_roll - drag_torque.x) / QUADCOPTER_IXY;
 
-    std::cout << "TY: " << torque_yaw << std::endl;
-
     double thrust = thrust_front + thrust_rear + thrust_right + thrust_left;
-    std::array thrustDirection = currentState.getPose().rotation.thrustDirection();
+    std::array thrustDirection = currentState.pose.rotation.thrustDirection();
 
     Vector3D force = Vector3D(
         thrust*thrustDirection[0],
@@ -135,7 +133,7 @@ Acceleration velocitiesToAccel (State currentState) {
         thrust*thrustDirection[2]
     );
 
-    auto vel = currentState.getLinearVelocity();
+    auto vel = currentState.linear_velocity;
     auto velocity_squared  = Vector3D(
         vel.x * std::abs(vel.x),
         vel.y * std::abs(vel.y),

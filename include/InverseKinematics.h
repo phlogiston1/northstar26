@@ -1,7 +1,7 @@
 #ifndef INVERSE_KINEMATICS_H
 #define INVERSE_KINEMATICS_H
 
-#include "Quadcopter.h"
+#include "Physics.h"
 
 /**
  * @brief Implements inverse kinematics for the quadcopter

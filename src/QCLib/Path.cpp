@@ -105,7 +105,7 @@ std::vector<PathPoint> generateFinalPath(
 std::vector<SegmentTime> computePathSegmentTimes(const std::vector<Bezier2D> &segments,
                                            double v_max, double a_max, double j_max, int num_samples=200)
 {
-    std::vector<SegmentTime> seg_times;
+    std::vector<SegmentTime> seg_times = {};
     double global_time = 0.0;
 
     for(const auto &seg : segments){
@@ -157,6 +157,7 @@ PathPoint evaluateChainedPath(const std::vector<Bezier2D> &segments,
 Path::Path(const std::vector<Vector2D>& waypoints,
            double max_velocity, double max_acceleration, double max_jerk, int num_samples) {
     // Generate C1 chained segments (control points computed with Catmull-Rom tangents, whatever that means)
+
     auto tangent = [&](int i) -> Vector2D {
         if(i==0) return (waypoints[1]-waypoints[0]);
         if(i==waypoints.size()-1) return (waypoints.back()-waypoints[waypoints.size()-2]);
@@ -171,6 +172,10 @@ Path::Path(const std::vector<Vector2D>& waypoints,
     }
 
     segment_times = computePathSegmentTimes(segments, max_velocity, max_acceleration, max_jerk, num_samples);
+}
+
+Path Path::origin() {
+    return Path({Vector2D{0,0}, Vector2D{0,0}}, 1, 1, 1);
 }
 
 /**

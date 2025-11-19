@@ -10,7 +10,7 @@
  */
 
 #include "InverseKinematics.h"
-#include "Quadcopter.h"
+#include "Physics.h"
 #include "Util.h"
 #include "Configuration.h"
 #include <cmath>
@@ -65,21 +65,20 @@ Quaternion getTargetAngle(State currentState, Vector3D targetAccel) {
     //account for gravity and drag:
     targetAccel = targetAccel + Vector3D(0, 0, G);
 
-    auto vel = currentState.getLinearVelocity();
+    auto vel = currentState.linear_velocity;
     auto velocity_squared  = Vector3D(
         vel.x * std::abs(vel.x),
         vel.y * std::abs(vel.y),
         vel.z * std::abs(vel.z)
     );
     Vector3D dragForce = velocity_squared.componentWiseMultiply(Vector3D(LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_XY, LINEAR_DRAG_COEFF_Z));
-    std::cout << "\ndrag: ";
-    dragForce.print();
+
 
     targetAccel = targetAccel + (dragForce / QUADCOPTER_MASS);
 
 
     // 1. Get current yaw (assumed to be around Z axis)
-    double fixed_yaw = currentState.getPose().rotation.getYaw();
+    double fixed_yaw = currentState.pose.rotation.getYaw();
 
     // 2. Normalize targetAccel to get direction (z_body axis)
     Vector3D z_body = targetAccel.normalized(); // body Z axis in world frame (aligned with thrust direction)

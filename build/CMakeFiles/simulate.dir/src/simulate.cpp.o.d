@@ -263,12 +263,13 @@ CMakeFiles/simulate.dir/src/simulate.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
  /usr/include/c++/13/thread /usr/include/c++/13/bits/std_thread.h \
  /usr/include/c++/13/bits/this_thread_sleep.h \
- /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/Physics.h \
  /home/seanb/Documents/quadsquad2026/include/Util.h \
  /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
- /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/Physics.h \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
  /home/seanb/Documents/quadsquad2026/include/MotionController.h \
  /home/seanb/Documents/quadsquad2026/include/Path.h \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
- /home/seanb/Documents/quadsquad2026/include/LQR.h
+ /home/seanb/Documents/quadsquad2026/include/LQR.h \
+ /home/seanb/Documents/quadsquad2026/include/Quadcopter.h

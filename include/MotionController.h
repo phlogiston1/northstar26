@@ -1,7 +1,9 @@
-#include "Quadcopter.h"
+#pragma once
+#include "Physics.h"
 #include "Path.h"
 #include "InverseKinematics.h"
 #include <chrono>
+
 
 struct QCRequest{
     Pose3D position, velocity;
@@ -23,35 +25,33 @@ class VelocityController{
 
 class PathController{
     public:
-        PathController(Vector2D position_kp, Vector2D velocity_kp, double cruiseHeight_kP);
+        PathController();
         void beginPath(const Path& newPath, double cruiseHeight);
         QCRequest getTarget(State current);
         QCRequest getTarget(State current, double yaw);
         Vector3D getTargetAcceleration(State& currentState, Pose3D currentPosition);
+        bool complete();
     private:
         Path path;
         double cruiseHeight;
         std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-        Vector2D position_kp;
-        Vector2D velocity_kp;
-        double cruiseHeight_kP;
 };
 
 //uses trapeoidal motion profile to smoothly take off to a target height
-class TakeoffController{
+class HeightController{
     public:
-        TakeoffController(double kP, double maxVelocity, double maxAcceleration);
+        HeightController(double maxVelocity, double maxAcceleration);
         void setTargetHeight(double height, double currentHeight);
-        Vector3D getTargetAcceleration(State& currentState, Pose3D currentPosition);
-        QCRequest getTarget(State& currentState, Pose3D currentPosition);
+        QCRequest getTarget(State& currentState);
+        bool complete();
     private:
         double start_height;
-        double end_height;
+        double delta_height;
         double max_velocity;
         double max_accel;
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
         double accel_time; //time spent accelerating
         double cruise_time; //time spent at constant velocity
         double deceleration_time; //time spent decelerating
-        double kP;
+        bool inverted = false;
 };

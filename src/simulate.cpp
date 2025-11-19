@@ -17,12 +17,13 @@
 #include <vector>
 #include <iostream>
 #include <thread>
-#include "Quadcopter.h"
+#include "Physics.h"
 #include "Util.h"
 #include "Kinematics.h"
 #include "InverseKinematics.h"
 #include "MotionController.h"
 #include "LQR.h"
+#include "Quadcopter.h"
 
 using namespace std::chrono_literals;
 
@@ -33,13 +34,8 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     str.replace(start_pos, from.length(), to);
     return true;
 }
-VelocityController velocityController = VelocityController(2,0.1,1);
 
-TakeoffController takeoffController = TakeoffController(1.5,2,1);
-
-PathController pathController = PathController(Vector2D(),Vector2D(),0);
-
-std::vector<Vector2D> waypoints = {
+std::vector<Vector2D> waypoints1 = {
     Vector2D{0,0},
     Vector2D{1,0},
     Vector2D{1,1},
@@ -52,7 +48,20 @@ std::vector<Vector2D> waypoints = {
     Vector2D{1,0},
     Vector2D{0,0}
 };
-Path testPath = Path(waypoints,
+std::vector<Vector2D> waypoints = waypoints1;
+std::vector<Vector2D> waypoints2 = {
+    Vector2D{0,0},
+    Vector2D{1,3},
+    Vector2D{-1,1},
+    Vector2D{0,0}
+};
+Path path = Path(waypoints,
+    1, //vel
+    2, //accel
+    5, //jerk
+    200
+);
+Path path2 = Path(waypoints2,
     1, //vel
     2, //accel
     5, //jerk
@@ -68,83 +77,63 @@ State initialState = State(
     0
 );
 
-
-State currentState = initialState;
+Quadcopter quadcopter = Quadcopter(initialState, 1, 1, 0.3);
 
 int runtime = 2500;
 int noise = 50;
 double ramp = 1000;
+int step = 0;
 
 void initSimulation() {
-    currentState = initialState;
-    takeoffController.setTargetHeight(3,0);
-    testPath = Path(waypoints,
-        0.3, //vel
-        7, //accel
-        10, //jerk
-        1000
-    );
     srand(time(0));
+    quadcopter.setHeight(2);
+    waypoints = waypoints1;
+    step = 0;
 }
 
-
-void runSimulation(int numIters, double dt) {
+int numIters;
+void runSimulation(double dt) {
     std::cout << "\n\n\nLoop time: " << dt << " Iter: " << numIters << std::endl;
 
-    currentState.print();
+    quadcopter.getState().print();
 
-    if(numIters == 150) {
-        pathController.beginPath(testPath, 3);
-        velocityController.setInitialPose(currentState);
+    if(step == 0 && !quadcopter.busy()) {
+        quadcopter.beginPath(path);
+        step++;
+    }
+    if(step == 1 && !quadcopter.busy()) {
+        quadcopter.setHeight(3);
+        step++;
+    }
+    if(step == 2 && !quadcopter.busy()) {
+        quadcopter.beginPath(path2);
+        waypoints = waypoints2; //just to update visualization
+        step++;
+    }
+    if(step == 3 && !quadcopter.busy()) {
+        quadcopter.setHeight(0);
+        step++;
+    }
+    if(step == 4 && !quadcopter.busy()) {
+        numIters = 10000; //force reset
+    }
+    if(numIters == 300) {
+        // quadcopter.beginManualControl([]() {return Vector3D(1,0,0);});
+        // quadcopter.setHeight(3);
+    }
+    if(numIters == 450) {
+        // quadcopter.setHeight(2);
+        // quadcopter.beginManualControl([]() {return Vector3D(0,0,0);});
     }
 
-    QCRequest req = takeoffController.getTarget(currentState, currentState.getPose());
     if(numIters > 150) {
         // req = pathController.getTarget(currentState);
-        req = velocityController.getTarget(currentState, Vector3D(1,0,0));
+        // req = velocityController.getTarget(currentState, Vector3D(1,0,0));
     }
-    std::cout << "controller req position: ";
-    req.position.print();
-
-    auto currentStateNoVel = State(
-        currentState.getPose(),
-        Vector3D(),
-        Vector3D(),
-        currentState.getMotorVelocities(),
-        currentState.getTime()
-    );
-
-    auto motorvels = applyMixer(lqrControlStep(
-        getStateVector(currentState),
-        getStateVector(req.position, req.velocity)
-    ));
-
-
-    double left = motorvels.getLeft();
-    double front = motorvels.getFront();
-    double right = motorvels.getRight();
-    double rear = motorvels.getRear();
-    if(true) {
-        double maxAllowedDeltaV = ramp * dt;
-        double leftdv = left - currentState.getMotorVelocities().getLeft();
-        double frontdv = front - currentState.getMotorVelocities().getFront();
-        double rightdv = right - currentState.getMotorVelocities().getRight();
-        double reardv = rear - currentState.getMotorVelocities().getRear();
-        double maxAbsDeltaV = std::max(std::max(std::abs(leftdv), std::abs(frontdv)), std::max(std::abs(rightdv), std::abs(reardv)));
-        if(maxAbsDeltaV > maxAllowedDeltaV) {
-            double scale = maxAllowedDeltaV / maxAbsDeltaV;
-            left = currentState.getMotorVelocities().getLeft() + leftdv * scale;
-            front = currentState.getMotorVelocities().getFront() + frontdv * scale;
-            right = currentState.getMotorVelocities().getRight() + rightdv * scale;
-            rear = currentState.getMotorVelocities().getRear() + reardv * scale;
-        }
-    }
-    motorvels = MotorVelocities(left + rand() % noise -(noise/2), front+ rand() % noise -(noise/2), right+ rand() % noise -(noise/2), rear+ rand() % noise -(noise/2));
-    currentState.setMotorVelocities(motorvels);
-
 
     if(numIters > 0){
-        currentState = currentState.predict(dt);
+        // currentState = currentState.predict(dt);
+        quadcopter.update_simulation();
     }
 
 }
@@ -160,8 +149,8 @@ int main(){
         }
     });
 
-    for(double t = 0.0; t <= testPath.getTotalTime(); t += 0.1) {
-        PathPoint pt = testPath.sample(t);
+    for(double t = 0.0; t <= path.getTotalTime(); t += 0.1) {
+        PathPoint pt = path.sample(t);
         std::cout << "t=" << t << ": Pos(" << pt.pos.x << ", " << pt.pos.y << "), Vel(" << pt.vel.x << ", " << pt.vel.y << "), Acc(" << pt.acc.x << ", " << pt.acc.y << ")\n";
     }
 
@@ -209,7 +198,7 @@ int main(){
         done = true;
     };
 
-    int numIters = 0;
+    numIters = 0;
     double last = 0;
     initSimulation();
 
@@ -223,10 +212,10 @@ int main(){
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
 
-        runSimulation(numIters, now-last);
+        runSimulation(now-last);
 
         last = now;
-        auto qcrotation = currentState.getPose().rotation;
+        auto qcrotation = quadcopter.getState().pose.rotation;
         auto rotation = Quaternion(
             qcrotation.getYaw() + M_PI_4,
             qcrotation.getPitch(),
@@ -237,7 +226,8 @@ int main(){
         foxglove::schemas::CubePrimitive cube;
         cube.size = foxglove::schemas::Vector3{QUADCOPTER_ROTOR_DISTANCE, QUADCOPTER_ROTOR_DISTANCE, 0.05};
         cube.color = foxglove::schemas::Color{1, 1, 1, 1};
-        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{1*currentState.getPose().getX(), 1*currentState.getPose().getY(), 1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+        auto currentState = quadcopter.getState();
+        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{1*currentState.pose.getX(), 1*currentState.pose.getY(), 1*currentState.pose.getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
 
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";
@@ -247,7 +237,7 @@ int main(){
             foxglove::schemas::CubePrimitive waypt;
             waypt.size = foxglove::schemas::Vector3{0.05, 0.05, 0.05};
             waypt.color = foxglove::schemas::Color{2, 255, 1, 255};
-            waypt.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{waypoints[i].x, waypoints[i].y, currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+            waypt.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{waypoints[i].x, waypoints[i].y, currentState.pose.getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
             entity.cubes.push_back(waypt);
         }
 

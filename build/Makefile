@@ -514,6 +514,30 @@ src/QCLib/Path.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.s
 .PHONY : src/QCLib/Path.cpp.s
 
+src/QCLib/Physics.o: src/QCLib/Physics.cpp.o
+.PHONY : src/QCLib/Physics.o
+
+# target to build an object file
+src/QCLib/Physics.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.o
+.PHONY : src/QCLib/Physics.cpp.o
+
+src/QCLib/Physics.i: src/QCLib/Physics.cpp.i
+.PHONY : src/QCLib/Physics.i
+
+# target to preprocess a source file
+src/QCLib/Physics.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.i
+.PHONY : src/QCLib/Physics.cpp.i
+
+src/QCLib/Physics.s: src/QCLib/Physics.cpp.s
+.PHONY : src/QCLib/Physics.s
+
+# target to generate assembly for a file
+src/QCLib/Physics.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.s
+.PHONY : src/QCLib/Physics.cpp.s
+
 src/QCLib/Quadcopter.o: src/QCLib/Quadcopter.cpp.o
 .PHONY : src/QCLib/Quadcopter.o
 
@@ -643,6 +667,9 @@ help:
 	@echo "... src/QCLib/Path.o"
 	@echo "... src/QCLib/Path.i"
 	@echo "... src/QCLib/Path.s"
+	@echo "... src/QCLib/Physics.o"
+	@echo "... src/QCLib/Physics.i"
+	@echo "... src/QCLib/Physics.s"
 	@echo "... src/QCLib/Quadcopter.o"
 	@echo "... src/QCLib/Quadcopter.i"
 	@echo "... src/QCLib/Quadcopter.s"

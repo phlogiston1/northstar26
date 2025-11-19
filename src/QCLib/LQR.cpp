@@ -1,6 +1,6 @@
 #include "Util.h"
 #include "Configuration.h"
-#include "Quadcopter.h"
+#include "Physics.h"
 
 //GET USING compute_K.py
 static const std::vector<std::vector<double>> LQR_K = {
@@ -101,28 +101,19 @@ std::vector<double> add_vectors_elementwise(const std::vector<double>& v1, const
       X Y
     4   3
 
-    Steps to convert:
-    1. invert Z axis
-    2. 
 */
 
-// Pose3d convertPoseFrame(Pose3d original){
-//     auto rotated = original.rotateBy(Rotation3d::fromDegrees(-45,0,0));
-//     return Pose3d(
-//         rotated.getY(),
-//     )
-// }
 
 std::vector<double> getStateVector(State state) {
     // auto position_adj = state.getPose().rotateBy(Rotation3d::fromDegrees(45,0,180));
     // auto velocity_adj = state.getVelocity().rotateBy(Rotation3d::fromDegrees(45,0,180));
-    auto position_adj = state.getPose();
-    auto velocity_adj = state.getLinearVelocity();
+    auto position_adj = state.pose;
+    auto velocity_adj = state.linear_velocity;
 
     auto pos = position_adj.translation;
-    auto vel = state.getLinearVelocity();
+    auto vel = state.linear_velocity;
     auto ang_pos = position_adj.rotation;
-    auto ang_vel = state.getAngularVelocity();
+    auto ang_vel = state.angular_velocity;
     return {
         pos.x, pos.y, pos.z,
         vel.x, vel.y, vel.z,

@@ -1,184 +1,87 @@
 #include "Quadcopter.h"
-#include "Kinematics.h"
-#include "Util.h"
+#include "Path.h"
+#include "MotionController.h"
+#include "LQR.h"
 #include "Configuration.h"
-#include <array>
-#include <iostream>
-#include <cmath>
+#include <chrono> 
 
 
-MotorVelocities::MotorVelocities(double left, double front, double right, double rear) : left(left), front(front), right(right), rear(rear) {
+Quadcopter::Quadcopter(State initial, double max_velocity, double max_acceleration, double max_jerk):
+    state(initial), 
+    velocity_controller(VelocityController(max_velocity, max_acceleration, max_jerk)),
+    path_controller(PathController()),
+    height_controller(HeightController(max_velocity, max_acceleration)) {
+}
+
+State Quadcopter::getState() {
+    return state;
+}
+
+void Quadcopter::addVisionMeasurement(Vector3D translation, double timestamp) {
 
 }
 
-double MotorVelocities::getLeft() const {
-    return left;
+void Quadcopter::addIMUMeasurement(Quaternion angular_pos, Vector3D angular_vel) {
+    state.pose.rotation = angular_pos;
+    state.angular_velocity = angular_vel;
 }
 
-double MotorVelocities::getFront() const {
-    return front;
+void Quadcopter::setHeight(double height) {
+    height_controller.setTargetHeight(height, state.pose.getZ());
+    manual = false;
 }
 
-double MotorVelocities::getRear() const {
-    return rear;
+void Quadcopter::beginPath(Path path) {
+    // if(landing_status = LANDED) return;
+    path_controller.beginPath(path, 0);
+    manual = false;
 }
 
-double MotorVelocities::getRight() const {
-    return right;
+void Quadcopter::beginManualControl(std::function<Vector3D()> velocity) {
+    landing_status = FLYING;
+    velocity_controller.setInitialPose(state);
+    velocity_supplier = velocity;
+    manual = true;
 }
 
-MotorVelocities MotorVelocities::limit(double maxVelocity) const {
-    return MotorVelocities(
-        std::min(left, maxVelocity),
-        std::min(front, maxVelocity),
-        std::min(right, maxVelocity),
-        std::min(rear, maxVelocity)
-    );
+void Quadcopter::land() {
+    landing_status = DECENT;
+    setHeight(0.1);
 }
 
-
-Acceleration::Acceleration(double x, double y, double z, double yaw, double pitch, double roll):
-    x(x),
-    y(y),
-    z(z),
-    yaw(yaw),
-    pitch(pitch),
-    roll(roll){
-
+bool Quadcopter::busy() {
+    return !(height_controller.complete() && path_controller.complete());
 }
 
-
-double Acceleration::getX() {
-    return x;
+bool Quadcopter::adjustingHeight() {
+    return height_controller.complete();
 }
 
-double Acceleration::getY() {
-    return y;
+MotorVelocities Quadcopter::getMotorVels() {
+    return state.motor_velocities;
 }
 
-double Acceleration::getZ() {
-    return z;
+double Quadcopter::getTime() {
+    auto time = std::chrono::high_resolution_clock::now();
+    return (time - start_time).count();
 }
 
-double Acceleration::getYaw() {
-    return yaw;
-}
+void Quadcopter::update_simulation() {
+    QCRequest req = QCRequest(Pose3D(), Pose3D());
+    if(manual){
+        req = velocity_controller.getTarget(state, velocity_supplier());
+    } else {
+        req = path_controller.getTarget(state);
+        QCRequest height_request = height_controller.getTarget(state);
 
-double Acceleration::getPitch() {
-    return pitch;
-}
-
-double Acceleration::getRoll() {
-    return roll;
-}
-
-State::State (Pose3D pose, Vector3D velocity, Vector3D angular_velocity, MotorVelocities motorVelocities, double time): pose(pose), velocity(velocity), angular_velocity(angular_velocity), motorVelocities(motorVelocities), time(time){
-
-}
-
-Pose3D State::getPose() {
-    return pose;
-}
-
-Vector3D State::getLinearVelocity() {
-    return velocity;
-}
-
-Vector3D State::getAngularVelocity() {
-    return angular_velocity;
-}
-
-Vector3D State::getAngularVelocityLocal() {
-    double roll  = pose.rotation.getRoll();
-    double pitch = pose.rotation.getPitch();
-    double yaw   = pose.rotation.getYaw();
-
-    double cr = cos(roll);
-    double sr = sin(roll);
-    double cp = cos(pitch);
-    double sp = sin(pitch);
-    double cy = cos(yaw);
-    double sy = sin(yaw);
-
-    // Rotation matrix R = Rz * Ry * Rx
-    double R[3][3];
-    R[0][0] = cy*cp;
-    R[0][1] = cy*sp*sr - sy*cr;
-    R[0][2] = cy*sp*cr + sy*sr;
-
-    R[1][0] = sy*cp;
-    R[1][1] = sy*sp*sr + cy*cr;
-    R[1][2] = sy*sp*cr - cy*sr;
-
-    R[2][0] = -sp;
-    R[2][1] = cp*sr;
-    R[2][2] = cp*cr;
-
-    // Local angular velocity = R^T * w_world
-    Vector3D w_local;
-    w_local.x = R[0][0]*angular_velocity.x + R[1][0]*angular_velocity.y + R[2][0]*angular_velocity.z;
-    w_local.y = R[0][1]*angular_velocity.x + R[1][1]*angular_velocity.y + R[2][1]*angular_velocity.z;
-    w_local.z = R[0][2]*angular_velocity.x + R[1][2]*angular_velocity.y + R[2][2]*angular_velocity.z;
-
-    return w_local;
-}
-
-MotorVelocities State::getMotorVelocities() {
-    return motorVelocities;
-}
-
-void State::setMotorVelocities(MotorVelocities newVels) {
-    motorVelocities = newVels;
-}
-
-double State::getTime(){
-    return time;
-}
-
-State State::predict(double timestep) {
-    Acceleration accel = velocitiesToAccel(*this);
-    // std::cout << "PREDITED ACCEL - x: " << accel.getX() << " y: " << accel.getY() << " z: " << accel.getZ() << std::endl;
-
-    //calculate velocity and angular velocity
-    double vel_x = (velocity.x + (accel.getX() * timestep));
-    double vel_y = (velocity.y + (accel.getY() * timestep));
-    double vel_z = (velocity.z + (accel.getZ() * timestep));
-    double ang_z = angular_velocity.z + (accel.getYaw() * timestep);
-    double ang_y = angular_velocity.y + (accel.getPitch() * timestep);
-    double ang_x = angular_velocity.x + (accel.getRoll() * timestep);
-
-    //calculate position and angular position.
-    //integrates under the velocity curve for more accuracy
-    double pos_x = pose.getX() + (velocity.x * timestep) + (0.5 * timestep * timestep * accel.getX());
-    double pos_y = pose.getY() + (velocity.y * timestep) + (0.5 * timestep * timestep * accel.getY());
-    double pos_z = pose.getZ() + (velocity.z * timestep) + (0.5 * timestep * timestep * accel.getZ());
-    double ang_pos_z = pose.rotation.getYaw() + (angular_velocity.z * timestep) + (0.5 * timestep * timestep * accel.getYaw());
-    double ang_pos_y = pose.rotation.getPitch() + (angular_velocity.y * timestep) + (0.5 * timestep * timestep * accel.getPitch());
-    double ang_pos_x = pose.rotation.getRoll() + (angular_velocity.x * timestep) + (0.5 * timestep * timestep * accel.getRoll());
-
-    //Don't go underground
-    if(ENABLE_FLOOR && pos_z < 0) {
-        pos_z = 0;
-        if(vel_z < 0) vel_z = 0;
+        req.position.translation.z = height_request.position.translation.z;
+        req.velocity.translation.z = height_request.velocity.translation.z;
     }
 
-    return State(
-        Pose3D(Vector3D(pos_x,pos_y,pos_z), Quaternion(ang_pos_z,ang_pos_y,ang_pos_x)),
-        Vector3D(vel_x,vel_y,vel_z),
-        Vector3D(ang_x, ang_y, ang_z),
-        motorVelocities,
-        time+timestep
-    );
-}
+    state.motor_velocities = applyMixer(lqrControlStep(
+        getStateVector(state),
+        getStateVector(req.position, req.velocity)
+    ));
 
-void State::print() {
-    std::cout << "\n\nQuadcopter State at t=" << time << "\n";
-    std::cout << "POSE - "; pose.print();
-    std::cout << "VELOCITY - "; velocity.print();
-    std::cout << "ANG VELOCITY - "; angular_velocity.print();
-    std::cout << "MOTOR VELS - left: " << motorVelocities.getLeft() 
-                          << " front: " << motorVelocities.getFront()
-                          << " right: " << motorVelocities.getRight()
-                          << " rear: " << motorVelocities.getRear();
-    std::cout << "\n\n";
+    state = state.predict(LOOP_TIME);
 }

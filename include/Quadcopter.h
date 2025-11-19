@@ -1,63 +1,53 @@
-#include <array>
-#include "Util.h"
+#pragma once
 
-#ifndef QUADCOPTER_H
-#define QUADCOPTER_H
-//ALL POSITIVE VALUES, IGNORING DIRECTION
-class MotorVelocities {
-    private:
-        double left;
-        double front;
-        double right;
-        double rear;
+#include "Physics.h"
+#include "MotionController.h"
+#include "Path.h"
+#include <vector>
+#include <functional>
 
-    public:
-        MotorVelocities(double left, double front, double right, double rear);
 
-        double getLeft() const;
-        double getFront() const;
-        double getRight() const;
-        double getRear() const;
+struct PoseObservation {
+    Pose3D pose = Pose3D();
+    double timestamp = 0;
+};
 
-        MotorVelocities limit(double maxVelocity) const;
+enum LandingStatus{
+    FLYING,
+    DECENT,
+    TOUCHDOWN,
+    LANDED
 };
 
 
 
-class Acceleration {
+class Quadcopter {
     private:
-        double x, y, z, yaw, pitch, roll;
+        State state;
+        Vector3D global_observation = Vector3D();
+        std::vector<PoseObservation> predictions = {};
+        std::function<Vector3D()> velocity_supplier;
+        bool manual = false;
+        LandingStatus landing_status = LANDED;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+
+        VelocityController velocity_controller;
+        PathController path_controller;
+        HeightController height_controller;
+
 
     public:
-        Acceleration(double x, double y, double z, double yaw, double pitch, double roll);
-
-        double getX();
-        double getY();
-        double getZ();
-        double getYaw();
-        double getPitch();
-        double getRoll();
-};
-
-class State {
-    private:
-        Pose3D pose;
-        Vector3D velocity;
-        Vector3D angular_velocity;
-        MotorVelocities motorVelocities;
-        double time;
-
-    public:
-        State(Pose3D pose, Vector3D velocity, Vector3D angular_velocity, MotorVelocities motorVelocities, double time);
-        Pose3D getPose();
-        Vector3D getLinearVelocity();
-        Vector3D getAngularVelocity();
-        Vector3D getAngularVelocityLocal();
-        MotorVelocities getMotorVelocities();
-        void setMotorVelocities(MotorVelocities newVels);
+        Quadcopter(State initial, double max_velocity, double max_acceleration, double max_jerk);
+        State getState();
+        void addVisionMeasurement(Vector3D translation, double timestamp);
+        void addIMUMeasurement(Quaternion angular_pos, Vector3D angular_vel);
+        void setHeight(double height);
+        void beginPath(Path path);
+        void beginManualControl(std::function<Vector3D()> velocity);
+        void land();
+        bool busy();
+        bool adjustingHeight();
+        void update_simulation();
         double getTime();
-        void print();
-        State predict(double timestep);
+        MotorVelocities getMotorVels();
 };
-
-#endif
