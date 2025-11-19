@@ -33,10 +33,7 @@ struct TargetQCState {
     double targetYawRate;
 };
 
-TargetQCState calculateTargetState(State currentState, Vector3D targetAccel, double targetYaw);
-
-InverseKinematicResult optimizeMotorVelocities(State currentState, TargetQCState targetState, double timestep);
-MotorVelocities optimizeMotorVelocities(State currentState, double thrust, double pitch_torque, double roll_torque, double yaw_torque);
+Quaternion getTargetAngle(State currentState, Vector3D targetAccel);
 
 
 #endif

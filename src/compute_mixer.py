@@ -5,7 +5,7 @@ import math
 rotor_center_dist = 0.2
 arm_length = math.sqrt(2*(rotor_center_dist/2)*(rotor_center_dist/2))
 print(arm_length)
-thrust_coeff = 1 # torque to thrust, not velocity to thrust?
+thrust_coeff = 1 # torque to thrust, not velocity to thrust? NOTE: I think this should just stay 1.
 
 
 def compute_mixer(L, c):

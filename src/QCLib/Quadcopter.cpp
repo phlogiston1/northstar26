@@ -137,42 +137,35 @@ double State::getTime(){
 
 State State::predict(double timestep) {
     Acceleration accel = velocitiesToAccel(*this);
-    std::cout << "PREDITED ACCEL - x: " << accel.getX() << " y: " << accel.getY() << " z: " << accel.getZ() << std::endl;
+    // std::cout << "PREDITED ACCEL - x: " << accel.getX() << " y: " << accel.getY() << " z: " << accel.getZ() << std::endl;
 
-    // double drag_x = -velocity.getX() * LINEAR_DRAG_COEFF_XY;
-    // double drag_y = -velocity.getY() * LINEAR_DRAG_COEFF_XY;
-    // double drag_z = -velocity.getZ() * LINEAR_DRAG_COEFF_Z;
+    //calculate velocity and angular velocity
+    double vel_x = (velocity.x + (accel.getX() * timestep));
+    double vel_y = (velocity.y + (accel.getY() * timestep));
+    double vel_z = (velocity.z + (accel.getZ() * timestep));
+    double ang_z = angular_velocity.z + (accel.getYaw() * timestep);
+    double ang_y = angular_velocity.y + (accel.getPitch() * timestep);
+    double ang_x = angular_velocity.x + (accel.getRoll() * timestep);
 
-    // std::cout << "Drag: " << drag_z << " Z Velocity: " << velocity.getZ() << "\n";
+    //calculate position and angular position.
+    //integrates under the velocity curve for more accuracy
+    double pos_x = pose.getX() + (velocity.x * timestep) + (0.5 * timestep * timestep * accel.getX());
+    double pos_y = pose.getY() + (velocity.y * timestep) + (0.5 * timestep * timestep * accel.getY());
+    double pos_z = pose.getZ() + (velocity.z * timestep) + (0.5 * timestep * timestep * accel.getZ());
+    double ang_pos_z = pose.rotation.getYaw() + (angular_velocity.z * timestep) + (0.5 * timestep * timestep * accel.getYaw());
+    double ang_pos_y = pose.rotation.getPitch() + (angular_velocity.y * timestep) + (0.5 * timestep * timestep * accel.getPitch());
+    double ang_pos_x = pose.rotation.getRoll() + (angular_velocity.x * timestep) + (0.5 * timestep * timestep * accel.getRoll());
 
-    // double ang_drag_x = -velocity.rotation.getRoll() * ANGULAR_DRAG_COEFF_XY;
-    // double ang_drag_y = -velocity.rotation.getPitch() * ANGULAR_DRAG_COEFF_XY;
-    // double ang_drag_z = -velocity.rotation.getYaw() * ANGULAR_DRAG_COEFF_Z;
-
-    double newVX = (velocity.x + (accel.getX() * timestep));
-    double newVY = (velocity.y + (accel.getY() * timestep));
-    double newVZ = (velocity.z + (accel.getZ() * timestep));
-
-    double newAZ = angular_velocity.z + ((accel.getYaw()/* + ang_drag_z*/) * timestep);
-    double newAY = angular_velocity.y + ((accel.getPitch()/* + ang_drag_y*/) * timestep);
-    double newAX = angular_velocity.x + ((accel.getRoll()/* + ang_drag_x*/) * timestep);
-
-    double newPX = pose.getX() + (velocity.x * timestep) + (0.5 * timestep * timestep * accel.getX());
-    double newPY = pose.getY() + (velocity.y * timestep) + (0.5 * timestep * timestep * accel.getY());
-    double newPZ = pose.getZ() + (velocity.z * timestep) + (0.5 * timestep * timestep * accel.getZ());
-    double newPAZ = pose.rotation.getYaw() + (newAZ * timestep);
-    double newPAY = pose.rotation.getPitch() + (newAY * timestep);
-    double newPAX = pose.rotation.getRoll() + (newAX * timestep);
-
-    if(ENABLE_FLOOR && newPZ < 0) {
-        newPZ = 0; //don't go underground
-        if(newVZ < 0) newVZ = 0;
+    //Don't go underground
+    if(ENABLE_FLOOR && pos_z < 0) {
+        pos_z = 0;
+        if(vel_z < 0) vel_z = 0;
     }
 
     return State(
-        Pose3D(Vector3D(newPX,newPY,newPZ), Quaternion(newPAZ,newPAY,newPAX)),
-        Vector3D(newVX,newVY,newVZ),
-        Vector3D(newAX, newAY, newAZ),
+        Pose3D(Vector3D(pos_x,pos_y,pos_z), Quaternion(ang_pos_z,ang_pos_y,ang_pos_x)),
+        Vector3D(vel_x,vel_y,vel_z),
+        Vector3D(ang_x, ang_y, ang_z),
         motorVelocities,
         time+timestep
     );

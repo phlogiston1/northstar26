@@ -34,10 +34,7 @@ int main() {
     std::cout << "pitch torque: " << result[2] << std::endl;
     std::cout << "yaw torque: " << result[3] << std::endl;
 
-    auto motorvels = optimizeMotorVelocities(current, result[0], result[1], result[2], result[3]);
-    // std::cout << "Motor Velocities fl:" << motorvels.getFrontLeft() << " fr:" << motorvels.getFrontRight()
-    //           << " rl:" << motorvels.getRearLeft() << " rr:" << motorvels.getRearRight() << std::endl;
-    motorvels = applyMixer(result);
+    MotorVelocities motorvels = applyMixer(result);
     std::cout << "Motor Velocities Left:" << motorvels.getLeft() << " Front:" << motorvels.getFront()
               << " Right:" << motorvels.getRight() << " Rear:" << motorvels.getRear() << std::endl;
 

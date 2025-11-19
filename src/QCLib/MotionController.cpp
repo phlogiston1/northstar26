@@ -16,35 +16,34 @@ NOTE: BUGS TO FIX:
  * @brief Implements various motion controllers for the quadcopter
  * @version 0.1
  * @date 2025-10-12
- * The motion controllers determine the acceleration of the quadcopter based on the desired state of the copter.
- * There are three types. VelocityController is for manual input. It limits acceleration when attaining a target velocity, probably from a joystick.
- * PathController is for following a predefined path. It uses a simple P controller to follow the path while maintaining a cruise height.
- * 
+ * The motion controllers determine the target position and velocity to feed into the state space controller
+ * to achieve the desired motion.
+ *
  */
 
  //ManualController simply sets the motor velocities to a fixed value
-VelocityController::VelocityController(){
+VelocityController::VelocityController(double max_velocity, double max_acceleration, double max_jerk): max_velocity(max_velocity), max_acceleration(max_acceleration), max_jerk(max_jerk) {
 }
 
-Vector3D VelocityController::getTargetAcceleration(State& currentState, const Vector3D& targetVelocity) {
-    Vector3D targetAcceleration = targetVelocity - currentState.getLinearVelocity();
-    //limit acceleration based on max acceleration constants
-    //it would be theoretically better to use polar coordinates here, but this is less computationally intensive
-    if (targetAcceleration.x > MAX_ACCELERATION_XY) targetAcceleration.x = MAX_ACCELERATION_XY;
-    if (targetAcceleration.x < -MAX_ACCELERATION_XY) targetAcceleration.x = -MAX_ACCELERATION_XY;
-    if (targetAcceleration.y > MAX_ACCELERATION_XY) targetAcceleration.y = MAX_ACCELERATION_XY;
-    if (targetAcceleration.y < -MAX_ACCELERATION_XY) targetAcceleration.y = -MAX_ACCELERATION_XY;
-    if (targetAcceleration.z > MAX_ACCELERATION_Z) targetAcceleration.z = MAX_ACCELERATION_Z;
-    if (targetAcceleration.z < -MAX_ACCELERATION_Z) targetAcceleration.z = -MAX_ACCELERATION_Z;
-    //smooth acceleration changes based on max jerk constants. Z axis doesn't need jerk constraint.
-    Vector3D jerk = targetAcceleration - lastTargetAcceleration;
-    if (jerk.x > MAX_JERK_XY) jerk.x = MAX_JERK_XY;
-    if (jerk.x < -MAX_JERK_XY) jerk.x = -MAX_JERK_XY;
-    if (jerk.y > MAX_JERK_XY) jerk.y = MAX_JERK_XY;
-    if (jerk.y < -MAX_JERK_XY) jerk.y = -MAX_JERK_XY;
-    targetAcceleration = lastTargetAcceleration + jerk;
-    lastTargetAcceleration = targetAcceleration;
-    return targetAcceleration;
+void VelocityController::setInitialPose(State current) {
+    pose = current.getPose().translation;
+}
+
+QCRequest VelocityController::getTarget(State current, Vector3D target_velocity) {
+    Vector3D accel = (target_velocity - current.getLinearVelocity())/LOOP_TIME;
+    if(accel.getMagnitude() > max_acceleration) accel = accel / (accel.getMagnitude() - max_acceleration);
+    Vector3D velocity = current.getLinearVelocity() + (accel * LOOP_TIME);
+    if(velocity.getMagnitude() > max_velocity) velocity = velocity /(velocity.getMagnitude() - max_velocity);
+
+    velocity.z = target_velocity.z; //no accel limit on z velocity
+
+
+    pose  = pose + (velocity * LOOP_TIME);
+
+    return QCRequest(
+        Pose3D(pose, Quaternion()),
+        Pose3D(velocity, Quaternion())
+    );
 }
 
 PathController::PathController(Vector2D position_kp, Vector2D velocity_kp, double cruiseHeight_kP)
@@ -64,27 +63,55 @@ QCRequest PathController::getTarget(State current) {
     auto sample = path.sample(elapsed);
     auto next = path.sample(elapsed + LOOP_TIME);
 
-    auto angle = calculateTargetState(current, Vector3D(sample.acc.x, sample.acc.y, 0), 0);
-    auto accel = calculateTargetState(current, Vector3D(next.acc.x, next.acc.y, 0), 0);
-    // angle.targetAngle.z = M_PI_4/2;
-    // accel.targetAngle.z = M_PI_4/2;
+    auto angle = getTargetAngle(current, Vector3D(sample.acc.x, sample.acc.y, 0));
+    auto accel = getTargetAngle(current, Vector3D(next.acc.x, next.acc.y, 0));
 
-    accel.targetAngle.rotateBy(angle.targetAngle.inverse());
+    accel.rotateBy(angle.inverse());
 
-    accel.targetAngle.print();
+    accel.print();
 
     return QCRequest(Pose3D(
         sample.pos.x,
         sample.pos.y,
         cruiseHeight,
-        angle.targetAngle
+        angle
     ), Pose3D(
-        sample.vel.x,// * 0.5,
-        sample.vel.y,// * 0.5,
+        sample.vel.x,
+        sample.vel.y,
         0,
-        accel.targetAngle
+        accel
     ));
 }
+
+QCRequest PathController::getTarget(State current, double yaw) {
+    auto now = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double>(now - startTime).count();
+    std::cout << "DEBUG ELAPSED: " << elapsed << std::endl;
+    auto sample = path.sample(elapsed);
+    auto next = path.sample(elapsed + LOOP_TIME);
+
+    auto angle = getTargetAngle(current, Vector3D(sample.acc.x, sample.acc.y, 0));
+    auto accel = getTargetAngle(current, Vector3D(next.acc.x, next.acc.y, 0));
+    angle.z = yaw;
+    accel.z = yaw;
+
+    accel.rotateBy(angle.inverse());
+
+    accel.print();
+
+    return QCRequest(Pose3D(
+        sample.pos.x,
+        sample.pos.y,
+        cruiseHeight,
+        angle
+    ), Pose3D(
+        sample.vel.x,
+        sample.vel.y,
+        0,
+        accel
+    ));
+}
+
 
 Vector3D PathController::getTargetAcceleration(State& currentState, Pose3D currentPosition) {
     auto now = std::chrono::high_resolution_clock::now();
@@ -115,95 +142,63 @@ Vector3D PathController::getTargetAcceleration(State& currentState, Pose3D curre
     return targetAcceleration;
 }
 
-TakeoffController::TakeoffController(double kP, double velocity, double acceleration) : kP(kP), maxVelocity(velocity), maxAcceleration(acceleration) {
+TakeoffController::TakeoffController(double kP, double velocity, double acceleration) : kP(kP), max_velocity(velocity), max_accel(acceleration) {
     setTargetHeight(0.0, 0.0);
 }
 
-void TakeoffController::setTargetHeight(double height, double currentHeight) {
-    targetHeight = height;
-    startTime = std::chrono::high_resolution_clock::now();
+void TakeoffController::setTargetHeight(double height, double current_height) {
+    end_height = height;
+    start_height = current_height;
+    start_time = std::chrono::high_resolution_clock::now();
     //calculate motion profile times based on max acceleration and velocity
-    double distance = targetHeight - currentHeight;
-    acceleration_time = maxVelocity / maxAcceleration;
-    double accel_distance = 0.5 * maxAcceleration * acceleration_time * acceleration_time;
+    double distance = end_height - current_height;
+    accel_time = max_velocity / max_accel;
+    double accel_distance = 0.5 * max_accel * accel_time * accel_time;
     if (2 * accel_distance > std::abs(distance)) {
         //triangle profile
-        acceleration_time = std::sqrt(std::abs(distance) / maxAcceleration);
+        accel_time = std::sqrt(std::abs(distance) / max_accel);
         cruise_time = 0.0;
-        deceleration_time = acceleration_time;
+        deceleration_time = accel_time;
     } else {
         //trapezoidal profile
-        cruise_time = (std::abs(distance) - 2 * accel_distance) / maxVelocity;
-        deceleration_time = acceleration_time;
+        cruise_time = (std::abs(distance) - 2 * accel_distance) / max_velocity;
+        deceleration_time = accel_time;
     }
-}
-
-Vector3D TakeoffController::getTargetAcceleration(State& currentState, Pose3D currentPosition) {
-    auto now = std::chrono::high_resolution_clock::now();
-    double elapsed = std::chrono::duration<double>(now - startTime).count();
-    //calculate target height based on motion profile
-    double targetHeightAtTime;
-    double targetAccelerationZ = 0.0;
-    if (elapsed < acceleration_time) {
-        targetHeightAtTime = 0.5 * maxAcceleration * elapsed * elapsed;
-        targetAccelerationZ = maxAcceleration;
-    } else if (elapsed < acceleration_time + cruise_time) {
-        targetHeightAtTime = 0.5 * maxAcceleration * acceleration_time * acceleration_time
-                                + maxVelocity * (elapsed - acceleration_time);
-    } else if (elapsed < acceleration_time + cruise_time + deceleration_time) {
-        double t = elapsed - (acceleration_time + cruise_time);
-        targetHeightAtTime = 0.5 * maxAcceleration * acceleration_time * acceleration_time
-                                + maxVelocity * cruise_time
-                                + maxVelocity * t - 0.5 * maxAcceleration * t * t;
-        targetAccelerationZ = -maxAcceleration;
-    } else {
-        targetHeightAtTime = targetHeight;
-    }
-
-    std::cout << "Target Height: " << targetHeightAtTime << std::endl;
-
-    double heightError = targetHeightAtTime + currentPosition.getZ();
-    Vector3D targetAcceleration = Vector3D{
-        0.0,
-        0.0,
-        (targetAccelerationZ) + heightError * kP
-    };
-    return -targetAcceleration;
 }
 
 QCRequest TakeoffController::getTarget(State& currentState, Pose3D currentPosition) {
     auto now = std::chrono::high_resolution_clock::now();
-    double elapsed = std::chrono::duration<double>(now - startTime).count();
+    double elapsed = std::chrono::duration<double>(now - start_time).count();
     //calculate target height based on motion profile
-    double targetHeightAtTime;
-    double targetVelocityAtTime;
-    double targetAccelerationZ = 0.0;
-    if (elapsed < acceleration_time) {
-        targetHeightAtTime = 0.5 * maxAcceleration * elapsed * elapsed;
-        targetVelocityAtTime = maxAcceleration*elapsed;
-        targetAccelerationZ = maxAcceleration;
-    } else if (elapsed < acceleration_time + cruise_time) {
-        targetHeightAtTime = 0.5 * maxAcceleration * acceleration_time * acceleration_time
-                                + maxVelocity * (elapsed - acceleration_time);
-        targetVelocityAtTime = maxVelocity;
-    } else if (elapsed < acceleration_time + cruise_time + deceleration_time) {
-        double t = elapsed - (acceleration_time + cruise_time);
-        targetHeightAtTime = 0.5 * maxAcceleration * acceleration_time * acceleration_time
-                                + maxVelocity * cruise_time
-                                + maxVelocity * t - 0.5 * maxAcceleration * t * t;
-        targetVelocityAtTime = maxVelocity - (elapsed - (acceleration_time + cruise_time))*maxAcceleration;
-        targetAccelerationZ = -maxAcceleration;
+    double target_height;
+    double target_vel;
+    double target_accel = 0.0;
+
+    //outrageous mess:
+    if (elapsed < accel_time) {
+        target_height = 0.5 * max_accel * elapsed * elapsed;
+        target_vel = max_accel * elapsed;
+        target_accel = max_accel;
+    } else if (elapsed < accel_time + cruise_time) {
+        target_height = 0.5 * max_accel * accel_time * accel_time
+                                + max_velocity * (elapsed - accel_time);
+        target_vel = max_velocity;
+    } else if (elapsed < accel_time + cruise_time + deceleration_time) {
+        double t = elapsed - (accel_time + cruise_time);
+        target_height = 0.5 * max_accel * accel_time * accel_time
+                                + max_velocity * cruise_time
+                                + max_velocity * t - 0.5 * max_accel * t * t;
+        target_vel = max_velocity - (elapsed - (accel_time + cruise_time))*max_accel;
+        target_accel = -max_accel;
     } else {
-        targetHeightAtTime = targetHeight;
-        targetVelocityAtTime = 0;
+        target_height = end_height;
+        target_vel = 0;
     }
 
-    std::cout << "Target Vel: " << targetVelocityAtTime << std::endl;
-
-    double heightError = targetHeightAtTime + currentPosition.getZ();
+    double heightError = target_height + currentPosition.getZ();
 
     return QCRequest(
-        Pose3D(0,0,targetHeightAtTime, Quaternion(M_PI_4/2,0,0)),
-        Pose3D(0,0,targetVelocityAtTime*0.5)//-targetVelocityAtTime)
+        Pose3D(0,0,target_height, Quaternion(M_PI_4/2,0,0)),
+        Pose3D(0,0,target_vel)
     );
 }

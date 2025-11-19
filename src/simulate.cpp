@@ -33,6 +33,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     str.replace(start_pos, from.length(), to);
     return true;
 }
+VelocityController velocityController = VelocityController(2,0.1,1);
 
 TakeoffController takeoffController = TakeoffController(1.5,2,1);
 
@@ -70,8 +71,8 @@ State initialState = State(
 
 State currentState = initialState;
 
-int runtime = 1000;
-int noise = 100;
+int runtime = 2500;
+int noise = 50;
 double ramp = 1000;
 
 void initSimulation() {
@@ -94,11 +95,13 @@ void runSimulation(int numIters, double dt) {
 
     if(numIters == 150) {
         pathController.beginPath(testPath, 3);
+        velocityController.setInitialPose(currentState);
     }
 
     QCRequest req = takeoffController.getTarget(currentState, currentState.getPose());
     if(numIters > 150) {
-        req = pathController.getTarget(currentState);
+        // req = pathController.getTarget(currentState);
+        req = velocityController.getTarget(currentState, Vector3D(1,0,0));
     }
     std::cout << "controller req position: ";
     req.position.print();
@@ -116,7 +119,7 @@ void runSimulation(int numIters, double dt) {
         getStateVector(req.position, req.velocity)
     ));
 
-    
+
     double left = motorvels.getLeft();
     double front = motorvels.getFront();
     double right = motorvels.getRight();
@@ -252,9 +255,9 @@ int main(){
         scene_update.entities.push_back(entity);
 
         scene_channel.log(scene_update);
-
+        // if(numIters == 1) std::this_thread::sleep_for(std::chrono::seconds(5));
         numIters++;
-        std::this_thread::sleep_for(33ms);
+        while(std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::system_clock::now().time_since_epoch()).count() - last < LOOP_TIME) {}
     }
 
     return 0;

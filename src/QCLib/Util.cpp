@@ -1,14 +1,11 @@
-// Util.cpp
 #include "Util.h"
 #include <cmath>
 #include <array>
 #include <vector>
 #include <iostream>
-#include <stdexcept> // For std::runtime_error
+#include <stdexcept>
 
-// -----------------------------
-// Utility functions
-// -----------------------------
+
 double interpolateLinear(const std::vector<double>& x_data,
                          const std::vector<double>& y_data,
                          double x_interp) {
@@ -42,7 +39,7 @@ double radiansToDegrees(double radians) {
 
 
 // -----------------------------
-// Vector3d
+// Quaternion
 // -----------------------------
 
 
@@ -61,10 +58,6 @@ static Vector3D rotateVectorByQuat(const Quaternion& q, const Vector3D& v) {
     return res;
 }
 
-
-// -----------------------------
-// Rotation3d implementations
-// -----------------------------
 Quaternion Quaternion::fromRotationMatrix(const Vector3D& x_axis, const Vector3D& y_axis, const Vector3D& z_axis) {
     // Interpret columns as x_axis, y_axis, z_axis (world coords of body axes)
     double m00 = x_axis.x;
