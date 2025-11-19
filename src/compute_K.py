@@ -10,12 +10,12 @@ Ts = 0.035  # Loop Time Seconds
 #Q: penalizes state error. Higher values correct more aggresively
 Q = np.diag([
     10,10,10,      # position (x,y,z)
-    10,10,10,         # velocity (x,y,z)
-    100,100,10,    # angles (p,r,y)
+    5,5,5,         # velocity (x,y,z)
+    50,50,1,    # angles (p,r,y)
     1,1,1          # angular velocities (p,r,y)
 ])
 #R: penalize control effort. Higher values reduce control effort, correcting less aggresively.
-R = np.diag([2, 1, 1, 1]) * 10
+R = np.diag([1, 1, 1, 1]) * 15
 
 
 

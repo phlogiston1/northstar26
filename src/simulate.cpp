@@ -12,6 +12,9 @@
 #include <cmath>
 #include <csignal>
 #include <functional>
+#include <cstdlib> // For rand() and srand()
+#include <ctime>   // For time()
+#include <vector>
 #include <iostream>
 #include <thread>
 #include "Quadcopter.h"
@@ -31,46 +34,68 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-TakeoffController takeoffController = TakeoffController(1.5,1,0.4);
+TakeoffController takeoffController = TakeoffController(1.5,2,0.3);
+
+PathController pathController = PathController(Vector2D(),Vector2D(),0);
+
+std::vector<Vector2D> waypoints = {
+    Vector2D{0,0},
+    Vector2D{1,0},
+    Vector2D{2,2},
+    Vector2D{0,1}
+};
+Path testPath = Path(waypoints,
+    1, //vel
+    1, //accel
+    1, //jerk
+    20
+);
+
 MotorVelocities initialVels = MotorVelocities(0,0,0,0);
 State initialState = State(
     Pose3D(Vector3D(0,0,0), Quaternion(0,0,0)),
-    Vector3D(0,0,0), 
-    Vector3D(0,0,0), 
-    initialVels, 
+    Vector3D(0,0,0),
+    Vector3D(0,0,0),
+    initialVels,
     0
 );
 
 
 State currentState = initialState;
 
+int runtime = 1000;
+int noise = 100;
+double ramp = 2000;
+
 void initSimulation() {
     currentState = initialState;
     takeoffController.setTargetHeight(3,0);
+    testPath = Path(waypoints,
+        1, //vel
+        0.5, //accel
+        0.1, //jerk
+        200
+    );
+    srand(time(0));
 }
 
 
 void runSimulation(int numIters, double dt) {
-    std::cout << "Loop time: " << dt << std::endl;
-    //test takeoff controller:
-    // std::cout << "\n\ncurrent state velocity: ";
-    // currentState.getVelocity().print();
+    std::cout << "\n\n\nLoop time: " << dt << " Iter: " << numIters << std::endl;
+
     currentState.print();
-    // Vector3D accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose()) + Vector3D(0.01,0,0);
-    // std::cout << "controller req accel: ";
-    // accel.print();
-    // auto newVels = optimizeMotorVelocities(
-    //     currentState,
-    //     calculateTargetState(
-    //         currentState,
-    //         accel,
-    //         0
-    //     ),
-    //     1
-    // );
+
+    if(numIters == 150) {
+        pathController.beginPath(testPath, 3);
+    }
+
     QCRequest req = takeoffController.getTarget(currentState, currentState.getPose());
-    // std::cout << "controller req vel: ";
-    // req.position.print();
+    if(numIters > 150) {
+        req = pathController.getTarget(currentState);
+        std::cout << "controller req position: ";
+        req.position.print();
+    }
+
     auto currentStateNoVel = State(
         currentState.getPose(),
         Vector3D(),
@@ -78,14 +103,36 @@ void runSimulation(int numIters, double dt) {
         currentState.getMotorVelocities(),
         currentState.getTime()
     );
+
     auto motorvels = applyMixer(lqrControlStep(
         getStateVector(currentState),
         getStateVector(req.position, req.velocity)
     ));
 
+    
+    double left = motorvels.getLeft();
+    double front = motorvels.getFront();
+    double right = motorvels.getRight();
+    double rear = motorvels.getRear();
+    if(true) {
+        double maxAllowedDeltaV = ramp * dt;
+        double leftdv = left - currentState.getMotorVelocities().getLeft();
+        double frontdv = front - currentState.getMotorVelocities().getFront();
+        double rightdv = right - currentState.getMotorVelocities().getRight();
+        double reardv = rear - currentState.getMotorVelocities().getRear();
+        double maxAbsDeltaV = std::max(std::max(std::abs(leftdv), std::abs(frontdv)), std::max(std::abs(rightdv), std::abs(reardv)));
+        std::cout << maxAbsDeltaV << "\n";
+        if(maxAbsDeltaV > maxAllowedDeltaV) {
+            double scale = maxAllowedDeltaV / maxAbsDeltaV;
+            left = currentState.getMotorVelocities().getLeft() + leftdv * scale;
+            front = currentState.getMotorVelocities().getFront() + frontdv * scale;
+            right = currentState.getMotorVelocities().getRight() + rightdv * scale;
+            rear = currentState.getMotorVelocities().getRear() + reardv * scale;
+        }
+    }
+    motorvels = MotorVelocities(left + rand() % noise -(noise/2), front+ rand() % noise -(noise/2), right+ rand() % noise -(noise/2), rear+ rand() % noise -(noise/2));
     std::cout << "Motor Velocities Left:" << motorvels.getLeft() << " Front:" << motorvels.getFront()
               << " Right:" << motorvels.getRight() << " Rear:" << motorvels.getRear() << std::endl;
-
     currentState.setMotorVelocities(motorvels);
 
 
@@ -93,7 +140,6 @@ void runSimulation(int numIters, double dt) {
         currentState = currentState.predict(dt);
     }
 
-    std::cout << "DT: " << dt << std::endl;
 }
 
 int main(){
@@ -106,6 +152,11 @@ int main(){
         sigint_handler();
         }
     });
+
+    for(double t = 0.0; t <= testPath.getTotalTime(); t += 0.1) {
+        PathPoint pt = testPath.sample(t);
+        std::cout << "t=" << t << ": Pos(" << pt.pos.x << ", " << pt.pos.y << "), Vel(" << pt.vel.x << ", " << pt.vel.y << "), Acc(" << pt.acc.x << ", " << pt.acc.y << ")\n";
+    }
 
 
     //connect to server
@@ -156,7 +207,7 @@ int main(){
     initSimulation();
 
     while (!done) {
-        if(numIters > 500) {
+        if(numIters > runtime) {
             numIters = 0;
             initSimulation();
         }

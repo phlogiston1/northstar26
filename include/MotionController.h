@@ -22,6 +22,7 @@ class PathController{
     public:
         PathController(Vector2D position_kp, Vector2D velocity_kp, double cruiseHeight_kP);
         void beginPath(const Path& newPath, double cruiseHeight);
+        QCRequest getTarget(State current);
         Vector3D getTargetAcceleration(State& currentState, Pose3D currentPosition);
     private:
         Path path;

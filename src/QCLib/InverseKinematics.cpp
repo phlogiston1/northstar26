@@ -63,7 +63,7 @@ double thrustToVelocity(double thrust) {
 TargetQCState calculateTargetState(State currentState, Vector3D targetAccel, double targetYawRate) {
     // Frame convention: +X forward, +Y right, +Z down (NED)
     //account for gravity and drag:
-    targetAccel = targetAccel - Vector3D(0, 0, G);
+    targetAccel = targetAccel + Vector3D(0, 0, G);
     auto vel = currentState.getLinearVelocity();
     auto velocity_squared  = Vector3D(
         vel.x * std::abs(vel.x),
@@ -81,7 +81,7 @@ TargetQCState calculateTargetState(State currentState, Vector3D targetAccel, dou
     double fixed_yaw = currentState.getPose().rotation.getYaw();
 
     // 2. Normalize targetAccel to get direction (z_body axis)
-    Vector3D z_body = -targetAccel.normalized(); // body Z axis in world frame (aligned with thrust direction)
+    Vector3D z_body = targetAccel.normalized(); // body Z axis in world frame (aligned with thrust direction)
 
     // 3. Compute desired x_c from yaw (projected on horizontal plane)
     double cy = cos(fixed_yaw);
@@ -123,7 +123,7 @@ TargetQCState calculateTargetState(State currentState, Vector3D targetAccel, dou
     // Vector3d currentZAxis = currentState.getPose().rotation.getZAxis().normalized();
     Vector3D currentZAxis = targetAngle.getZAxis().normalized();
 
-    double z_accel = -targetAccel.dot(currentZAxis);
+    double z_accel = targetAccel.dot(currentZAxis);
     double targetThrust = z_accel * QUADCOPTER_MASS; //F=ma
     std::cout << "targetThrust: " << targetThrust << std::endl;
 

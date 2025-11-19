@@ -57,4 +57,22 @@ int main() {
     //     test.getTarget(current, current.getPose());
     // }
 
+    auto path = Path(
+        {
+            Vector2D{0,0},
+            Vector2D{1,2},
+            Vector2D{3,3}
+        },
+        1, // max velocity
+        1, // max acceleration
+        1  // max jerk
+    );
+
+    double dt = 0.1;
+    std::cout << "\nPath Sampling:\n";
+    for(double t = 0.0; t <= path.getTotalTime(); t += dt) {
+        PathPoint pt = path.sample(t);
+        std::cout << "t=" << t << ": Pos(" << pt.pos.x << ", " << pt.pos.y << "), Vel(" << pt.vel.x << ", " << pt.vel.y << "), Acc(" << pt.acc.x << ", " << pt.acc.y << ")\n";
+    }
+
 }//Motor Velocities fl:648.405 fr:0 rl:1649.46 rr:648.405

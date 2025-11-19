@@ -2,6 +2,22 @@
 #include "Configuration.h"
 #include "Quadcopter.h"
 
+//GET USING compute_K.py
+static const std::vector<std::vector<double>> LQR_K = {
+{-0.000000,0.000000,0.798664,-0.000000,0.000000,1.495234,-0.000000,-0.000000,0.000000,-0.000000,-0.000000,-0.000000},
+{0.000000,-0.552704,-0.000000,0.000000,-0.650985,-0.000000,2.405366,0.000000,-0.000000,0.350387,0.000000,-0.000000},
+{0.552704,-0.000000,-0.000000,0.650985,-0.000000,-0.000000,0.000000,2.405366,0.000000,0.000000,0.350387,0.000000},
+{0.000000,0.000000,-0.000000,0.000000,0.000000,-0.000000,-0.000000,0.000000,0.226942,-0.000000,0.000000,0.263928},
+};
+
+//GET USING compute_mixer.py
+static const std::vector<std::vector<double>> LQR_MIXER = {
+{0.250000,3.535534,0.000000,-0.250000},
+{0.250000,0.000000,3.535534,0.250000},
+{0.250000,-3.535534,-0.000000,-0.250000},
+{0.250000,-0.000000,-3.535534,0.250000},
+};
+
 double thrustToVel(double thrust) {
     // if(thrust < 0) return 0;
     return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
@@ -133,6 +149,8 @@ std::vector<double> getStateVector(Pose3D position, Pose3D velocity) {
     };
 }
 
+double angle_limit = M_PI/4;
+
 /**
  * @brief Get the output of an LQR control step.
  * 
@@ -141,11 +159,31 @@ std::vector<double> getStateVector(Pose3D position, Pose3D velocity) {
  * @return std::vector<double> containing: {total force (thrust), roll torque, pitch torque, yaw torque}
  */
 std::vector<double> lqrControlStep(std::vector<double> current, std::vector<double> reference) {
+
+    // if(current[8] > angle_limit) current[8] = angle_limit;
+    // if(current[8] < -angle_limit) current[8] = -angle_limit;
+    // if(current[7] > angle_limit) current[7] = angle_limit;
+    // if(current[7] < -angle_limit) current[7] = -angle_limit;
+
     std::vector<double> error = subtract_vectors_elementwise(current, reference);
-    std::vector<double> feedback = matrix_vector_multiply(negateArray(LQR_K), error);
+    Pose3D positionError = Pose3D(error[0], error[1], error[2], Quaternion(error[8], error[7], error[6]));
+    Pose3D velocityError = Pose3D(error[3], error[4], error[5], Quaternion(error[11], error[10], error[9]));
+
+
+    //rotate the error by the quadcopter's current yaw to convert to local coordinates
+    positionError = positionError.rotateBy(Quaternion(-current[8],0,0));
+    velocityError = velocityError.rotateBy(Quaternion(-current[8],0,0));
+
+    std::vector<double> error_local  = getStateVector(positionError, velocityError);
+    //bring the original yaw / yaw rate into the local coordinate vector since it doesn't need to change.
+    error_local[8] = error[8];
+    error_local[11] = error[11];
+
+
+    std::vector<double> feedback = matrix_vector_multiply(negateArray(LQR_K), error_local);
 
     std::vector<double> steady_state = {
-        QUADCOPTER_MASS * G * cos(current[7]) * cos(current[8]),
+        QUADCOPTER_MASS * G,// * cos(current[7]) * cos(current[8]),
         0,
         0,
         0
