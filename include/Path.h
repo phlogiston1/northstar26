@@ -51,4 +51,6 @@ struct Path {
     PathPoint getPointAtIndex(size_t index) const {
         return sample(segment_times[index].t_start);
     }
+
+    static Path origin();
 };

@@ -2,7 +2,7 @@ CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.o: \
  /home/seanb/Documents/quadsquad2026/src/QCLib/InverseKinematics.cpp \
  /usr/include/stdc-predef.h \
  /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
- /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/Physics.h \
  /usr/include/c++/13/array /usr/include/c++/13/compare \
  /usr/include/c++/13/initializer_list \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -181,5 +181,5 @@ CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.o: \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
  /usr/include/c++/13/bits/vector.tcc \
- /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/Physics.h \
  /home/seanb/Documents/quadsquad2026/include/Configuration.h

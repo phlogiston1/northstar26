@@ -2,6 +2,25 @@
 Lets make some cool stuff!
 
 # COORDINATE SYSTEM!!
+## NEW COORDINATE SYSTEM:
++Y = forward, in the direction of rotor 2
++X = rightward, in direction of rotor 3
++Z = upward
+
+         2 (Y axis)
+         |
+     1---O---3 (X axis)
+         |
+         4
+
++pitch = quadcopter angles to the left
++roll = quadcopter angles to the back
++yaw = quadcopter rotates counterclockwise
+
+IMPORTANT: SOFTWARE ASSUMES THAT ROTORS 1 AND 3 SPIN CLOCKWISE.
+
+
+## ORIGINAL COORDINATE SYSTEM:
 +X = forward motion
 +Y = left motion
 +Z = downward motion
@@ -39,3 +58,4 @@ base_station.cpp - the control loop for the base computer
 ## FlightController - eventually connects QCLib to the hardware on the quadcopter
 ## MissionControl - software that runs on the control computer
 ## Misisons - defines the actual autonomous/manual behaviors of the quadcopter
+

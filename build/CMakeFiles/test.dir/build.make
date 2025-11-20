@@ -97,10 +97,24 @@ CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/seanb/Documents/quadsquad2026/src/QCLib/Kinematics.cpp -o CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.s
 
+CMakeFiles/test.dir/src/QCLib/LQR.cpp.o: CMakeFiles/test.dir/flags.make
+CMakeFiles/test.dir/src/QCLib/LQR.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/LQR.cpp
+CMakeFiles/test.dir/src/QCLib/LQR.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/test.dir/src/QCLib/LQR.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/src/QCLib/LQR.cpp.o -MF CMakeFiles/test.dir/src/QCLib/LQR.cpp.o.d -o CMakeFiles/test.dir/src/QCLib/LQR.cpp.o -c /home/seanb/Documents/quadsquad2026/src/QCLib/LQR.cpp
+
+CMakeFiles/test.dir/src/QCLib/LQR.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test.dir/src/QCLib/LQR.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/seanb/Documents/quadsquad2026/src/QCLib/LQR.cpp > CMakeFiles/test.dir/src/QCLib/LQR.cpp.i
+
+CMakeFiles/test.dir/src/QCLib/LQR.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test.dir/src/QCLib/LQR.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/seanb/Documents/quadsquad2026/src/QCLib/LQR.cpp -o CMakeFiles/test.dir/src/QCLib/LQR.cpp.s
+
 CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp
 CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o -MF CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o.d -o CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o -c /home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp
 
 CMakeFiles/test.dir/src/QCLib/MotionController.cpp.i: cmake_force
@@ -114,7 +128,7 @@ CMakeFiles/test.dir/src/QCLib/MotionController.cpp.s: cmake_force
 CMakeFiles/test.dir/src/QCLib/Path.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/src/QCLib/Path.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp
 CMakeFiles/test.dir/src/QCLib/Path.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/test.dir/src/QCLib/Path.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/test.dir/src/QCLib/Path.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/src/QCLib/Path.cpp.o -MF CMakeFiles/test.dir/src/QCLib/Path.cpp.o.d -o CMakeFiles/test.dir/src/QCLib/Path.cpp.o -c /home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp
 
 CMakeFiles/test.dir/src/QCLib/Path.cpp.i: cmake_force
@@ -128,7 +142,7 @@ CMakeFiles/test.dir/src/QCLib/Path.cpp.s: cmake_force
 CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp
 CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o -MF CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o.d -o CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o -c /home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp
 
 CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.i: cmake_force
@@ -142,7 +156,7 @@ CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.s: cmake_force
 CMakeFiles/test.dir/src/QCLib/Util.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/src/QCLib/Util.cpp.o: /home/seanb/Documents/quadsquad2026/src/QCLib/Util.cpp
 CMakeFiles/test.dir/src/QCLib/Util.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/test.dir/src/QCLib/Util.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/test.dir/src/QCLib/Util.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/src/QCLib/Util.cpp.o -MF CMakeFiles/test.dir/src/QCLib/Util.cpp.o.d -o CMakeFiles/test.dir/src/QCLib/Util.cpp.o -c /home/seanb/Documents/quadsquad2026/src/QCLib/Util.cpp
 
 CMakeFiles/test.dir/src/QCLib/Util.cpp.i: cmake_force
@@ -156,7 +170,7 @@ CMakeFiles/test.dir/src/QCLib/Util.cpp.s: cmake_force
 CMakeFiles/test.dir/src/test.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/src/test.cpp.o: /home/seanb/Documents/quadsquad2026/src/test.cpp
 CMakeFiles/test.dir/src/test.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/test.dir/src/test.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/test.dir/src/test.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/src/test.cpp.o -MF CMakeFiles/test.dir/src/test.cpp.o.d -o CMakeFiles/test.dir/src/test.cpp.o -c /home/seanb/Documents/quadsquad2026/src/test.cpp
 
 CMakeFiles/test.dir/src/test.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/test.dir/src/test.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o: _deps/foxglove-src/src/channel.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/channel.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.i: cmake_force
@@ -184,7 +198,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/channel.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o: _deps/foxglove-src/src/context.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/context.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.i: cmake_force
@@ -198,7 +212,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/context.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o: _deps/foxglove-src/src/error.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/error.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.i: cmake_force
@@ -212,7 +226,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/error.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o: _deps/foxglove-src/src/foxglove.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/foxglove.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.i: cmake_force
@@ -226,7 +240,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/foxglove.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o: _deps/foxglove-src/src/mcap.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/mcap.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.i: cmake_force
@@ -240,7 +254,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/mcap.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o: _deps/foxglove-src/src/schemas.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/schemas.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.i: cmake_force
@@ -254,7 +268,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/schemas.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o: _deps/foxglove-src/src/server.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/server.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.i: cmake_force
@@ -268,7 +282,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/server.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o: _deps/foxglove-src/src/server/connection_graph.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/server/connection_graph.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.i: cmake_force
@@ -282,7 +296,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/server/connection_graph.cpp.s: cmake_
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o: _deps/foxglove-src/src/server/fetch_asset.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/server/fetch_asset.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.i: cmake_force
@@ -296,7 +310,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o: _deps/foxglove-src/src/server/parameter.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/server/parameter.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.i: cmake_force
@@ -310,7 +324,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/server/parameter.cpp.s: cmake_force
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o: _deps/foxglove-src/src/server/service.cpp
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o: CMakeFiles/test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o -MF CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o.d -o CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o -c /home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/server/service.cpp
 
 CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.i: cmake_force
@@ -325,6 +339,7 @@ CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.s: cmake_force
 test_OBJECTS = \
 "CMakeFiles/test.dir/src/QCLib/InverseKinematics.cpp.o" \
 "CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o" \
+"CMakeFiles/test.dir/src/QCLib/LQR.cpp.o" \
 "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o" \
 "CMakeFiles/test.dir/src/QCLib/Path.cpp.o" \
 "CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o" \
@@ -347,6 +362,7 @@ test_EXTERNAL_OBJECTS =
 
 test: CMakeFiles/test.dir/src/QCLib/InverseKinematics.cpp.o
 test: CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o
+test: CMakeFiles/test.dir/src/QCLib/LQR.cpp.o
 test: CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o
 test: CMakeFiles/test.dir/src/QCLib/Path.cpp.o
 test: CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o
@@ -366,7 +382,7 @@ test: CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o
 test: CMakeFiles/test.dir/build.make
 test: _deps/foxglove-src/lib/libfoxglove.a
 test: CMakeFiles/test.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Linking CXX executable test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Linking CXX executable test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

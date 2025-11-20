@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-struct Rotation3d; // forward declaration
+struct Quaternion; // forward declaration
 
 struct Vector2D {
     double x, y;
@@ -16,31 +16,31 @@ struct Vector2D {
 };
 
 // ============================
-// Vector3d
+// Vector3D
 // ============================
-struct Vector3d {
+struct Vector3D {
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
 
-    Vector3d() = default;
-    Vector3d(double x, double y, double z) : x(x), y(y), z(z) {}
+    Vector3D() = default;
+    Vector3D(double x, double y, double z) : x(x), y(y), z(z) {}
 
     double getMagnitude() const {
         return std::sqrt(x*x + y*y + z*z);
     }
 
-    Vector3d normalized() const {
+    Vector3D normalized() const {
         double mag = getMagnitude();
-        return (mag == 0) ? Vector3d{} : Vector3d{x/mag, y/mag, z/mag};
+        return (mag == 0) ? Vector3D{} : Vector3D{x/mag, y/mag, z/mag};
     }
 
-    double dot(const Vector3d& o) const {
+    double dot(const Vector3D& o) const {
         return x*o.x + y*o.y + z*o.z;
     }
 
-    Vector3d cross(const Vector3d& o) const {
-        return Vector3d{
+    Vector3D cross(const Vector3D& o) const {
+        return Vector3D{
             y*o.z - z*o.y,
             z*o.x - x*o.z,
             x*o.y - y*o.x
@@ -51,19 +51,19 @@ struct Vector3d {
         return Vector2D{x, y};
     }
 
-    Vector3d operator+(const Vector3d& o) const { return {x+o.x, y+o.y, z+o.z}; }
-    Vector3d operator-(const Vector3d& o) const { return {x-o.x, y-o.y, z-o.z}; }
-    Vector3d operator*(double s) const { return {x*s, y*s, z*s}; }
-    Vector3d operator/(double s) const { return {x/s, y/s, z/s}; }
-    Vector3d operator-() const { return {-x, -y, -z}; }
-    Vector3d componentWiseMultiply(const Vector3d& o) const { return {x*o.x, y*o.y, z*o.z}; }
+    Vector3D operator+(const Vector3D& o) const { return {x+o.x, y+o.y, z+o.z}; }
+    Vector3D operator-(const Vector3D& o) const { return {x-o.x, y-o.y, z-o.z}; }
+    Vector3D operator*(double s) const { return {x*s, y*s, z*s}; }
+    Vector3D operator/(double s) const { return {x/s, y/s, z/s}; }
+    Vector3D operator-() const { return {-x, -y, -z}; }
+    Vector3D componentWiseMultiply(const Vector3D& o) const { return {x*o.x, y*o.y, z*o.z}; }
 
-    bool operator==(const Vector3d& o) const {
+    bool operator==(const Vector3D& o) const {
         return x==o.x && y==o.y && z==o.z;
     }
 
     void print() const {
-        std::cout << "Vector3d(" << x << ", " << y << ", " << z << ")\n";
+        std::cout << "Vector3D(" << x << ", " << y << ", " << z << ")\n";
     }
 };
 
@@ -71,17 +71,17 @@ struct Vector3d {
 // ============================
 // Rotation3d (Quaternion Only)
 // ============================
-struct Rotation3d {
+struct Quaternion {
     double w = 1.0;
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
 
-    Rotation3d() = default;
-    Rotation3d(double w, double x, double y, double z) : w(w), x(x), y(y), z(z) {}
+    Quaternion() = default;
+    Quaternion(double w, double x, double y, double z) : w(w), x(x), y(y), z(z) {}
 
     // Construct from yaw/pitch/roll (radians)
-    Rotation3d(double yaw, double pitch, double roll) {
+    Quaternion(double yaw, double pitch, double roll) {
         double cy = std::cos(yaw * 0.5), sy = std::sin(yaw * 0.5);
         double cp = std::cos(pitch * 0.5), sp = std::sin(pitch * 0.5);
         double cr = std::cos(roll * 0.5), sr = std::sin(roll * 0.5);
@@ -92,13 +92,13 @@ struct Rotation3d {
         z = cr*cp*sy - sr*sp*cy;
     }
 
-    Rotation3d normalized() const {
+    Quaternion normalized() const {
         double mag = std::sqrt(w*w + x*x + y*y + z*z);
-        return Rotation3d(w/mag, x/mag, y/mag, z/mag);
+        return Quaternion(w/mag, x/mag, y/mag, z/mag);
     }
 
     // Quaternion composition (this = this ∘ other)
-    void rotateBy(const Rotation3d& o) {
+    void rotateBy(const Quaternion& o) {
         double nw = w*o.w - x*o.x - y*o.y - z*o.z;
         double nx = w*o.x + x*o.w + y*o.z - z*o.y;
         double ny = w*o.y - x*o.z + y*o.w + z*o.x;
@@ -118,12 +118,17 @@ struct Rotation3d {
         return std::atan2( 2*(w*x + y*z), 1 - 2*(x*x + y*y) );
     }
 
-    Vector3d getZAxis() const; // implemented in .cpp
-    Vector3d getXAxis() const;
-    Vector3d getYAxis() const;
+    Vector3D getZAxis() const; // implemented in .cpp
+    Vector3D getXAxis() const;
+    Vector3D getYAxis() const;
+    Vector3D getRotationVector() {
+        return Vector3D(getRoll(), getPitch(), getYaw());
+    }
 
     std::array<double, 3> thrustDirection() const; // implemented in .cpp
     std::array<double, 3> thrustVector(double thrustMagnitude) const;
+
+    Quaternion inverse() const;
 
     void print() const {
         std::cout << "Rotation3d(yaw=" << getYaw()
@@ -134,26 +139,58 @@ struct Rotation3d {
     //operators:
     
 
-    static Rotation3d fromDegrees(double yaw, double pitch, double roll);
-    static Rotation3d fromRotationMatrix(const Vector3d& xa, const Vector3d& ya, const Vector3d& za);
+    static Quaternion fromDegrees(double yaw, double pitch, double roll);
+    static Quaternion fromRotationMatrix(const Vector3D& xa, const Vector3D& ya, const Vector3D& za);
 };
 
 
 // ============================
 // Pose3d
 // ============================
-struct Pose3d {
-    Vector3d translation;
-    Rotation3d rotation;
+struct Pose3D {
+    Vector3D translation;
+    Quaternion rotation;
 
-    Pose3d() = default;
-    Pose3d(Vector3d t, Rotation3d r) : translation(t), rotation(r) {}
-    Pose3d(double x, double y, double z, Rotation3d r) : translation(x,y,z), rotation(r) {}
-    Pose3d(double x, double y, double z) : translation(x,y,z), rotation() {}
+    Pose3D() = default;
+    Pose3D(Vector3D t, Quaternion r) : translation(t), rotation(r) {}
+    Pose3D(double x, double y, double z, Quaternion r) : translation(x,y,z), rotation(r) {}
+    Pose3D(double x, double y, double z) : translation(x,y,z), rotation() {}
 
     double getX() const { return translation.x; }
     double getY() const { return translation.y; }
     double getZ() const { return translation.z; }
+
+    Pose3D rotateBy(Quaternion r) {
+        // Rotate translation vector using quaternion
+        // Convert translation to a quaternion (0, v)
+        Quaternion tQuat(0.0, translation.x, translation.y, translation.z);
+
+        // q * v * q_conjugate
+        Quaternion q = r.normalized();
+        Quaternion qConj(q.w, -q.x, -q.y, -q.z);
+
+        // First multiply q * tQuat
+        Quaternion temp;
+        temp.w = q.w * tQuat.w - q.x * tQuat.x - q.y * tQuat.y - q.z * tQuat.z;
+        temp.x = q.w * tQuat.x + q.x * tQuat.w + q.y * tQuat.z - q.z * tQuat.y;
+        temp.y = q.w * tQuat.y - q.x * tQuat.z + q.y * tQuat.w + q.z * tQuat.x;
+        temp.z = q.w * tQuat.z + q.x * tQuat.y - q.y * tQuat.x + q.z * tQuat.w;
+
+        // Now multiply (q * v) * q_conjugate
+        Quaternion rotated;
+        rotated.w = temp.w * qConj.w - temp.x * qConj.x - temp.y * qConj.y - temp.z * qConj.z;
+        rotated.x = temp.w * qConj.x + temp.x * qConj.w + temp.y * qConj.z - temp.z * qConj.y;
+        rotated.y = temp.w * qConj.y - temp.x * qConj.z + temp.y * qConj.w + temp.z * qConj.x;
+        rotated.z = temp.w * qConj.z + temp.x * qConj.y - temp.y * qConj.x + temp.z * qConj.w;
+
+        Vector3D newTranslation(rotated.x, rotated.y, rotated.z);
+
+        // Compose orientations: new = r ∘ old
+        Quaternion newRotation = r;
+        newRotation.rotateBy(rotation); // multiply r * oldRotation
+
+        return Pose3D(newTranslation, newRotation);
+    }
 
     void print() const {
         std::cout << "Pose3d:\n\t";
@@ -163,7 +200,32 @@ struct Pose3d {
     }
 };
 
+// struct Twist3D {
+//     Vector3D linear, angular;
 
-// ============================
-// 2D types remain unchanged
-// ============================
+//     Twist3D(Vector3D linear, Vector3D angular): linear(linear), angular(angular) {
+//     }
+
+//     Twist3D(Vector3D linear, double yaw, double pitch, double roll): linear(linear), angular(Vector3D(roll, pitch, yaw)){
+
+//     }
+
+//     double getYaw() {
+//         return angular.z;
+//     }
+
+//     double getPitch() {
+//         return angular.y;
+//     }
+
+//     double getRoll() {
+//         return angular.x;
+//     }
+
+//     Pose3D apply(Pose3D other) {
+//         return Pose3D(
+//             (other.translation + linear),
+//             other.rotation.rotateBy(Quaternion(angular.z, angular.y, angular.x))
+//         );
+//     }
+// };

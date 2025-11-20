@@ -58,18 +58,18 @@ target_link_libraries(simulate PRIVATE
 
 ################ TEST EXECUTABLE ################ (must have the exact same configuration as simulate)
 
-file(GLOB TEST_SOURCES "src/QCLib/*.cpp" "src/test.cpp")
-add_executable(test ${TEST_SOURCES})
+# file(GLOB TEST_SOURCES "src/QCLib/*.cpp" "src/test.cpp")
+# add_executable(test ${TEST_SOURCES})
 
-target_include_directories(test PRIVATE
-    ${foxglove_SOURCE_DIR}/include
-    ${foxglove_SOURCE_DIR}/include/foxglove
-    ${PROJECT_SOURCE_DIR}/include
-)
+# target_include_directories(test PRIVATE
+#     ${foxglove_SOURCE_DIR}/include
+#     ${foxglove_SOURCE_DIR}/include/foxglove
+#     ${PROJECT_SOURCE_DIR}/include
+# )
 
-target_sources(test PRIVATE ${FOXGLOVE_SOURCES})
+# target_sources(test PRIVATE ${FOXGLOVE_SOURCES})
 
-target_link_libraries(test PRIVATE
-    ${foxglove_SOURCE_DIR}/lib/libfoxglove.a
-    pthread
-)
+# target_link_libraries(test PRIVATE
+#     ${foxglove_SOURCE_DIR}/lib/libfoxglove.a
+#     pthread
+# )

@@ -1,61 +1,53 @@
-#include <array>
-#include "Util.h"
+#pragma once
 
-#ifndef QUADCOPTER_H
-#define QUADCOPTER_H
-//ALL POSITIVE VALUES, IGNORING DIRECTION
-class MotorVelocities {
-    private:
-        double frontLeft;
-        double frontRight;
-        double rearLeft;
-        double rearRight;
+#include "Physics.h"
+#include "MotionController.h"
+#include "Path.h"
+#include <vector>
+#include <functional>
 
-    public:
-        MotorVelocities(double frontLeft, double frontRight, double rearLeft, double rearRight);
 
-        double getFrontLeft() const;
-        double getFrontRight() const;
-        double getRearLeft() const;
-        double getRearRight() const;
+struct PoseObservation {
+    Pose3D pose = Pose3D();
+    double timestamp = 0;
+};
 
-        MotorVelocities limit(double maxVelocity) const;
+enum LandingStatus{
+    FLYING,
+    DECENT,
+    TOUCHDOWN,
+    LANDED
 };
 
 
 
-class QCAcceleration {
+class Quadcopter {
     private:
-        Rotation3d angular_accel;
-        double accel_x;
-        double accel_y;
-        double accel_z;
+        State state;
+        Vector3D global_observation = Vector3D();
+        std::vector<PoseObservation> predictions = {};
+        std::function<Vector3D()> velocity_supplier;
+        bool manual = false;
+        LandingStatus landing_status = LANDED;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+
+        VelocityController velocity_controller;
+        PathController path_controller;
+        HeightController height_controller;
+
 
     public:
-        QCAcceleration(Rotation3d angular_accel, double accel_x, double accel_y, double accel_z);
-
-        Rotation3d getAngular();
-        double getX();
-        double getY();
-        double getZ();
-};
-
-class QCState {
-    private:
-        Pose3d pose;
-        Pose3d velocity;
-        MotorVelocities motorVelocities;
-        double time;
-
-    public:
-        QCState(Pose3d pose, Pose3d velocity, MotorVelocities motorVelocities, double time);
-        Pose3d getPose();
-        Pose3d getVelocity();
-        MotorVelocities getMotorVelocities();
-        void setMotorVelocities(MotorVelocities newVels);
+        Quadcopter(State initial, double max_velocity, double max_acceleration, double max_jerk);
+        State getState();
+        void addVisionMeasurement(Vector3D translation, double timestamp);
+        void addIMUMeasurement(Quaternion angular_pos, Vector3D angular_vel);
+        void setHeight(double height);
+        void beginPath(Path path);
+        void beginManualControl(std::function<Vector3D()> velocity);
+        void land();
+        bool busy();
+        bool adjustingHeight();
+        void update_simulation();
         double getTime();
-        void print();
-        QCState predict(double timestep);
+        MotorVelocities getMotorVels();
 };
-
-#endif

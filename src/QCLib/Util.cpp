@@ -1,14 +1,11 @@
-// Util.cpp
 #include "Util.h"
 #include <cmath>
 #include <array>
 #include <vector>
 #include <iostream>
-#include <stdexcept> // For std::runtime_error
+#include <stdexcept>
 
-// -----------------------------
-// Utility functions
-// -----------------------------
+
 double interpolateLinear(const std::vector<double>& x_data,
                          const std::vector<double>& y_data,
                          double x_interp) {
@@ -42,7 +39,7 @@ double radiansToDegrees(double radians) {
 
 
 // -----------------------------
-// Vector3d
+// Quaternion
 // -----------------------------
 
 
@@ -51,21 +48,17 @@ double radiansToDegrees(double radians) {
 // -----------------------------
 // Rotate vector v by quaternion q (this quaternion). Uses formula:
 // v' = v + 2*cross(q_vec, cross(q_vec, v) + w*v)
-static Vector3d rotateVectorByQuat(const Rotation3d& q, const Vector3d& v) {
+static Vector3D rotateVectorByQuat(const Quaternion& q, const Vector3D& v) {
     // q = (w, qv)
-    Vector3d qv{ q.x, q.y, q.z };
+    Vector3D qv{ q.x, q.y, q.z };
     // t = 2 * cross(qv, v)
-    Vector3d t = qv.cross(v) * 2.0;
+    Vector3D t = qv.cross(v) * 2.0;
     // v' = v + w * t + cross(qv, t)
-    Vector3d res = v + (t * q.w) + qv.cross(t);
+    Vector3D res = v + (t * q.w) + qv.cross(t);
     return res;
 }
 
-
-// -----------------------------
-// Rotation3d implementations
-// -----------------------------
-Rotation3d Rotation3d::fromRotationMatrix(const Vector3d& x_axis, const Vector3d& y_axis, const Vector3d& z_axis) {
+Quaternion Quaternion::fromRotationMatrix(const Vector3D& x_axis, const Vector3D& y_axis, const Vector3D& z_axis) {
     // Interpret columns as x_axis, y_axis, z_axis (world coords of body axes)
     double m00 = x_axis.x;
     double m01 = y_axis.x;
@@ -108,42 +101,63 @@ Rotation3d Rotation3d::fromRotationMatrix(const Vector3d& x_axis, const Vector3d
         }
     }
 
-    return Rotation3d(qw, qx, qy, qz);
+    return Quaternion(qw, qx, qy, qz);
 }
 
-Rotation3d Rotation3d::fromDegrees(double yaw, double pitch, double roll) {
-    return Rotation3d(degreesToRadians(yaw), degreesToRadians(pitch), degreesToRadians(roll));
+Quaternion Quaternion::fromDegrees(double yaw, double pitch, double roll) {
+    return Quaternion(degreesToRadians(yaw), degreesToRadians(pitch), degreesToRadians(roll));
 }
 
-Vector3d Rotation3d::getZAxis() const {
+Vector3D Quaternion::getZAxis() const {
     // Body Z axis in world coordinates = rotate (0,0,1) by quaternion
-    Vector3d bodyZ{0.0, 0.0, 1.0};
-    Vector3d worldZ = rotateVectorByQuat(*this, bodyZ);
+    Vector3D bodyZ{0.0, 0.0, 1.0};
+    Vector3D worldZ = rotateVectorByQuat(*this, bodyZ);
     return worldZ.normalized();
 }
 
-Vector3d Rotation3d::getXAxis() const {
-    Vector3d bodyX{1.0, 0.0, 0.0};
-    Vector3d worldX = rotateVectorByQuat(*this, bodyX);
+Vector3D Quaternion::getXAxis() const {
+    Vector3D bodyX{1.0, 0.0, 0.0};
+    Vector3D worldX = rotateVectorByQuat(*this, bodyX);
     return worldX.normalized();
 }
 
-Vector3d Rotation3d::getYAxis() const {
-    Vector3d bodyY{0.0, 1.0, 0.0};
-    Vector3d worldY = rotateVectorByQuat(*this, bodyY);
+Vector3D Quaternion::getYAxis() const {
+    Vector3D bodyY{0.0, 1.0, 0.0};
+    Vector3D worldY = rotateVectorByQuat(*this, bodyY);
     return worldY.normalized();
 }
 
-std::array<double, 3> Rotation3d::thrustDirection() const {
+std::array<double, 3> Quaternion::thrustDirection() const {
     // Thrust acts along body -Z. Compute world direction of body -Z.
-    Vector3d negBodyZ = rotateVectorByQuat(*this, Vector3d{0.0, 0.0, -1.0});
+    Vector3D negBodyZ = rotateVectorByQuat(*this, Vector3D{0.0, 0.0, 1.0});
     double mag = negBodyZ.getMagnitude();
     if (mag == 0.0) return {0.0, 0.0, 0.0};
     return {negBodyZ.x / mag, negBodyZ.y / mag, negBodyZ.z / mag};
 }
 
-std::array<double, 3> Rotation3d::thrustVector(double thrustMagnitude) const {
+std::array<double, 3> Quaternion::thrustVector(double thrustMagnitude) const {
     auto dir = thrustDirection();
     return { dir[0] * thrustMagnitude, dir[1] * thrustMagnitude, dir[2] * thrustMagnitude };
+}
+
+Quaternion Quaternion::inverse() const {
+    // Compute magnitude (norm)
+    double norm = std::sqrt(w*w + x*x + y*y + z*z);
+
+    // Guard against divide-by-zero
+    if (norm == 0.0) {
+        // Return identity quaternion if something is horribly wrong
+        return Quaternion(1.0, 0.0, 0.0, 0.0);
+    }
+
+    double invNorm = 1.0 / norm;
+
+    // For rotation quaternions, inverse = conjugate / |q|
+    return Quaternion(
+        w * invNorm,
+        -x * invNorm,
+        -y * invNorm,
+        -z * invNorm
+    );
 }
 

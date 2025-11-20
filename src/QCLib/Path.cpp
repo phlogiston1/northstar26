@@ -39,21 +39,6 @@ void Bezier2D::getKinematics(double t, double T, Vector2D &pos, Vector2D &vel, V
 }
 
 
-
-/**
- * @brief Compute time parameterization for a 2D Bezier curve.
- * 
- * The time parameterization ensures that the curve can be traversed
- * within specified maximum velocity, acceleration, and jerk constraints.
- * It relates the curve parameter t to time increments dt.
- * 
- * @param curve the Bezier2D curve to parameterize
- * @param max_velocity the maximum allowed velocity
- * @param max_acceleration the maximum allowed acceleration
- * @param max_jerk the maximum allowed jerk
- * @param samples the number of samples to compute
- * @return TimeParam containing the time parameterization
- */
 TimeParam computeTimeParameterization(
     const Bezier2D &curve,
     double max_velocity, double max_acceleration, double max_jerk,
@@ -81,6 +66,7 @@ TimeParam computeTimeParameterization(
 
     return tp;
 }
+
 
 std::vector<double> computeTimeSchedule(const TimeParam &tp) {
     std::vector<double> tau(tp.t.size());
@@ -119,7 +105,7 @@ std::vector<PathPoint> generateFinalPath(
 std::vector<SegmentTime> computePathSegmentTimes(const std::vector<Bezier2D> &segments,
                                            double v_max, double a_max, double j_max, int num_samples=200)
 {
-    std::vector<SegmentTime> seg_times;
+    std::vector<SegmentTime> seg_times = {};
     double global_time = 0.0;
 
     for(const auto &seg : segments){
@@ -157,9 +143,21 @@ PathPoint evaluateChainedPath(const std::vector<Bezier2D> &segments,
     return {last.P3, {0,0}, {0,0}, time};
 }
 
+/**
+ * @brief Represents a path in a 2D plane
+ * Note: the time parameterization doesn't seem work properly on the last segment,
+ * so I reccomend putting an extra waypoint very close to the last waypoint to
+ * allow the copter to decelerate.
+ * @param waypoints a list of Vector2Ds for the quadcopter to fly through.
+ * @param max_velocity maximum linear velocity
+ * @param max_acceleration maximum linear acceleration
+ * @param max_jerk maximum linear jerk (change in acceleration)
+ * @param num_samples how many samples to compute for each path segment
+ */
 Path::Path(const std::vector<Vector2D>& waypoints,
            double max_velocity, double max_acceleration, double max_jerk, int num_samples) {
-    // Generate C1 chained segments (control points computed with Catmull-Rom tangents)
+    // Generate C1 chained segments (control points computed with Catmull-Rom tangents, whatever that means)
+
     auto tangent = [&](int i) -> Vector2D {
         if(i==0) return (waypoints[1]-waypoints[0]);
         if(i==waypoints.size()-1) return (waypoints.back()-waypoints[waypoints.size()-2]);
@@ -176,6 +174,16 @@ Path::Path(const std::vector<Vector2D>& waypoints,
     segment_times = computePathSegmentTimes(segments, max_velocity, max_acceleration, max_jerk, num_samples);
 }
 
+Path Path::origin() {
+    return Path({Vector2D{0,0}, Vector2D{0,0}}, 1, 1, 1);
+}
+
+/**
+ * @brief Get the position, velocity, and acceleration along the path
+ *
+ * @param time the time to sample.
+ * @return PathPoint
+ */
 PathPoint Path::sample(double time) const {
     for(size_t i = 0; i < segments.size(); i++){
         const auto &seg = segments[i];

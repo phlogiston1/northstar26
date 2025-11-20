@@ -2,6 +2,7 @@ CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o: \
  /home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp \
  /usr/include/stdc-predef.h \
  /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/Physics.h \
  /usr/include/c++/13/array /usr/include/c++/13/compare \
  /usr/include/c++/13/initializer_list \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -180,6 +181,27 @@ CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o: \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
  /usr/include/c++/13/bits/vector.tcc \
- /home/seanb/Documents/quadsquad2026/include/Kinematics.h \
- /home/seanb/Documents/quadsquad2026/include/Quadcopter.h \
+ /home/seanb/Documents/quadsquad2026/include/MotionController.h \
+ /home/seanb/Documents/quadsquad2026/include/Path.h \
+ /home/seanb/Documents/quadsquad2026/include/InverseKinematics.h \
+ /usr/include/c++/13/chrono /usr/include/c++/13/bits/chrono.h \
+ /usr/include/c++/13/ratio /usr/include/c++/13/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+ /usr/include/c++/13/ctime /usr/include/c++/13/bits/parse_numbers.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/unordered_map \
+ /usr/include/c++/13/bits/unordered_map.h \
+ /usr/include/c++/13/bits/hashtable.h \
+ /usr/include/c++/13/bits/hashtable_policy.h \
+ /usr/include/c++/13/ext/aligned_buffer.h \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
+ /home/seanb/Documents/quadsquad2026/include/LQR.h \
  /home/seanb/Documents/quadsquad2026/include/Configuration.h

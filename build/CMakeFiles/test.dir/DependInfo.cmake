@@ -21,6 +21,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/seanb/Documents/quadsquad2026/build/_deps/foxglove-src/src/server/service.cpp" "CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o" "gcc" "CMakeFiles/test.dir/_deps/foxglove-src/src/server/service.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/InverseKinematics.cpp" "CMakeFiles/test.dir/src/QCLib/InverseKinematics.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/InverseKinematics.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Kinematics.cpp" "CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Kinematics.cpp.o.d"
+  "/home/seanb/Documents/quadsquad2026/src/QCLib/LQR.cpp" "CMakeFiles/test.dir/src/QCLib/LQR.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/LQR.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/MotionController.cpp" "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/MotionController.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Path.cpp" "CMakeFiles/test.dir/src/QCLib/Path.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Path.cpp.o.d"
   "/home/seanb/Documents/quadsquad2026/src/QCLib/Quadcopter.cpp" "CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o" "gcc" "CMakeFiles/test.dir/src/QCLib/Quadcopter.cpp.o.d"

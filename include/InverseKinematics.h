@@ -1,7 +1,7 @@
 #ifndef INVERSE_KINEMATICS_H
 #define INVERSE_KINEMATICS_H
 
-#include "Quadcopter.h"
+#include "Physics.h"
 
 /**
  * @brief Implements inverse kinematics for the quadcopter
@@ -19,7 +19,7 @@
  */
  struct InverseKinematicResult {
     MotorVelocities motorVelocities;
-    QCAcceleration achievedAccel;
+    Acceleration achievedAccel;
     double errorMagnitude;
 };
 
@@ -28,16 +28,12 @@
  * @brief Represents the target state for the quadcopter based on desired acceleration and yaw rate
  */
 struct TargetQCState {
-    Rotation3d targetAngle;
+    Quaternion targetAngle;
     double targetThrust;
     double targetYawRate;
 };
 
-TargetQCState calculateTargetState_robust(QCState currentState, Vector3d targetAccel, double targetYawRate);
-TargetQCState calculateTargetState(QCState currentState, Vector3d targetAccel, double targetYaw);
+Quaternion getTargetAngle(State currentState, Vector3D targetAccel);
 
-InverseKinematicResult optimizeMotorVelocities(QCState currentState, TargetQCState targetState, double timestep);
-
-InverseKinematicResult calculateMotorVelocitiesForAccel(QCState currentState, TargetQCState targetState);
 
 #endif

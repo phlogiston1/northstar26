@@ -1,3 +1,3 @@
-#include "Quadcopter.h"
+#include "Physics.h"
 
-QCAcceleration velocitiesToAccel(QCState currentState);
+Acceleration velocitiesToAccel(State currentState);

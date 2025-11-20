@@ -12,13 +12,18 @@
 #include <cmath>
 #include <csignal>
 #include <functional>
+#include <cstdlib> // For rand() and srand()
+#include <ctime>   // For time()
+#include <vector>
 #include <iostream>
 #include <thread>
-#include "Quadcopter.h"
+#include "Physics.h"
 #include "Util.h"
 #include "Kinematics.h"
 #include "InverseKinematics.h"
 #include "MotionController.h"
+#include "LQR.h"
+#include "Quadcopter.h"
 
 using namespace std::chrono_literals;
 
@@ -30,45 +35,107 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-TakeoffController takeoffController = TakeoffController(1.5,1,1);
+std::vector<Vector2D> waypoints1 = {
+    Vector2D{0,0},
+    Vector2D{1,0},
+    Vector2D{1,1},
+    Vector2D{0,1},
+    Vector2D{-1,1},
+    Vector2D{-1,0},
+    Vector2D{-1,-1},
+    Vector2D{0,-1},
+    Vector2D{1,-1},
+    Vector2D{1,0},
+    Vector2D{0,0}
+};
+std::vector<Vector2D> waypoints = waypoints1;
+std::vector<Vector2D> waypoints2 = {
+    Vector2D{0,0},
+    Vector2D{1,3},
+    Vector2D{-1,1},
+    Vector2D{0,0}
+};
+Path path = Path(waypoints,
+    1, //vel
+    2, //accel
+    5, //jerk
+    200
+);
+Path path2 = Path(waypoints2,
+    1, //vel
+    2, //accel
+    5, //jerk
+    200
+);
+
 MotorVelocities initialVels = MotorVelocities(0,0,0,0);
-QCState initialState = QCState(
-    Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)),
-    Pose3d(Vector3d(0,0,0), Rotation3d(0,0,0)), initialVels, 0);
+State initialState = State(
+    Pose3D(Vector3D(0,0,0), Quaternion(0,0,0)),
+    Vector3D(0,0,0),
+    Vector3D(0,0,0),
+    initialVels,
+    0
+);
 
+Quadcopter quadcopter = Quadcopter(initialState, 1, 1, 0.3);
 
-QCState currentState = initialState;
+int runtime = 2500;
+int noise = 50;
+double ramp = 1000;
+int step = 0;
 
 void initSimulation() {
-    currentState = initialState;
-    takeoffController.setTargetHeight(3,0);
+    srand(time(0));
+    quadcopter.setHeight(2);
+    waypoints = waypoints1;
+    step = 0;
 }
 
+int numIters;
+void runSimulation(double dt) {
+    std::cout << "\n\n\nLoop time: " << dt << " Iter: " << numIters << std::endl;
 
-void runSimulation(int numIters, double dt) {
-    std::cout << "Loop time: " << dt << std::endl;
-    //test takeoff controller:
-    // std::cout << "\n\ncurrent state velocity: ";
-    // currentState.getVelocity().print();
-    currentState.print();
-    Vector3d accel = takeoffController.getTargetAcceleration(currentState, currentState.getPose()) + Vector3d(0.01,0,0);
-    std::cout << "controller req accel: ";
-    accel.print();
-    auto newVels = optimizeMotorVelocities(
-        currentState,
-        calculateTargetState(
-            currentState,
-            accel,
-            0
-        ),
-        1
-    );
-    currentState.setMotorVelocities(newVels.motorVelocities);
+    quadcopter.getState().print();
 
+    if(step == 0 && !quadcopter.busy()) {
+        quadcopter.beginPath(path);
+        step++;
+    }
+    if(step == 1 && !quadcopter.busy()) {
+        quadcopter.setHeight(3);
+        step++;
+    }
+    if(step == 2 && !quadcopter.busy()) {
+        quadcopter.beginPath(path2);
+        waypoints = waypoints2; //just to update visualization
+        step++;
+    }
+    if(step == 3 && !quadcopter.busy()) {
+        quadcopter.setHeight(0);
+        step++;
+    }
+    if(step == 4 && !quadcopter.busy()) {
+        numIters = 10000; //force reset
+    }
+    if(numIters == 300) {
+        // quadcopter.beginManualControl([]() {return Vector3D(1,0,0);});
+        // quadcopter.setHeight(3);
+    }
+    if(numIters == 450) {
+        // quadcopter.setHeight(2);
+        // quadcopter.beginManualControl([]() {return Vector3D(0,0,0);});
+    }
+
+    if(numIters > 150) {
+        // req = pathController.getTarget(currentState);
+        // req = velocityController.getTarget(currentState, Vector3D(1,0,0));
+    }
 
     if(numIters > 0){
-        currentState = currentState.predict(dt);
+        // currentState = currentState.predict(dt);
+        quadcopter.update_simulation();
     }
+
 }
 
 int main(){
@@ -81,6 +148,11 @@ int main(){
         sigint_handler();
         }
     });
+
+    for(double t = 0.0; t <= path.getTotalTime(); t += 0.1) {
+        PathPoint pt = path.sample(t);
+        std::cout << "t=" << t << ": Pos(" << pt.pos.x << ", " << pt.pos.y << "), Vel(" << pt.vel.x << ", " << pt.vel.y << "), Acc(" << pt.acc.x << ", " << pt.acc.y << ")\n";
+    }
 
 
     //connect to server
@@ -126,12 +198,12 @@ int main(){
         done = true;
     };
 
-    int numIters = 0;
+    numIters = 0;
     double last = 0;
     initSimulation();
 
     while (!done) {
-        if(numIters > 500) {
+        if(numIters > runtime) {
             numIters = 0;
             initSimulation();
         }
@@ -140,28 +212,42 @@ int main(){
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
 
-        runSimulation(numIters, now-last);
+        runSimulation(now-last);
 
         last = now;
-        auto rotation = currentState.getPose().rotation;
+        auto qcrotation = quadcopter.getState().pose.rotation;
+        auto rotation = Quaternion(
+            qcrotation.getYaw() + M_PI_4,
+            qcrotation.getPitch(),
+            qcrotation.getRoll()
+        );
 
 
         foxglove::schemas::CubePrimitive cube;
         cube.size = foxglove::schemas::Vector3{QUADCOPTER_ROTOR_DISTANCE, QUADCOPTER_ROTOR_DISTANCE, 0.05};
         cube.color = foxglove::schemas::Color{1, 1, 1, 1};
-        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{-1*currentState.getPose().getX(), -1*currentState.getPose().getY(), -1*currentState.getPose().getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+        auto currentState = quadcopter.getState();
+        cube.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{1*currentState.pose.getX(), 1*currentState.pose.getY(), 1*currentState.pose.getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
 
         foxglove::schemas::SceneEntity entity;
         entity.id = "box";
         entity.cubes.push_back(cube);
 
+        for(int i = 0; i < waypoints.size(); i++) {
+            foxglove::schemas::CubePrimitive waypt;
+            waypt.size = foxglove::schemas::Vector3{0.05, 0.05, 0.05};
+            waypt.color = foxglove::schemas::Color{2, 255, 1, 255};
+            waypt.pose = foxglove::schemas::Pose{foxglove::schemas::Vector3{waypoints[i].x, waypoints[i].y, currentState.pose.getZ()}, foxglove::schemas::Quaternion{rotation.x,rotation.y,rotation.z,rotation.w}};
+            entity.cubes.push_back(waypt);
+        }
+
         foxglove::schemas::SceneUpdate scene_update;
         scene_update.entities.push_back(entity);
 
         scene_channel.log(scene_update);
-
+        // if(numIters == 1) std::this_thread::sleep_for(std::chrono::seconds(5));
         numIters++;
-        std::this_thread::sleep_for(33ms);
+        while(std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::system_clock::now().time_since_epoch()).count() - last < LOOP_TIME) {}
     }
 
     return 0;
