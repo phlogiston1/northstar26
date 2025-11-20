@@ -11,6 +11,7 @@ Quadcopter::Quadcopter(State initial, double max_velocity, double max_accelerati
     velocity_controller(VelocityController(max_velocity, max_acceleration, max_jerk)),
     path_controller(PathController()),
     height_controller(HeightController(max_velocity, max_acceleration)) {
+        start_time = std::chrono::high_resolution_clock::now();
 }
 
 State Quadcopter::getState() {
@@ -63,7 +64,7 @@ MotorVelocities Quadcopter::getMotorVels() {
 
 double Quadcopter::getTime() {
     auto time = std::chrono::high_resolution_clock::now();
-    return (time - start_time).count();
+    return std::chrono::duration_cast<std::chrono::seconds>(time - start_time).count();
 }
 
 void Quadcopter::update_simulation() {

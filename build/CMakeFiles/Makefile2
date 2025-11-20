@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/seanb/Documents/quadsquad2026/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/simulate.dir/all
+all: CMakeFiles/quadcopter.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/simulate.dir/clean
+clean: CMakeFiles/quadcopter.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/simulate.dir
+# Target rules for target CMakeFiles/quadcopter.dir
 
 # All Build rule for target.
-CMakeFiles/simulate.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21 "Built target simulate"
-.PHONY : CMakeFiles/simulate.dir/all
+CMakeFiles/quadcopter.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/seanb/Documents/quadsquad2026/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Built target quadcopter"
+.PHONY : CMakeFiles/quadcopter.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/simulate.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/seanb/Documents/quadsquad2026/build/CMakeFiles 21
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/simulate.dir/all
+CMakeFiles/quadcopter.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/seanb/Documents/quadsquad2026/build/CMakeFiles 9
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/quadcopter.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/seanb/Documents/quadsquad2026/build/CMakeFiles 0
-.PHONY : CMakeFiles/simulate.dir/rule
+.PHONY : CMakeFiles/quadcopter.dir/rule
 
 # Convenience name for target.
-simulate: CMakeFiles/simulate.dir/rule
-.PHONY : simulate
+quadcopter: CMakeFiles/quadcopter.dir/rule
+.PHONY : quadcopter
 
 # clean rule for target.
-CMakeFiles/simulate.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/clean
-.PHONY : CMakeFiles/simulate.dir/clean
+CMakeFiles/quadcopter.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/clean
+.PHONY : CMakeFiles/quadcopter.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
@@ -107,7 +107,6 @@ CMakeFiles/simulate.dir/clean:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -P /home/seanb/Documents/quadsquad2026/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

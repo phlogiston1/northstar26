@@ -59,7 +59,7 @@ void PathController::beginPath(const Path& newPath, double cruiseHeight) {
 QCRequest PathController::getTarget(State current) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - startTime).count();
-    std::cout << "DEBUG ELAPSED: " << elapsed << std::endl;
+    // std::cout << "DEBUG ELAPSED: " << elapsed << std::endl;
     auto sample = path.sample(elapsed);
     auto next = path.sample(elapsed + LOOP_TIME);
 
@@ -86,7 +86,7 @@ QCRequest PathController::getTarget(State current) {
 QCRequest PathController::getTarget(State current, double yaw) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - startTime).count();
-    std::cout << "DEBUG ELAPSED: " << elapsed << std::endl;
+    // std::cout << "DEBUG ELAPSED: " << elapsed << std::endl;
     auto sample = path.sample(elapsed);
     auto next = path.sample(elapsed + LOOP_TIME);
 
@@ -150,7 +150,7 @@ void HeightController::setTargetHeight(double height, double current_height) {
 QCRequest HeightController::getTarget(State& currentState) {
     auto now = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double>(now - start_time).count();
-    std::cout << elapsed << std::endl;
+    // std::cout << elapsed << std::endl;
     //calculate target height based on motion profile
     double target_height;
     double target_vel;

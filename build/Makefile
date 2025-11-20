@@ -85,6 +85,51 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/seanb/Documents/quadsquad2026/build/CMakeFiles /home/seanb/Documents/quadsquad2026/build//CMakeFiles/progress.marks
@@ -113,293 +158,28 @@ preinstall/fast:
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -P /home/seanb/Documents/quadsquad2026/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named simulate
+# Target rules for targets named quadcopter
 
 # Build rule for target.
-simulate: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 simulate
-.PHONY : simulate
+quadcopter: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 quadcopter
+.PHONY : quadcopter
 
 # fast build rule for target.
-simulate/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/build
-.PHONY : simulate/fast
-
-_deps/foxglove-src/src/channel.o: _deps/foxglove-src/src/channel.cpp.o
-.PHONY : _deps/foxglove-src/src/channel.o
-
-# target to build an object file
-_deps/foxglove-src/src/channel.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/channel.cpp.o
-.PHONY : _deps/foxglove-src/src/channel.cpp.o
-
-_deps/foxglove-src/src/channel.i: _deps/foxglove-src/src/channel.cpp.i
-.PHONY : _deps/foxglove-src/src/channel.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/channel.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/channel.cpp.i
-.PHONY : _deps/foxglove-src/src/channel.cpp.i
-
-_deps/foxglove-src/src/channel.s: _deps/foxglove-src/src/channel.cpp.s
-.PHONY : _deps/foxglove-src/src/channel.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/channel.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/channel.cpp.s
-.PHONY : _deps/foxglove-src/src/channel.cpp.s
-
-_deps/foxglove-src/src/context.o: _deps/foxglove-src/src/context.cpp.o
-.PHONY : _deps/foxglove-src/src/context.o
-
-# target to build an object file
-_deps/foxglove-src/src/context.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/context.cpp.o
-.PHONY : _deps/foxglove-src/src/context.cpp.o
-
-_deps/foxglove-src/src/context.i: _deps/foxglove-src/src/context.cpp.i
-.PHONY : _deps/foxglove-src/src/context.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/context.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/context.cpp.i
-.PHONY : _deps/foxglove-src/src/context.cpp.i
-
-_deps/foxglove-src/src/context.s: _deps/foxglove-src/src/context.cpp.s
-.PHONY : _deps/foxglove-src/src/context.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/context.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/context.cpp.s
-.PHONY : _deps/foxglove-src/src/context.cpp.s
-
-_deps/foxglove-src/src/error.o: _deps/foxglove-src/src/error.cpp.o
-.PHONY : _deps/foxglove-src/src/error.o
-
-# target to build an object file
-_deps/foxglove-src/src/error.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/error.cpp.o
-.PHONY : _deps/foxglove-src/src/error.cpp.o
-
-_deps/foxglove-src/src/error.i: _deps/foxglove-src/src/error.cpp.i
-.PHONY : _deps/foxglove-src/src/error.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/error.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/error.cpp.i
-.PHONY : _deps/foxglove-src/src/error.cpp.i
-
-_deps/foxglove-src/src/error.s: _deps/foxglove-src/src/error.cpp.s
-.PHONY : _deps/foxglove-src/src/error.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/error.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/error.cpp.s
-.PHONY : _deps/foxglove-src/src/error.cpp.s
-
-_deps/foxglove-src/src/foxglove.o: _deps/foxglove-src/src/foxglove.cpp.o
-.PHONY : _deps/foxglove-src/src/foxglove.o
-
-# target to build an object file
-_deps/foxglove-src/src/foxglove.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/foxglove.cpp.o
-.PHONY : _deps/foxglove-src/src/foxglove.cpp.o
-
-_deps/foxglove-src/src/foxglove.i: _deps/foxglove-src/src/foxglove.cpp.i
-.PHONY : _deps/foxglove-src/src/foxglove.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/foxglove.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/foxglove.cpp.i
-.PHONY : _deps/foxglove-src/src/foxglove.cpp.i
-
-_deps/foxglove-src/src/foxglove.s: _deps/foxglove-src/src/foxglove.cpp.s
-.PHONY : _deps/foxglove-src/src/foxglove.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/foxglove.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/foxglove.cpp.s
-.PHONY : _deps/foxglove-src/src/foxglove.cpp.s
-
-_deps/foxglove-src/src/mcap.o: _deps/foxglove-src/src/mcap.cpp.o
-.PHONY : _deps/foxglove-src/src/mcap.o
-
-# target to build an object file
-_deps/foxglove-src/src/mcap.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/mcap.cpp.o
-.PHONY : _deps/foxglove-src/src/mcap.cpp.o
-
-_deps/foxglove-src/src/mcap.i: _deps/foxglove-src/src/mcap.cpp.i
-.PHONY : _deps/foxglove-src/src/mcap.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/mcap.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/mcap.cpp.i
-.PHONY : _deps/foxglove-src/src/mcap.cpp.i
-
-_deps/foxglove-src/src/mcap.s: _deps/foxglove-src/src/mcap.cpp.s
-.PHONY : _deps/foxglove-src/src/mcap.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/mcap.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/mcap.cpp.s
-.PHONY : _deps/foxglove-src/src/mcap.cpp.s
-
-_deps/foxglove-src/src/schemas.o: _deps/foxglove-src/src/schemas.cpp.o
-.PHONY : _deps/foxglove-src/src/schemas.o
-
-# target to build an object file
-_deps/foxglove-src/src/schemas.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/schemas.cpp.o
-.PHONY : _deps/foxglove-src/src/schemas.cpp.o
-
-_deps/foxglove-src/src/schemas.i: _deps/foxglove-src/src/schemas.cpp.i
-.PHONY : _deps/foxglove-src/src/schemas.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/schemas.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/schemas.cpp.i
-.PHONY : _deps/foxglove-src/src/schemas.cpp.i
-
-_deps/foxglove-src/src/schemas.s: _deps/foxglove-src/src/schemas.cpp.s
-.PHONY : _deps/foxglove-src/src/schemas.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/schemas.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/schemas.cpp.s
-.PHONY : _deps/foxglove-src/src/schemas.cpp.s
-
-_deps/foxglove-src/src/server.o: _deps/foxglove-src/src/server.cpp.o
-.PHONY : _deps/foxglove-src/src/server.o
-
-# target to build an object file
-_deps/foxglove-src/src/server.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server.cpp.o
-.PHONY : _deps/foxglove-src/src/server.cpp.o
-
-_deps/foxglove-src/src/server.i: _deps/foxglove-src/src/server.cpp.i
-.PHONY : _deps/foxglove-src/src/server.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/server.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server.cpp.i
-.PHONY : _deps/foxglove-src/src/server.cpp.i
-
-_deps/foxglove-src/src/server.s: _deps/foxglove-src/src/server.cpp.s
-.PHONY : _deps/foxglove-src/src/server.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/server.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server.cpp.s
-.PHONY : _deps/foxglove-src/src/server.cpp.s
-
-_deps/foxglove-src/src/server/connection_graph.o: _deps/foxglove-src/src/server/connection_graph.cpp.o
-.PHONY : _deps/foxglove-src/src/server/connection_graph.o
-
-# target to build an object file
-_deps/foxglove-src/src/server/connection_graph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/connection_graph.cpp.o
-.PHONY : _deps/foxglove-src/src/server/connection_graph.cpp.o
-
-_deps/foxglove-src/src/server/connection_graph.i: _deps/foxglove-src/src/server/connection_graph.cpp.i
-.PHONY : _deps/foxglove-src/src/server/connection_graph.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/server/connection_graph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/connection_graph.cpp.i
-.PHONY : _deps/foxglove-src/src/server/connection_graph.cpp.i
-
-_deps/foxglove-src/src/server/connection_graph.s: _deps/foxglove-src/src/server/connection_graph.cpp.s
-.PHONY : _deps/foxglove-src/src/server/connection_graph.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/server/connection_graph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/connection_graph.cpp.s
-.PHONY : _deps/foxglove-src/src/server/connection_graph.cpp.s
-
-_deps/foxglove-src/src/server/fetch_asset.o: _deps/foxglove-src/src/server/fetch_asset.cpp.o
-.PHONY : _deps/foxglove-src/src/server/fetch_asset.o
-
-# target to build an object file
-_deps/foxglove-src/src/server/fetch_asset.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.o
-.PHONY : _deps/foxglove-src/src/server/fetch_asset.cpp.o
-
-_deps/foxglove-src/src/server/fetch_asset.i: _deps/foxglove-src/src/server/fetch_asset.cpp.i
-.PHONY : _deps/foxglove-src/src/server/fetch_asset.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/server/fetch_asset.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.i
-.PHONY : _deps/foxglove-src/src/server/fetch_asset.cpp.i
-
-_deps/foxglove-src/src/server/fetch_asset.s: _deps/foxglove-src/src/server/fetch_asset.cpp.s
-.PHONY : _deps/foxglove-src/src/server/fetch_asset.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/server/fetch_asset.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/fetch_asset.cpp.s
-.PHONY : _deps/foxglove-src/src/server/fetch_asset.cpp.s
-
-_deps/foxglove-src/src/server/parameter.o: _deps/foxglove-src/src/server/parameter.cpp.o
-.PHONY : _deps/foxglove-src/src/server/parameter.o
-
-# target to build an object file
-_deps/foxglove-src/src/server/parameter.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/parameter.cpp.o
-.PHONY : _deps/foxglove-src/src/server/parameter.cpp.o
-
-_deps/foxglove-src/src/server/parameter.i: _deps/foxglove-src/src/server/parameter.cpp.i
-.PHONY : _deps/foxglove-src/src/server/parameter.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/server/parameter.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/parameter.cpp.i
-.PHONY : _deps/foxglove-src/src/server/parameter.cpp.i
-
-_deps/foxglove-src/src/server/parameter.s: _deps/foxglove-src/src/server/parameter.cpp.s
-.PHONY : _deps/foxglove-src/src/server/parameter.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/server/parameter.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/parameter.cpp.s
-.PHONY : _deps/foxglove-src/src/server/parameter.cpp.s
-
-_deps/foxglove-src/src/server/service.o: _deps/foxglove-src/src/server/service.cpp.o
-.PHONY : _deps/foxglove-src/src/server/service.o
-
-# target to build an object file
-_deps/foxglove-src/src/server/service.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/service.cpp.o
-.PHONY : _deps/foxglove-src/src/server/service.cpp.o
-
-_deps/foxglove-src/src/server/service.i: _deps/foxglove-src/src/server/service.cpp.i
-.PHONY : _deps/foxglove-src/src/server/service.i
-
-# target to preprocess a source file
-_deps/foxglove-src/src/server/service.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/service.cpp.i
-.PHONY : _deps/foxglove-src/src/server/service.cpp.i
-
-_deps/foxglove-src/src/server/service.s: _deps/foxglove-src/src/server/service.cpp.s
-.PHONY : _deps/foxglove-src/src/server/service.s
-
-# target to generate assembly for a file
-_deps/foxglove-src/src/server/service.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/_deps/foxglove-src/src/server/service.cpp.s
-.PHONY : _deps/foxglove-src/src/server/service.cpp.s
+quadcopter/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/build
+.PHONY : quadcopter/fast
 
 src/QCLib/InverseKinematics.o: src/QCLib/InverseKinematics.cpp.o
 .PHONY : src/QCLib/InverseKinematics.o
 
 # target to build an object file
 src/QCLib/InverseKinematics.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/InverseKinematics.cpp.o
 .PHONY : src/QCLib/InverseKinematics.cpp.o
 
 src/QCLib/InverseKinematics.i: src/QCLib/InverseKinematics.cpp.i
@@ -407,7 +187,7 @@ src/QCLib/InverseKinematics.i: src/QCLib/InverseKinematics.cpp.i
 
 # target to preprocess a source file
 src/QCLib/InverseKinematics.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/InverseKinematics.cpp.i
 .PHONY : src/QCLib/InverseKinematics.cpp.i
 
 src/QCLib/InverseKinematics.s: src/QCLib/InverseKinematics.cpp.s
@@ -415,7 +195,7 @@ src/QCLib/InverseKinematics.s: src/QCLib/InverseKinematics.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/InverseKinematics.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/InverseKinematics.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/InverseKinematics.cpp.s
 .PHONY : src/QCLib/InverseKinematics.cpp.s
 
 src/QCLib/Kinematics.o: src/QCLib/Kinematics.cpp.o
@@ -423,7 +203,7 @@ src/QCLib/Kinematics.o: src/QCLib/Kinematics.cpp.o
 
 # target to build an object file
 src/QCLib/Kinematics.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Kinematics.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Kinematics.cpp.o
 .PHONY : src/QCLib/Kinematics.cpp.o
 
 src/QCLib/Kinematics.i: src/QCLib/Kinematics.cpp.i
@@ -431,7 +211,7 @@ src/QCLib/Kinematics.i: src/QCLib/Kinematics.cpp.i
 
 # target to preprocess a source file
 src/QCLib/Kinematics.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Kinematics.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Kinematics.cpp.i
 .PHONY : src/QCLib/Kinematics.cpp.i
 
 src/QCLib/Kinematics.s: src/QCLib/Kinematics.cpp.s
@@ -439,7 +219,7 @@ src/QCLib/Kinematics.s: src/QCLib/Kinematics.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/Kinematics.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Kinematics.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Kinematics.cpp.s
 .PHONY : src/QCLib/Kinematics.cpp.s
 
 src/QCLib/LQR.o: src/QCLib/LQR.cpp.o
@@ -447,7 +227,7 @@ src/QCLib/LQR.o: src/QCLib/LQR.cpp.o
 
 # target to build an object file
 src/QCLib/LQR.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/LQR.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/LQR.cpp.o
 .PHONY : src/QCLib/LQR.cpp.o
 
 src/QCLib/LQR.i: src/QCLib/LQR.cpp.i
@@ -455,7 +235,7 @@ src/QCLib/LQR.i: src/QCLib/LQR.cpp.i
 
 # target to preprocess a source file
 src/QCLib/LQR.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/LQR.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/LQR.cpp.i
 .PHONY : src/QCLib/LQR.cpp.i
 
 src/QCLib/LQR.s: src/QCLib/LQR.cpp.s
@@ -463,7 +243,7 @@ src/QCLib/LQR.s: src/QCLib/LQR.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/LQR.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/LQR.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/LQR.cpp.s
 .PHONY : src/QCLib/LQR.cpp.s
 
 src/QCLib/MotionController.o: src/QCLib/MotionController.cpp.o
@@ -471,7 +251,7 @@ src/QCLib/MotionController.o: src/QCLib/MotionController.cpp.o
 
 # target to build an object file
 src/QCLib/MotionController.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/MotionController.cpp.o
 .PHONY : src/QCLib/MotionController.cpp.o
 
 src/QCLib/MotionController.i: src/QCLib/MotionController.cpp.i
@@ -479,7 +259,7 @@ src/QCLib/MotionController.i: src/QCLib/MotionController.cpp.i
 
 # target to preprocess a source file
 src/QCLib/MotionController.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/MotionController.cpp.i
 .PHONY : src/QCLib/MotionController.cpp.i
 
 src/QCLib/MotionController.s: src/QCLib/MotionController.cpp.s
@@ -487,7 +267,7 @@ src/QCLib/MotionController.s: src/QCLib/MotionController.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/MotionController.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/MotionController.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/MotionController.cpp.s
 .PHONY : src/QCLib/MotionController.cpp.s
 
 src/QCLib/Path.o: src/QCLib/Path.cpp.o
@@ -495,7 +275,7 @@ src/QCLib/Path.o: src/QCLib/Path.cpp.o
 
 # target to build an object file
 src/QCLib/Path.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Path.cpp.o
 .PHONY : src/QCLib/Path.cpp.o
 
 src/QCLib/Path.i: src/QCLib/Path.cpp.i
@@ -503,7 +283,7 @@ src/QCLib/Path.i: src/QCLib/Path.cpp.i
 
 # target to preprocess a source file
 src/QCLib/Path.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Path.cpp.i
 .PHONY : src/QCLib/Path.cpp.i
 
 src/QCLib/Path.s: src/QCLib/Path.cpp.s
@@ -511,7 +291,7 @@ src/QCLib/Path.s: src/QCLib/Path.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/Path.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Path.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Path.cpp.s
 .PHONY : src/QCLib/Path.cpp.s
 
 src/QCLib/Physics.o: src/QCLib/Physics.cpp.o
@@ -519,7 +299,7 @@ src/QCLib/Physics.o: src/QCLib/Physics.cpp.o
 
 # target to build an object file
 src/QCLib/Physics.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Physics.cpp.o
 .PHONY : src/QCLib/Physics.cpp.o
 
 src/QCLib/Physics.i: src/QCLib/Physics.cpp.i
@@ -527,7 +307,7 @@ src/QCLib/Physics.i: src/QCLib/Physics.cpp.i
 
 # target to preprocess a source file
 src/QCLib/Physics.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Physics.cpp.i
 .PHONY : src/QCLib/Physics.cpp.i
 
 src/QCLib/Physics.s: src/QCLib/Physics.cpp.s
@@ -535,7 +315,7 @@ src/QCLib/Physics.s: src/QCLib/Physics.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/Physics.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Physics.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Physics.cpp.s
 .PHONY : src/QCLib/Physics.cpp.s
 
 src/QCLib/Quadcopter.o: src/QCLib/Quadcopter.cpp.o
@@ -543,7 +323,7 @@ src/QCLib/Quadcopter.o: src/QCLib/Quadcopter.cpp.o
 
 # target to build an object file
 src/QCLib/Quadcopter.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Quadcopter.cpp.o
 .PHONY : src/QCLib/Quadcopter.cpp.o
 
 src/QCLib/Quadcopter.i: src/QCLib/Quadcopter.cpp.i
@@ -551,7 +331,7 @@ src/QCLib/Quadcopter.i: src/QCLib/Quadcopter.cpp.i
 
 # target to preprocess a source file
 src/QCLib/Quadcopter.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Quadcopter.cpp.i
 .PHONY : src/QCLib/Quadcopter.cpp.i
 
 src/QCLib/Quadcopter.s: src/QCLib/Quadcopter.cpp.s
@@ -559,7 +339,7 @@ src/QCLib/Quadcopter.s: src/QCLib/Quadcopter.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/Quadcopter.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Quadcopter.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Quadcopter.cpp.s
 .PHONY : src/QCLib/Quadcopter.cpp.s
 
 src/QCLib/Util.o: src/QCLib/Util.cpp.o
@@ -567,7 +347,7 @@ src/QCLib/Util.o: src/QCLib/Util.cpp.o
 
 # target to build an object file
 src/QCLib/Util.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Util.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Util.cpp.o
 .PHONY : src/QCLib/Util.cpp.o
 
 src/QCLib/Util.i: src/QCLib/Util.cpp.i
@@ -575,7 +355,7 @@ src/QCLib/Util.i: src/QCLib/Util.cpp.i
 
 # target to preprocess a source file
 src/QCLib/Util.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Util.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Util.cpp.i
 .PHONY : src/QCLib/Util.cpp.i
 
 src/QCLib/Util.s: src/QCLib/Util.cpp.s
@@ -583,32 +363,8 @@ src/QCLib/Util.s: src/QCLib/Util.cpp.s
 
 # target to generate assembly for a file
 src/QCLib/Util.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/QCLib/Util.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/src/QCLib/Util.cpp.s
 .PHONY : src/QCLib/Util.cpp.s
-
-src/simulate.o: src/simulate.cpp.o
-.PHONY : src/simulate.o
-
-# target to build an object file
-src/simulate.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/simulate.cpp.o
-.PHONY : src/simulate.cpp.o
-
-src/simulate.i: src/simulate.cpp.i
-.PHONY : src/simulate.i
-
-# target to preprocess a source file
-src/simulate.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/simulate.cpp.i
-.PHONY : src/simulate.cpp.i
-
-src/simulate.s: src/simulate.cpp.s
-.PHONY : src/simulate.s
-
-# target to generate assembly for a file
-src/simulate.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/simulate.dir/build.make CMakeFiles/simulate.dir/src/simulate.cpp.s
-.PHONY : src/simulate.cpp.s
 
 # Help Target
 help:
@@ -617,41 +373,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... simulate"
-	@echo "... _deps/foxglove-src/src/channel.o"
-	@echo "... _deps/foxglove-src/src/channel.i"
-	@echo "... _deps/foxglove-src/src/channel.s"
-	@echo "... _deps/foxglove-src/src/context.o"
-	@echo "... _deps/foxglove-src/src/context.i"
-	@echo "... _deps/foxglove-src/src/context.s"
-	@echo "... _deps/foxglove-src/src/error.o"
-	@echo "... _deps/foxglove-src/src/error.i"
-	@echo "... _deps/foxglove-src/src/error.s"
-	@echo "... _deps/foxglove-src/src/foxglove.o"
-	@echo "... _deps/foxglove-src/src/foxglove.i"
-	@echo "... _deps/foxglove-src/src/foxglove.s"
-	@echo "... _deps/foxglove-src/src/mcap.o"
-	@echo "... _deps/foxglove-src/src/mcap.i"
-	@echo "... _deps/foxglove-src/src/mcap.s"
-	@echo "... _deps/foxglove-src/src/schemas.o"
-	@echo "... _deps/foxglove-src/src/schemas.i"
-	@echo "... _deps/foxglove-src/src/schemas.s"
-	@echo "... _deps/foxglove-src/src/server.o"
-	@echo "... _deps/foxglove-src/src/server.i"
-	@echo "... _deps/foxglove-src/src/server.s"
-	@echo "... _deps/foxglove-src/src/server/connection_graph.o"
-	@echo "... _deps/foxglove-src/src/server/connection_graph.i"
-	@echo "... _deps/foxglove-src/src/server/connection_graph.s"
-	@echo "... _deps/foxglove-src/src/server/fetch_asset.o"
-	@echo "... _deps/foxglove-src/src/server/fetch_asset.i"
-	@echo "... _deps/foxglove-src/src/server/fetch_asset.s"
-	@echo "... _deps/foxglove-src/src/server/parameter.o"
-	@echo "... _deps/foxglove-src/src/server/parameter.i"
-	@echo "... _deps/foxglove-src/src/server/parameter.s"
-	@echo "... _deps/foxglove-src/src/server/service.o"
-	@echo "... _deps/foxglove-src/src/server/service.i"
-	@echo "... _deps/foxglove-src/src/server/service.s"
+	@echo "... quadcopter"
 	@echo "... src/QCLib/InverseKinematics.o"
 	@echo "... src/QCLib/InverseKinematics.i"
 	@echo "... src/QCLib/InverseKinematics.s"
@@ -676,9 +403,6 @@ help:
 	@echo "... src/QCLib/Util.o"
 	@echo "... src/QCLib/Util.i"
 	@echo "... src/QCLib/Util.s"
-	@echo "... src/simulate.o"
-	@echo "... src/simulate.i"
-	@echo "... src/simulate.s"
 .PHONY : help
 
 
@@ -690,7 +414,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -P /home/seanb/Documents/quadsquad2026/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

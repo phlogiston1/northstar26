@@ -51,3 +51,31 @@ class Quadcopter {
         double getTime();
         MotorVelocities getMotorVels();
 };
+
+
+extern "C" {
+
+
+    Quadcopter* Quadcopter_new() {
+        State initialState = State(
+            Pose3D(Vector3D(0,0,0), Quaternion(0,0,0)),
+            Vector3D(0,0,0),
+            Vector3D(0,0,0),
+            MotorVelocities(0,0,0,0),
+            0
+        );
+        return new Quadcopter(initialState, 1,1,0.3);
+    };
+
+    void Quadcopter_setHeight(Quadcopter* obj, double height) {obj ->setHeight(height);}
+
+    void Quadcopter_update_simulation(Quadcopter* obj) {obj -> update_simulation();}
+    void Quadcopter_printState(Quadcopter* obj) {obj -> getState().print();}
+
+    double Quadcopter_frontMotorVel(Quadcopter* obj) {return obj->getMotorVels().getFront();}
+    double Quadcopter_leftMotorVel(Quadcopter* obj) {return obj->getMotorVels().getLeft();}
+    double Quadcopter_rearMotorVel(Quadcopter* obj) {return obj->getMotorVels().getRear();}
+    double Quadcopter_rightMotorVel(Quadcopter* obj) {return obj->getMotorVels().getRight();}
+
+    double Quadcopter_getTime(Quadcopter* obj) {return obj->getTime();}
+};
