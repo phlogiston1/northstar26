@@ -19,7 +19,8 @@ State Quadcopter::getState() {
 }
 
 void Quadcopter::addVisionMeasurement(Vector3D translation, double timestamp) {
-
+    //TODO make this not sucky and stupid
+    state.pose.translation = translation;
 }
 
 void Quadcopter::addIMUMeasurement(Quaternion angular_pos, Vector3D angular_vel) {
@@ -97,13 +98,21 @@ Vector3D* Quadcopter::getVelocity() {
     return &state.linear_velocity;
 }
 
-void Quadcopter::update_simulation() {
-    getRequest();
+void Quadcopter::updateSimulation() {
+    // getRequest();
 
-    state.motor_velocities = applyMixer(lqrControlStep(
-        getStateVector(state),
-        getStateVector(req.position, req.velocity)
-    ));
+    // state.motor_velocities = applyMixer(lqrControlStep(
+    //     getStateVector(state),
+    //     getStateVector(req.position, req.velocity)
+    // ));
 
-    state = state.predict(LOOP_TIME);
+    state = state.fullKinematicsStep(LOOP_TIME);
+}
+
+void Quadcopter::updateKinematics() {
+    state = state.translationKinematicsStep(LOOP_TIME);
+}
+
+void Quadcopter::setMotorVelocities(MotorVelocities vels) {
+    state.motor_velocities = vels;
 }

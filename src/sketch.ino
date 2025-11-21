@@ -15,6 +15,13 @@ static const double LQR_K[4][12] = {
     {-0.000000,-0.000000,0.000000,-0.000000,-0.000000,-0.000000,0.000000,-0.000000,3.126511,0.000000,-0.000000,1.978831},
 };
 
+static const double LQR_KNEG[4][12] = {
+    {0.000000,0.000000,-6.716873,0.000000,0.000000,-6.571935,-0.000000,0.000000,0.000000,-0.000000,0.000000,0.000000},
+    {0.000000,1.309546,-0.000000,-0.000000,1.638736,-0.000000,-6.204574,-0.000000,-0.000000,-1.127978,-0.000000,-0.000000},
+    {-1.309546,0.000000,-0.000000,-1.638736,0.000000,-0.000000,-0.000000,-6.204574,0.000000,-0.000000,-1.127978,0.000000},
+    {0.000000,0.000000,-0.000000,0.000000,0.000000,0.000000,-0.000000,0.000000,-3.126511,-0.000000,0.000000,-1.978831},
+};
+
 //GET USING compute_mixer.py
 static const double LQR_MIXER[4][4] = {
     {0.250000,3.535534,0.000000,-0.250000},
@@ -22,6 +29,42 @@ static const double LQR_MIXER[4][4] = {
     {0.250000,-3.535534,-0.000000,-0.250000},
     {0.250000,-0.000000,-3.535534,0.250000},
 };
+
+// 91 x 2 bytes ==> 182 bytes
+unsigned int isinTable16[] = { 
+  0, 1144, 2287, 3430, 4571, 5712, 6850, 7987, 9121, 10252, 11380, 
+  12505, 13625, 14742, 15854, 16962, 18064, 19161, 20251, 21336, 22414, 
+  23486, 24550, 25607, 26655, 27696, 28729, 29752, 30767, 31772, 32768, 
+
+  33753, 34728, 35693, 36647, 37589, 38521, 39440, 40347, 41243, 42125, 
+  42995, 43851, 44695, 45524, 46340, 47142, 47929, 48702, 49460, 50203, 
+  50930, 51642, 52339, 53019, 53683, 54331, 54962, 55577, 56174, 56755, 
+
+  57318, 57864, 58392, 58902, 59395, 59869, 60325, 60763, 61182, 61583, 
+  61965, 62327, 62671, 62996, 63302, 63588, 63855, 64103, 64331, 64539, 
+  64728, 64897, 65047, 65176, 65286, 65375, 65445, 65495, 65525, 65535, 
+  };
+
+double isin(long x){
+    bool pos = true;  // positive - keeps an eye on the sign.
+    if (x < 0) {
+        x = -x;
+        pos = false;
+    }
+    if (x >= 360) x %= 360;
+    if (x > 180) {
+        x -= 180;
+        pos = !pos;
+    }
+    if (x > 90) x = 180 - x;
+    if (pos) return isinTable16[x] * 0.0000152590219;
+    return isinTable16[x] * -0.0000152590219;
+}
+
+double icos(long x){
+    return isin(x+90);
+}
+
 
 double thrustToVel(double thrust) {
     return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
@@ -84,8 +127,11 @@ void lqrControlStep(const double current[12], const double reference[12], double
     // current[8] = yaw
 
     double yaw = -current[8];
-    double cy = cos(yaw);
-    double sy = sin(yaw);
+    // double cy = cos(yaw);
+    // double sy = sin(yaw);
+    //APPROXIMATIONS FOR SPEED
+    double cy = icos(static_cast<long>(yaw*57.295779513));
+    double sy = isin(static_cast<long>(yaw*57.295779513));
 
     //---------------------------------------------
     // Rotate the POSITION error into local frame
@@ -133,18 +179,18 @@ void lqrControlStep(const double current[12], const double reference[12], double
         error[11]   // yaw rate    (unchanged)
     };
 
-    double error_local[12];
+    // double error_local[12];
     // getStateVector(posErr, velErr, error_local);
 
     // keep yaw and yaw rate unchanged
     error_local[8] = error[8];
     error_local[11] = error[11];
 
-    double Kneg[4][12];
-    negate4x12(LQR_K, Kneg);
+    // double Kneg[4][12];
+    // negate4x12(LQR_K, Kneg);
 
     double feedback[4];
-    mat4x12_vec12(Kneg, error_local, feedback);
+    mat4x12_vec12(LQR_KNEG, error_local, feedback);
 
     double steady_state[4] = {
         QUADCOPTER_MASS * G,
@@ -190,6 +236,8 @@ void setup() {
     Serial.begin(9600);
 }
 
+bool state = false;
+
 void loop() {
     // (Eventually) get IMU data, store in "cur" array (current state)
 
@@ -197,6 +245,8 @@ void loop() {
     lqrControlStep(cur, ref, LQR_result);
     applyMixer(LQR_result, motor_velocities);
 
+    state = !state;
+    set_led_state(state);
     // Transmit data to linux loop
     Bridge.call("recieve_front_vel", getFront());
     Bridge.call("recieve_right_vel", getRight());

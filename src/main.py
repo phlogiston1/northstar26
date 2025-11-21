@@ -96,6 +96,14 @@ lib.Quadcopter_beginManualControl.argtypes = [c_void_p]
 lib.Quadcopter_beginManualControl.restype = None
 lib.Quadcopter_setVelocity.argtypes = [c_void_p, c_void_p]
 lib.Quadcopter_setVelocity.restype = None
+lib.Quadcopter_updateKinematics.argtypes = [c_void_p]
+lib.Quadcopter_updateKinematics.restype = None
+lib.Quadcopter_setMotorVelocities.argtypes = [c_void_p, c_double, c_double, c_double, c_double]
+lib.Quadcopter_setMotorVelocities.restype = None
+lib.Quadcopter_addVisionMeasurement.argtypes = [c_void_p, c_void_p, c_double]
+lib.Quadcopter_addVisionMeasurement.restype = None
+lib.Quadcopter_addIMUMeasurement.argtypes = [c_void_p, c_void_p, c_void_p]
+lib.Quadcopter_addIMUMeasurement.restype = None
 lib.Quadcopter_busy.argtypes = [c_void_p]
 lib.Quadcopter_busy.restype = c_bool
 
@@ -175,7 +183,7 @@ class Quadcopter(object):
     def setHeight(self, height):
         lib.Quadcopter_setHeight(self.ptr, height)
 
-    def update_simulation(self):
+    def updateSimulation(self):
         lib.Quadcopter_update_simulation(self.ptr)
 
     def printState(self):
@@ -217,6 +225,19 @@ class Quadcopter(object):
     def setVelocity(self, velocity: Vector3D):
         lib.Quadcopter_setVelocity(self.ptr, velocity.ptr)
 
+    def updateKinematics(self):
+        lib.Quadcopter_updateKinematics(self.ptr)
+
+    def setMotorVelocities(self, left, front, right, rear):
+        lib.Quadcopter_setMotorVelocities(self.ptr, left, front, right, rear)
+
+    def addVisionMeasurement(self, translation: Vector3D, timestamp):
+        lib.Quadcopter_addVisionMeasurement(self.ptr, translation.ptr, timestamp)
+
+    def addIMUMeasurement(self, angle: Quaternion, angular_rate: Vector3D):
+        lib.Quadcopter_addIMUMeasurement(self.ptr, angle.ptr, angular_rate.ptr)
+
+
     def busy(self):
         return lib.Quadcopter_busy(self.ptr)
 
@@ -224,13 +245,19 @@ class Quadcopter(object):
 
 ##### START OF ACTUAL CONTROL CODE
 
-# Keep track of motor speeds from the MCU,
-# To pass them to the C++ Kinematics
+# These variables are updated BY THE MCU
+# The functions below are called via. the Bridge
+# To keep them up to date
 front_vel = 0
 right_vel = 0
 rear_vel = 0
 left_vel = 0
-
+imu_yaw = 0
+imu_pitch = 0
+imu_roll = 0
+imu_yaw_rate = 0
+imu_pitch_rate = 0
+imu_roll_rate = 0
 
 def recieve_front_vel(velocity):
     global front_vel
@@ -247,6 +274,20 @@ def recieve_rear_vel(velocity):
 def recieve_left_vel(velocity):
     global left_vel
     left_vel = velocity
+
+def recieve_imu(y,p,r,yr,pr,rr):
+    global imu_yaw
+    global imu_pitch
+    global imu_roll
+    global imu_yaw_rate
+    global imu_pitch_rate
+    global imu_roll_rate
+    imu_yaw = y
+    imu_pitch = p
+    imu_roll = r
+    imu_yaw_rate = yr
+    imu_pitch_rate = pr
+    imu_roll_rate = rr
 
 Bridge.provide("recieve_front_vel", recieve_front_vel)
 Bridge.provide("recieve_right_vel", recieve_right_vel)
@@ -270,19 +311,19 @@ def main():
         # toggle led for debugging
         global led_state
         led_state = not led_state
-        Bridge.call("set_led_state", led_state).result()
+        # Bridge.call("set_led_state", led_state)
         # time.sleep(0.5)
 
-        # Call C++ Main Loop (whatever form that takes)
-        qc.update_simulation();
+        # Pass MCU data to C++ Loop
+        # qc.addIMUMeasurement(Quaternion(imu_yaw,imu_pitch,imu_roll), Vector3D(imu_roll_rate, imu_pitch_rate, imu_yaw_rate))
+        qc.setMotorVelocities(left_vel, front_vel, right_vel, rear_vel)
+
+        # Call C++ Main Loop
+        qc.updateSimulation();
 
 
-        # Pass data to MCU
+        # Pass C++ data to MCU
         request = qc.getRequest()
-        print("REQUEST POSITION:")
-        print(request.position().translation().x())
-        print(request.position().translation().y())
-        print(request.position().translation().z())
 
         ref_pos = request.position().translation()
         ref_vel = request.velocity().translation()
@@ -314,13 +355,18 @@ def main():
             cur_vel.y(),
             cur_vel.z())
 
+        #logging for debug:
+        print("REQUEST POSITION:")
+        print(request.position().translation().x())
+        print(request.position().translation().y())
+        print(request.position().translation().z())
         print("MOTOR SPEED FROM PY:")
         print("front: ", front_vel)
         print("right: ", right_vel)
         print("rear: ", rear_vel)
         print("left: ",left_vel)
 
-
+        # manage loop time:
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
         sleep_duration = LOOP_TIME - elapsed_time

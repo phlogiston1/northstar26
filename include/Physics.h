@@ -49,7 +49,7 @@ struct State {
     State(Pose3D pose, Vector3D velocity, Vector3D angular_velocity, MotorVelocities motorVelocities, double time);
     Vector3D getAngularVelocityLocal();
     void print();
-    State predict(double timestep);
-    State predict(double timestep, Quaternion imu_ang_pos, Vector3D imu_ang_vel);
+    State fullKinematicsStep(double timestep);
+    State translationKinematicsStep(double timestep);
 };
 #endif

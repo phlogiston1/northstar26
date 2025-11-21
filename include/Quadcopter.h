@@ -56,7 +56,9 @@ class Quadcopter {
         QCRequest* getRequest();
         Vector3D* getTranslation();
         Vector3D* getVelocity();
-        void update_simulation();
+        void updateSimulation();
+        void updateKinematics();
+        void setMotorVelocities(MotorVelocities vels);
         double getTime();
         MotorVelocities getMotorVels();
 };
@@ -98,7 +100,7 @@ extern "C" {
 
     void Quadcopter_setHeight(Quadcopter* obj, double height) {obj ->setHeight(height);}
 
-    void Quadcopter_update_simulation(Quadcopter* obj) {obj -> update_simulation();}
+    void Quadcopter_update_simulation(Quadcopter* obj) {obj -> updateSimulation();}
     void Quadcopter_printState(Quadcopter* obj) {obj -> getState().print();}
 
     double Quadcopter_frontMotorVel(Quadcopter* obj) {return obj->getMotorVels().getFront();}
@@ -116,6 +118,17 @@ extern "C" {
 
     void Quadcopter_beginManualControl(Quadcopter* obj) {obj->beginManualControl();}
     void Quadcopter_setVelocity(Quadcopter* obj, Vector3D velocity) {obj->setVelocity(velocity);}
+
+    void Quadcopter_updateKinematics(Quadcopter* obj){obj->updateKinematics();}
+    void Quadcopter_setMotorVelocities(Quadcopter* obj, double left, double front, double right, double rear){
+        obj->setMotorVelocities(MotorVelocities(left,front,right,rear));
+    }
+    void Quadcopter_addVisionMeasurement(Quadcopter* obj, Vector3D* pos, double velocity) {
+        obj->addVisionMeasurement(*pos, velocity);
+    }
+    void Quadcopter_addIMUMeasurement(Quadcopter* obj, Quaternion* ang_position, Vector3D* ang_velocity) {
+        obj->addIMUMeasurement(*ang_position, *ang_velocity);
+    }
 
     bool Quadcopter_busy(Quadcopter* obj) {return obj->busy();}
 };

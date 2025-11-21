@@ -111,9 +111,8 @@ Vector3D State::getAngularVelocityLocal() {
     return w_local;
 }
 
-State State::predict(double timestep) {
+State State::fullKinematicsStep(double timestep) {
     Acceleration accel = velocitiesToAccel(*this);
-    // std::cout << "PREDITED ACCEL - x: " << accel.getX() << " y: " << accel.getY() << " z: " << accel.getZ() << std::endl;
 
     //calculate velocity and angular velocity
     double vel_x = (linear_velocity.x + (accel.getX() * timestep));
@@ -147,12 +146,8 @@ State State::predict(double timestep) {
     );
 }
 
-State State::predict(double timestep, Quaternion imu_ang_pos, Vector3D imu_ang_vel) {
-    pose.rotation = imu_ang_pos;
-    angular_velocity = imu_ang_vel;
+State State::translationKinematicsStep(double timestep) {
     Acceleration accel = velocitiesToAccel(*this);
-    // std::cout << "PREDITED ACCEL - x: " << accel.getX() << " y: " << accel.getY() << " z: " << accel.getZ() << std::endl;
-
     //calculate velocity and angular velocity
     double vel_x = (linear_velocity.x + (accel.getX() * timestep));
     double vel_y = (linear_velocity.y + (accel.getY() * timestep));
@@ -171,9 +166,9 @@ State State::predict(double timestep, Quaternion imu_ang_pos, Vector3D imu_ang_v
     }
 
     return State(
-        Pose3D(Vector3D(pos_x,pos_y,pos_z), imu_ang_pos),
+        Pose3D(Vector3D(pos_x,pos_y,pos_z), pose.rotation),
         Vector3D(vel_x,vel_y,vel_z),
-        imu_ang_vel,
+        angular_velocity,
         motor_velocities,
         time+timestep
     );

@@ -63,8 +63,18 @@ K = inv(R + Bd.T @ P @ Bd) @ (Bd.T @ P @ Ad)
 
 
 print("K shape:", K.shape)
+print("K MATRIX:")
 print("{")
 for i in K:
+    print("{", end="")
+    for j in i[:-1]:
+        print('{:f}'.format(j),end=",")
+    print('{:f}'.format(i[-1]),end="},\n")
+print("}")
+
+print("\n\nNEGATIVE K MATRIX:")
+print("{")
+for i in -K:
     print("{", end="")
     for j in i[:-1]:
         print('{:f}'.format(j),end=",")

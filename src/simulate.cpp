@@ -133,7 +133,7 @@ void runSimulation(double dt) {
 
     if(numIters > 0){
         // currentState = currentState.predict(dt);
-        quadcopter.update_simulation();
+        quadcopter.updateSimulation();
     }
 
 }
