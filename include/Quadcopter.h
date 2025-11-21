@@ -52,7 +52,10 @@ class Quadcopter {
         void land();
         bool busy();
         bool adjustingHeight();
+        //these return pointers to allow python binding
         QCRequest* getRequest();
+        Vector3D* getTranslation();
+        Vector3D* getVelocity();
         void update_simulation();
         double getTime();
         MotorVelocities getMotorVels();
@@ -103,6 +106,8 @@ extern "C" {
     double Quadcopter_rearMotorVel(Quadcopter* obj) {return obj->getMotorVels().getRear();}
     double Quadcopter_rightMotorVel(Quadcopter* obj) {return obj->getMotorVels().getRight();}
 
+    Vector3D* Quadcopter_getTranslation(Quadcopter* obj) {return obj->getTranslation();};
+    Vector3D* Quadcopter_getVelocity(Quadcopter* obj) {return obj->getVelocity();};
     double Quadcopter_getTime(Quadcopter* obj) {return obj->getTime();}
     QCRequest* Quadcopter_getRequest(Quadcopter* obj) {return obj->getRequest();}
 

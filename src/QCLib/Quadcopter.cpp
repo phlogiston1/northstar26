@@ -89,6 +89,14 @@ QCRequest* Quadcopter::getRequest() {
     return &req;
 }
 
+Vector3D* Quadcopter::getTranslation() {
+    return &state.pose.translation;
+}
+
+Vector3D* Quadcopter::getVelocity() {
+    return &state.linear_velocity;
+}
+
 void Quadcopter::update_simulation() {
     getRequest();
 

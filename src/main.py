@@ -21,7 +21,13 @@ lib = ctypes.CDLL(lib_path)
 ##### TO RUN LOCALLY:
 #lib = cdll.LoadLibrary('/home/seanb/Documents/quadsquad2026/build/libquadcopter.so')
 
-##### Ensure every data type for every function is set, or it won't work on the Uno Q (but may work locally)
+##### CONFIGURATION STUFF:
+LOOP_TIME = 0.05
+
+
+
+##### Ensure ctypes knows the argument and return types for every function
+# or it won't work on the Uno Q (but may work locally)
 lib.Vector3D_new.argtypes = [c_double, c_double, c_double]
 lib.Vector3D_new.restype = c_void_p
 lib.Vector3D_x.argtypes = [c_void_p]
@@ -74,6 +80,10 @@ lib.Quadcopter_rearMotorVel.argtypes = [c_void_p]
 lib.Quadcopter_rearMotorVel.restype = c_double
 lib.Quadcopter_rightMotorVel.argtypes = [c_void_p]
 lib.Quadcopter_rightMotorVel.restype = c_double
+lib.Quadcopter_getTranslation.argtypes = [c_void_p]
+lib.Quadcopter_getTranslation.restype = c_void_p
+lib.Quadcopter_getVelocity.argtypes = [c_void_p]
+lib.Quadcopter_getVelocity.restype = c_void_p
 lib.Quadcopter_getTime.argtypes = [c_void_p]
 lib.Quadcopter_getTime.restype = c_double
 lib.Quadcopter_getRequest.argtypes = [c_void_p]
@@ -90,7 +100,8 @@ lib.Quadcopter_busy.argtypes = [c_void_p]
 lib.Quadcopter_busy.restype = c_bool
 
 
-
+##### BINDING CLASSES
+# These classes bind to the equivalent C++ classes.
 class Vector3D(object):
     def __init__(self, x=0, y=0, z=0, ptr=None):
         if ptr is not None:
@@ -185,6 +196,12 @@ class Quadcopter(object):
     def rearMotorVel(self):
         return lib.Quadcopter_rearMotorVel(self.ptr)
 
+    def getTranslation(self):
+        return Vector3D(ptr=lib.Quadcopter_getTranslation(self.ptr))
+
+    def getVelocity(self):
+        return Vector3D(ptr=lib.Quadcopter_getVelocity(self.ptr))
+
     def getRequest(self):
         return QCRequest(None, None, lib.Quadcopter_getRequest(self.ptr))
 
@@ -203,47 +220,116 @@ class Quadcopter(object):
     def busy(self):
         return lib.Quadcopter_busy(self.ptr)
 
+
+
+##### START OF ACTUAL CONTROL CODE
+
+# Keep track of motor speeds from the MCU,
+# To pass them to the C++ Kinematics
+front_vel = 0
+right_vel = 0
+rear_vel = 0
+left_vel = 0
+
+
+def recieve_front_vel(velocity):
+    global front_vel
+    front_vel = velocity
+
+def recieve_right_vel(velocity):
+    global right_vel
+    right_vel = velocity
+
+def recieve_rear_vel(velocity):
+    global rear_vel
+    rear_vel = velocity
+
+def recieve_left_vel(velocity):
+    global left_vel
+    left_vel = velocity
+
+Bridge.provide("recieve_front_vel", recieve_front_vel)
+Bridge.provide("recieve_right_vel", recieve_right_vel)
+Bridge.provide("recieve_rear_vel", recieve_rear_vel)
+Bridge.provide("recieve_left_vel", recieve_left_vel)
+
+
+# Initialization
 qc = Quadcopter()
 qc.setHeight(1)
 qc.addWaypoint(0,0)
 qc.addWaypoint(1,1)
 qc.addWaypoint(2,1)
+qc.addWaypoint(0,0)
 qc.beginPath()
 led_state = False
 
 def main():
     while(True):
+        start_time = time.perf_counter()
+        # toggle led for debugging
         global led_state
-        time.sleep(0.5)
-        qc.update_simulation();
-        req = qc.getRequest()
-        print("REQUEST POSITION:")
-        print(req.position().translation().x())
-        print(req.position().translation().y())
-        print(req.position().translation().z())
         led_state = not led_state
-        Bridge.call("set_led_state", led_state)
-        Bridge.call("trans_x", req.position().translation().x())
+        Bridge.call("set_led_state", led_state).result()
+        # time.sleep(0.5)
+
+        # Call C++ Main Loop (whatever form that takes)
+        qc.update_simulation();
 
 
+        # Pass data to MCU
+        request = qc.getRequest()
+        print("REQUEST POSITION:")
+        print(request.position().translation().x())
+        print(request.position().translation().y())
+        print(request.position().translation().z())
+
+        ref_pos = request.position().translation()
+        ref_vel = request.velocity().translation()
+        ref_ang_pos = request.position().rotation()
+        ref_ang_vel = request.velocity().rotation()
+        Bridge.call(
+            "set_reference",
+            ref_pos.x(),
+            ref_pos.y(),
+            ref_pos.z(),
+            ref_vel.x(),
+            ref_vel.y(),
+            ref_vel.z(),
+            ref_ang_pos.getPitch(),
+            ref_ang_pos.getRoll(),
+            ref_ang_pos.getYaw(),
+            ref_ang_vel.getPitch(),
+            ref_ang_vel.getRoll(),
+            ref_ang_vel.getYaw())
+
+        cur_pos = qc.getTranslation()
+        cur_vel = qc.getVelocity()
+        Bridge.call(
+            "set_current",
+            cur_pos.x(),
+            cur_pos.y(),
+            cur_pos.z(),
+            cur_vel.x(),
+            cur_vel.y(),
+            cur_vel.z())
+
+        print("MOTOR SPEED FROM PY:")
+        print("front: ", front_vel)
+        print("right: ", right_vel)
+        print("rear: ", rear_vel)
+        print("left: ",left_vel)
 
 
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        sleep_duration = LOOP_TIME - elapsed_time
 
-# def main():
-#     qc = Quadcopter()
-#     qc.setHeight(1)
-#     qc.addWaypoint(0,0)
-#     qc.addWaypoint(1,1)
-#     qc.addWaypoint(2,1)
-#     qc.beginPath()
-#     while True:
-#         qc.update_simulation()
-#         req = qc.getRequest()
-#         print("REQUEST POSITION:")
-#         print(req.position().translation().x())
-#         print(req.position().translation().y())
-#         print(req.position().translation().z())
-#         time.sleep(0.01)
+        if sleep_duration > 0:
+            time.sleep(sleep_duration)
+        else:
+            print("PYTHON LOOP OVERRUN. LOOP TOOK AN ADDITIONAL ", -sleep_duration, " SECONDS.")
+            pass
 
 
 if __name__ == "__main__":
