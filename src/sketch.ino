@@ -224,16 +224,8 @@ double motor_velocities[4] = {0,0,0,0};
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
-    Bridge.begin();
-    Bridge.provide("set_led_state", set_led_state);
-    Bridge.provide("set_reference", set_reference);
-    Bridge.provide("set_current", set_current);
-    Bridge.provide("get_left", getLeft);
-    Bridge.provide("get_front", getFront);
-    Bridge.provide("get_right", getRight);
-    Bridge.provide("get_back", getBack);
-
-    Serial.begin(9600);
+    Bridge.begin(460800);
+    Bridge.provide("s", recieve_data);
 }
 
 bool state = false;
@@ -248,10 +240,19 @@ void loop() {
     state = !state;
     set_led_state(state);
     // Transmit data to linux loop
-    Bridge.call("recieve_front_vel", getFront());
-    Bridge.call("recieve_right_vel", getRight());
-    Bridge.call("recieve_rear_vel", getBack());
-    Bridge.call("recieve_left_vel", getLeft());
+    Bridge.call(
+        "r",
+        getLeft(),
+        getFront(),
+        getRight(),
+        getRear(),
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
     // todo imu data
 }
 
@@ -260,10 +261,17 @@ void set_led_state(bool state) {
     digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
 }
 
-void set_reference(double pos_x, double pos_y, double pos_z, 
-                   double vel_x, double vel_y, double vel_z, 
+void recieve_data(double pos_x, double pos_y, double pos_z,
+                   double vel_x, double vel_y, double vel_z,
                    double ang_pos_x, double ang_pos_y, double ang_pos_z,
-                   double ang_vel_x, double ang_vel_y, double ang_vel_z) {
+                   double ang_vel_x, double ang_vel_y, double ang_vel_z)
+
+void set_reference(double pos_x, double pos_y, double pos_z, 
+                    double vel_x, double vel_y, double vel_z, 
+                    double ang_pos_x, double ang_pos_y, double ang_pos_z,
+                    double ang_vel_x, double ang_vel_y, double ang_vel_z,
+                    double cur_pos_x, double cur_pos_y, double cur_pos_z, 
+                    double cur_vel_x, double cur_vel_y, double cur_vel_z) {
     ref[0]  = pos_x;
     ref[1]  = pos_y;
     ref[2]  = pos_z;
@@ -279,6 +287,14 @@ void set_reference(double pos_x, double pos_y, double pos_z,
     ref[9]  = ang_vel_x;
     ref[10] = ang_vel_y;
     ref[11] = ang_vel_z;
+
+    cur[0]  = cur_pos_x;
+    cur[1]  = cur_pos_y;
+    cur[2]  = cur_pos_z;
+
+    cur[3]  = cur_vel_x;
+    cur[4]  = cur_vel_y;
+    cur[5]  = cur_vel_z;
 }
 
 void set_current(double pos_x, double pos_y, double pos_z, double vel_x, double vel_y, double vel_z) {

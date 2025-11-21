@@ -259,29 +259,21 @@ imu_yaw_rate = 0
 imu_pitch_rate = 0
 imu_roll_rate = 0
 
-def recieve_front_vel(velocity):
+def recieve_imu_data(left, front, right, rear, y,p,r,yr,pr,rr):
     global front_vel
-    front_vel = velocity
-
-def recieve_right_vel(velocity):
     global right_vel
-    right_vel = velocity
-
-def recieve_rear_vel(velocity):
     global rear_vel
-    rear_vel = velocity
-
-def recieve_left_vel(velocity):
     global left_vel
-    left_vel = velocity
-
-def recieve_imu(y,p,r,yr,pr,rr):
     global imu_yaw
     global imu_pitch
     global imu_roll
     global imu_yaw_rate
     global imu_pitch_rate
     global imu_roll_rate
+    left_vel = left
+    front_vel = front
+    right_vel = right
+    rear_vel = rear
     imu_yaw = y
     imu_pitch = p
     imu_roll = r
@@ -289,10 +281,8 @@ def recieve_imu(y,p,r,yr,pr,rr):
     imu_pitch_rate = pr
     imu_roll_rate = rr
 
-Bridge.provide("recieve_front_vel", recieve_front_vel)
-Bridge.provide("recieve_right_vel", recieve_right_vel)
-Bridge.provide("recieve_rear_vel", recieve_rear_vel)
-Bridge.provide("recieve_left_vel", recieve_left_vel)
+
+Bridge.provide("r", recieve_imu_data)
 
 
 # Initialization
@@ -329,8 +319,10 @@ def main():
         ref_vel = request.velocity().translation()
         ref_ang_pos = request.position().rotation()
         ref_ang_vel = request.velocity().rotation()
+        cur_pos = qc.getTranslation()
+        cur_vel = qc.getVelocity()
         Bridge.call(
-            "set_reference",
+            "s",
             ref_pos.x(),
             ref_pos.y(),
             ref_pos.z(),
@@ -342,12 +334,7 @@ def main():
             ref_ang_pos.getYaw(),
             ref_ang_vel.getPitch(),
             ref_ang_vel.getRoll(),
-            ref_ang_vel.getYaw())
-
-        cur_pos = qc.getTranslation()
-        cur_vel = qc.getVelocity()
-        Bridge.call(
-            "set_current",
+            ref_ang_vel.getYaw(),
             cur_pos.x(),
             cur_pos.y(),
             cur_pos.z(),
