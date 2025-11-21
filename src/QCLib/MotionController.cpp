@@ -68,7 +68,7 @@ QCRequest PathController::getTarget(State current) {
 
     accel.rotateBy(angle.inverse());
 
-    accel.print();
+    // accel.print();
 
     return QCRequest(Pose3D(
         sample.pos.x,
@@ -97,7 +97,7 @@ QCRequest PathController::getTarget(State current, double yaw) {
 
     accel.rotateBy(angle.inverse());
 
-    accel.print();
+    // accel.print();
 
     return QCRequest(Pose3D(
         sample.pos.x,
@@ -182,7 +182,7 @@ QCRequest HeightController::getTarget(State& currentState) {
         target_vel = -target_vel;
     }
 
-    std::cout << "\n\nHEIGHT " << start_height + target_height << " VEL " << target_vel << std::endl;
+    if(VERBOSE) std::cout << "\n\nHEIGHT " << start_height + target_height << " VEL " << target_vel << std::endl;
 
     return QCRequest(
         Pose3D(0,0,start_height + target_height, Quaternion(M_PI_4/2,0,0)),

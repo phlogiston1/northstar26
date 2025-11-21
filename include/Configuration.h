@@ -74,3 +74,5 @@
 
 #define ENABLE_FLOOR true
 
+#define VERBOSE false
+
