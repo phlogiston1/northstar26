@@ -1,7 +1,7 @@
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/quadcopter.dir
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/edit_cache.dir
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/rebuild_cache.dir
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/list_install_components.dir
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/install.dir
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/install/local.dir
-/home/seanb/Documents/quadsquad2026/build/CMakeFiles/install/strip.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/quadcopter.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/edit_cache.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/rebuild_cache.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/list_install_components.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/install.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/install/local.dir
+/home/arduino/Documents/northstar26/build/CMakeFiles/install/strip.dir

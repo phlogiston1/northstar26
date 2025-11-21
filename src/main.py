@@ -15,11 +15,11 @@ import os
 import time
 
 ##### TO RUN ON UNO Q:
-# lib_path = os.path.join(os.path.dirname(__file__), "libquadcopter.so")
-# lib = ctypes.CDLL(lib_path)
+lib_path = os.path.join(os.path.dirname(__file__), "libquadcopter.so")
+lib = ctypes.CDLL(lib_path)
 
 ##### TO RUN LOCALLY:
-lib = cdll.LoadLibrary('/home/seanb/Documents/quadsquad2026/build/libquadcopter.so')
+#lib = cdll.LoadLibrary('/home/seanb/Documents/quadsquad2026/build/libquadcopter.so')
 
 ##### Ensure every data type for every function is set, or it won't work on the Uno Q (but may work locally)
 lib.Vector3D_new.argtypes = [c_double, c_double, c_double]
@@ -62,9 +62,7 @@ lib.Quadcopter_new.argtypes = []
 lib.Quadcopter_new.restype = c_void_p
 lib.Quadcopter_setHeight.argtypes = [c_void_p, c_double]
 lib.Quadcopter_setHeight.restype = None
-lib.name__ == "__main__":
-#     main()
-Quadcopter_update_simulation.argtypes = [c_void_p]
+lib.Quadcopter_update_simulation.argtypes = [c_void_p]
 lib.Quadcopter_update_simulation.restype = None
 lib.Quadcopter_printState.argtypes = [c_void_p]
 lib.Quadcopter_printState.restype = None
@@ -213,20 +211,21 @@ qc.addWaypoint(2,1)
 qc.beginPath()
 led_state = False
 
-def loop():
-    global led_state
-    time.sleep(0.5)
-    qc.update_simulation();
-    req = qc.getRequest()
-    print("REQUEST POSITION:")
-    print(req.position().translation().x())
-    print(req.position().translation().y())
-    print(req.position().translation().z())
-    led_state = not led_state
-    Bridge.call("set_led_state", led_state)
-    Bridge.call("trans_x", req.position().translation().x())
+def main():
+    while(True):
+        global led_state
+        time.sleep(0.5)
+        qc.update_simulation();
+        req = qc.getRequest()
+        print("REQUEST POSITION:")
+        print(req.position().translation().x())
+        print(req.position().translation().y())
+        print(req.position().translation().z())
+        led_state = not led_state
+        Bridge.call("set_led_state", led_state)
+        Bridge.call("trans_x", req.position().translation().x())
 
-App.run(user_loop=True)
+
 
 
 
@@ -247,5 +246,5 @@ App.run(user_loop=True)
 #         time.sleep(0.01)
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

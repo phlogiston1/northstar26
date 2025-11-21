@@ -1,3 +1,0 @@
-/home/seanb/Documents/quadsquad2026/build/_deps/foxglove-subbuild/CMakeFiles/foxglove-populate.dir
-/home/seanb/Documents/quadsquad2026/build/_deps/foxglove-subbuild/CMakeFiles/edit_cache.dir
-/home/seanb/Documents/quadsquad2026/build/_deps/foxglove-subbuild/CMakeFiles/rebuild_cache.dir
