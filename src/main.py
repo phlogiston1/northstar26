@@ -1,4 +1,15 @@
+# THIS FILE IS THE MAIN LOOP THAT RUNS ON THE UNO Q's LINUX PROCESSOR.
+# It links QCLib with the MCU on the Uno Q.
+
+# TO RUN:
+# Create an App Lab project. Compile QCLib as a dynamic library (I might be annoying and just have multiple
+# CMakeLists.txt so just use the right one).
+# Copy the libquadcopter.so file from the build folder to the python folder in the app lab project.
+# Make sure that the correct library loading method is uncommented in this file (just below the imports)
+# As of right now, only run using arduino-app-cli because if you run it in App Lab the application freezes.
+
 from ctypes import *
+from arduino.app_utils import *
 import ctypes
 import os
 import time
@@ -47,11 +58,13 @@ lib.QCRequest_position.argtypes = [c_void_p]
 lib.QCRequest_position.restype = c_void_p
 lib.QCRequest_velocity.argtypes = [c_void_p]
 lib.QCRequest_velocity.restype = c_void_p
-lib.Quadcopter_new.argtypes = [c_double,c_double,c_double]
+lib.Quadcopter_new.argtypes = []
 lib.Quadcopter_new.restype = c_void_p
 lib.Quadcopter_setHeight.argtypes = [c_void_p, c_double]
 lib.Quadcopter_setHeight.restype = None
-lib.Quadcopter_update_simulation.argtypes = [c_void_p]
+lib.name__ == "__main__":
+#     main()
+Quadcopter_update_simulation.argtypes = [c_void_p]
 lib.Quadcopter_update_simulation.restype = None
 lib.Quadcopter_printState.argtypes = [c_void_p]
 lib.Quadcopter_printState.restype = None
@@ -67,6 +80,17 @@ lib.Quadcopter_getTime.argtypes = [c_void_p]
 lib.Quadcopter_getTime.restype = c_double
 lib.Quadcopter_getRequest.argtypes = [c_void_p]
 lib.Quadcopter_getRequest.restype = c_void_p
+lib.Quadcopter_addWaypoint.argtypes = [c_void_p, c_double, c_double]
+lib.Quadcopter_addWaypoint.restype = None
+lib.Quadcopter_beginPath.argtypes = [c_void_p]
+lib.Quadcopter_beginPath.restype = None
+lib.Quadcopter_beginManualControl.argtypes = [c_void_p]
+lib.Quadcopter_beginManualControl.restype = None
+lib.Quadcopter_setVelocity.argtypes = [c_void_p, c_void_p]
+lib.Quadcopter_setVelocity.restype = None
+lib.Quadcopter_busy.argtypes = [c_void_p]
+lib.Quadcopter_busy.restype = c_bool
+
 
 
 class Vector3D(object):
@@ -78,13 +102,13 @@ class Vector3D(object):
 
     def x(self):
         return lib.Vector3D_x(self.ptr)
-    
+
     def y(self):
         return lib.Vector3D_y(self.ptr)
-    
+
     def z(self):
         return lib.Vector3D_z(self.ptr)
-    
+
 
 class Quaternion(object):
     def __init__(self, yaw=0, pitch=0, roll=0, ptr=None):
@@ -127,17 +151,17 @@ class QCRequest(object):
             self.ptr = ptr
         else:
             self.ptr = lib.QCRequest_new(position.ptr, velocity.ptr)
-    
+
     def position(self):
         return Pose3D(None, None, lib.QCRequest_position(self.ptr))
-    
+
     def velocity(self):
         return Pose3D(None, None, lib.QCRequest_velocity(self.ptr))
 
 
 class Quadcopter(object):
-    def __init__(self, max_velocity, max_acceleration, max_jerk):
-        self.ptr = lib.Quadcopter_new(max_velocity, max_acceleration, max_jerk)
+    def __init__(self):
+        self.ptr = lib.Quadcopter_new()
 
     def setHeight(self, height):
         lib.Quadcopter_setHeight(self.ptr, height)
@@ -166,19 +190,62 @@ class Quadcopter(object):
     def getRequest(self):
         return QCRequest(None, None, lib.Quadcopter_getRequest(self.ptr))
 
+    def addWaypoint(self, x, y):
+        lib.Quadcopter_addWaypoint(self.ptr, x, y)
 
-def main():
-    qc = Quadcopter(1,1,0.5)
-    qc.setHeight(3)
-    while True:
-        qc.update_simulation()
-        req = qc.getRequest()
-        print("REQUEST POSITION:")
-        print(req.position().translation().x())
-        print(req.position().translation().y())
-        print(req.position().translation().z())
-        time.sleep(0.01)
+    def beginPath(self):
+        lib.Quadcopter_beginPath(self.ptr)
+
+    def beginManualControl(self):
+        lib.Quadcopter_beginManualControl(self.ptr)
+
+    def setVelocity(self, velocity: Vector3D):
+        lib.Quadcopter_setVelocity(self.ptr, velocity.ptr)
+
+    def busy(self):
+        return lib.Quadcopter_busy(self.ptr)
+
+qc = Quadcopter()
+qc.setHeight(1)
+qc.addWaypoint(0,0)
+qc.addWaypoint(1,1)
+qc.addWaypoint(2,1)
+qc.beginPath()
+led_state = False
+
+def loop():
+    global led_state
+    time.sleep(0.5)
+    qc.update_simulation();
+    req = qc.getRequest()
+    print("REQUEST POSITION:")
+    print(req.position().translation().x())
+    print(req.position().translation().y())
+    print(req.position().translation().z())
+    led_state = not led_state
+    Bridge.call("set_led_state", led_state)
+    Bridge.call("trans_x", req.position().translation().x())
+
+App.run(user_loop=True)
 
 
-if __name__ == "__main__":
-    main()
+
+# def main():
+#     qc = Quadcopter()
+#     qc.setHeight(1)
+#     qc.addWaypoint(0,0)
+#     qc.addWaypoint(1,1)
+#     qc.addWaypoint(2,1)
+#     qc.beginPath()
+#     while True:
+#         qc.update_simulation()
+#         req = qc.getRequest()
+#         print("REQUEST POSITION:")
+#         print(req.position().translation().x())
+#         print(req.position().translation().y())
+#         print(req.position().translation().z())
+#         time.sleep(0.01)
+
+
+# if __name__ == "__main__":
+#     main()

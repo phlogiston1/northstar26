@@ -26,11 +26,12 @@ class Quadcopter {
         State state;
         Vector3D global_observation = Vector3D();
         std::vector<PoseObservation> predictions = {};
-        std::function<Vector3D()> velocity_supplier;
+        Vector3D manual_velocity = Vector3D();
         QCRequest req = QCRequest(Pose3D(), Pose3D());
         bool manual = false;
         LandingStatus landing_status = LANDED;
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+        std::vector<Vector2D> path_waypoints = {};
 
         VelocityController velocity_controller;
         PathController path_controller;
@@ -38,13 +39,16 @@ class Quadcopter {
 
 
     public:
-        Quadcopter(State initial, double max_velocity, double max_acceleration, double max_jerk);
+        Quadcopter(State initial);
         State getState();
         void addVisionMeasurement(Vector3D translation, double timestamp);
         void addIMUMeasurement(Quaternion angular_pos, Vector3D angular_vel);
         void setHeight(double height);
+        void addWaypoint(Vector2D waypoint);
+        void beginPath();
         void beginPath(Path path);
-        void beginManualControl(std::function<Vector3D()> velocity);
+        void beginManualControl();
+        void setVelocity(Vector3D velocity);
         void land();
         bool busy();
         bool adjustingHeight();
@@ -78,7 +82,7 @@ extern "C" {
     Pose3D* QCRequest_position(QCRequest* obj){return &obj->position;}
     Pose3D* QCRequest_velocity(QCRequest* obj){return &obj->velocity;}
 
-    Quadcopter* Quadcopter_new(double max_velocity, double max_acceleration, double max_jerk) {
+    Quadcopter* Quadcopter_new() {
         State initialState = State(
             Pose3D(Vector3D(0,0,0), Quaternion(0,0,0)),
             Vector3D(0,0,0),
@@ -86,7 +90,7 @@ extern "C" {
             MotorVelocities(0,0,0,0),
             0
         );
-        return new Quadcopter(initialState,max_velocity,max_acceleration,max_jerk);
+        return new Quadcopter(initialState);
     };
 
     void Quadcopter_setHeight(Quadcopter* obj, double height) {obj ->setHeight(height);}
@@ -101,4 +105,12 @@ extern "C" {
 
     double Quadcopter_getTime(Quadcopter* obj) {return obj->getTime();}
     QCRequest* Quadcopter_getRequest(Quadcopter* obj) {return obj->getRequest();}
+
+    void Quadcopter_addWaypoint(Quadcopter* obj, double x, double y) {obj->addWaypoint(Vector2D{x,y});}
+    void Quadcopter_beginPath(Quadcopter* obj) {obj->beginPath();}
+
+    void Quadcopter_beginManualControl(Quadcopter* obj) {obj->beginManualControl();}
+    void Quadcopter_setVelocity(Quadcopter* obj, Vector3D velocity) {obj->setVelocity(velocity);}
+
+    bool Quadcopter_busy(Quadcopter* obj) {return obj->busy();}
 };

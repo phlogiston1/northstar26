@@ -22,7 +22,7 @@ NOTE: BUGS TO FIX:
  */
 
  //ManualController simply sets the motor velocities to a fixed value
-VelocityController::VelocityController(double max_velocity, double max_acceleration, double max_jerk): max_velocity(max_velocity), max_acceleration(max_acceleration), max_jerk(max_jerk) {
+VelocityController::VelocityController() {
 }
 
 void VelocityController::setInitialPose(State current) {
@@ -31,9 +31,9 @@ void VelocityController::setInitialPose(State current) {
 
 QCRequest VelocityController::getTarget(State current, Vector3D target_velocity) {
     // Vector3D accel = (target_velocity - current.linear_velocity)/LOOP_TIME;
-    // if(accel.getMagnitude() > max_acceleration) accel = accel / (accel.getMagnitude() - max_acceleration);
+    // if(accel.getMagnitude() > MAX_ACCELERATION_Zeration) accel = accel / (accel.getMagnitude() - MAX_ACCELERATION_Zeration);
     // Vector3D velocity = current.linear_velocity + (accel * LOOP_TIME);
-    // if(velocity.getMagnitude() > max_velocity) velocity = velocity /(velocity.getMagnitude() - max_velocity);
+    // if(velocity.getMagnitude() > MAX_VELOCITY_Z) velocity = velocity /(velocity.getMagnitude() - MAX_VELOCITY_Z);
 
     // velocity.z = target_velocity.z; //no accel limit on z velocity
     auto velocty = target_velocity;
@@ -119,7 +119,7 @@ bool PathController::complete() {
 }
 
 
-HeightController::HeightController(double velocity, double acceleration) : max_velocity(velocity), max_accel(acceleration) {
+HeightController::HeightController() {
     setTargetHeight(0.0, 0.0);
 }
 
@@ -133,16 +133,16 @@ void HeightController::setTargetHeight(double height, double current_height) {
     start_time = std::chrono::high_resolution_clock::now();
     //calculate motion profile times based on max acceleration and velocity
     double distance = delta_height;
-    accel_time = max_velocity / max_accel;
-    double accel_distance = 0.5 * max_accel * accel_time * accel_time;
+    accel_time = MAX_VELOCITY_Z / MAX_ACCELERATION_Z;
+    double accel_distance = 0.5 * MAX_ACCELERATION_Z * accel_time * accel_time;
     if (2 * accel_distance > std::abs(distance)) {
         //triangle profile
-        accel_time = std::sqrt(std::abs(distance) / max_accel);
+        accel_time = std::sqrt(std::abs(distance) / MAX_ACCELERATION_Z);
         cruise_time = 0.0;
         deceleration_time = accel_time;
     } else {
         //trapezoidal profile
-        cruise_time = (std::abs(distance) - 2 * accel_distance) / max_velocity;
+        cruise_time = (std::abs(distance) - 2 * accel_distance) / MAX_VELOCITY_Z;
         deceleration_time = accel_time;
     }
 }
@@ -158,20 +158,20 @@ QCRequest HeightController::getTarget(State& currentState) {
 
     //outrageous mess:
     if (elapsed < accel_time) {
-        target_height = 0.5 * max_accel * elapsed * elapsed;
-        target_vel = max_accel * elapsed;
-        target_accel = max_accel;
+        target_height = 0.5 * MAX_ACCELERATION_Z * elapsed * elapsed;
+        target_vel = MAX_ACCELERATION_Z * elapsed;
+        target_accel = MAX_ACCELERATION_Z;
     } else if (elapsed < accel_time + cruise_time) {
-        target_height = 0.5 * max_accel * accel_time * accel_time
-                                + max_velocity * (elapsed - accel_time);
-        target_vel = max_velocity;
+        target_height = 0.5 * MAX_ACCELERATION_Z * accel_time * accel_time
+                                + MAX_VELOCITY_Z * (elapsed - accel_time);
+        target_vel = MAX_VELOCITY_Z;
     } else if (elapsed < accel_time + cruise_time + deceleration_time) {
         double t = elapsed - (accel_time + cruise_time);
-        target_height = 0.5 * max_accel * accel_time * accel_time
-                                + max_velocity * cruise_time
-                                + max_velocity * t - 0.5 * max_accel * t * t;
-        target_vel = max_velocity - (elapsed - (accel_time + cruise_time))*max_accel;
-        target_accel = -max_accel;
+        target_height = 0.5 * MAX_ACCELERATION_Z * accel_time * accel_time
+                                + MAX_VELOCITY_Z * cruise_time
+                                + MAX_VELOCITY_Z * t - 0.5 * MAX_ACCELERATION_Z * t * t;
+        target_vel = MAX_VELOCITY_Z - (elapsed - (accel_time + cruise_time))*MAX_ACCELERATION_Z;
+        target_accel = -MAX_ACCELERATION_Z;
     } else {
         target_height = delta_height;
         target_vel = 0;

@@ -14,13 +14,12 @@ struct QCRequest{
 
 class VelocityController{
     public:
-        VelocityController(double max_velocity, double max_acceleration, double max_jerk);
+        VelocityController();
         void setInitialPose(State current);
         QCRequest getTarget(State current, Vector3D target_velocity);
     private:
         Vector3D velocity = Vector3D(0,0,0);
         Vector3D pose = Vector3D(0,0,0);
-        double max_velocity, max_acceleration, max_jerk;
 };
 
 class PathController{
@@ -40,15 +39,13 @@ class PathController{
 //uses trapeoidal motion profile to smoothly take off to a target height
 class HeightController{
     public:
-        HeightController(double maxVelocity, double maxAcceleration);
+        HeightController();
         void setTargetHeight(double height, double currentHeight);
         QCRequest getTarget(State& currentState);
         bool complete();
     private:
         double start_height;
         double delta_height;
-        double max_velocity;
-        double max_accel;
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
         double accel_time; //time spent accelerating
         double cruise_time; //time spent at constant velocity
