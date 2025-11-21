@@ -64,28 +64,13 @@
 #define MOTOR_KS 0.0 //motor velocity static friction constant
 #define MOTOR_KV 0.0 //motor velocity proportional constant
 #define MOTOR_KA 0.0 //motor velocity acceleration constant
-#define MOTOR_KP 0.0 //motor velocity proportional control constant
-#define MOTOR_KI 0.0 //motor velocity integral control constant
-#define MOTOR_KD 0.0 //motor velocity derivative control constant
-#define MOTOR_INTEGRAL_WINDUP_LIMIT 100.0 //limit for motor velocity PID integral term to prevent windup
+// #define MOTOR_KP 0.0 //motor velocity proportional control constant
+// #define MOTOR_KI 0.0 //motor velocity integral control constant
+// #define MOTOR_KD 0.0 //motor velocity derivative control constant
+// #define MOTOR_INTEGRAL_WINDUP_LIMIT 100.0 //limit for motor velocity PID integral term to prevent windup
 #define MOTOR_VELOCITY_RAMP_RATE 1000.0 //max change in motor velocity per second
 #define MAX_MOTOR_VELOCITY 1000.0 //max motor velocity in Rad/s
 #define ENABLE_INV_KIN_MOTOR_CONTSTRAINTS false
 
 #define ENABLE_FLOOR true
 
-// static const std::vector<std::vector<double>> LQR_K = {
-//     {0.1, 0, 0, 0.05, 0, 0, 1.2, 0, 0, 0.1, 0, 0},   // thrust channel
-//     {0, 0, 0, 0, 0, 0, 0, 1.1, 0, 0, 0.9, 0},       // roll torque
-//     {0, 0, 0, 0, 0, 0, -1.1, 0, 0, -0.9, 0, 0},     // pitch torque
-//     {0, 0, 0, 0, 0, 0, 0, 0, 1.2, 0, 0, 0.8}        // yaw torque
-// };
-
-
-
-/*
-RANDOM NOTES:
-Possible encoder/magnet pairing:
-https://www.apexmagnets.com/magnets/3mm-x-2mm-disc-neodymium-magnet?srsltid=ARcRdnooPzPf5m3-a-cQOnyCKTR5fxU1tlA2biy94N--J_RvzCmAhl6O
-https://www.amazon.com/AS5048A-Accuracy-Magnetic-Peripheral-Interface/dp/B08LW1K6F7
-*/
