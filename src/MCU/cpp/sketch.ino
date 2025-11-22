@@ -1,13 +1,49 @@
-// #include "Arduino_RouterBridge.h"
 #include <cmath>
 
+//----------- CONFIGURATION -------------
+
+double loop_time = 0.01*1000; //convert to millis
+
+//physics constants
 #define THRUST_COEFF 0.0001
 #define QUADCOPTER_MASS 0.1
 #define G 9.81
 
+//pin numbers
+#define HARDWARE_SAFETY_PIN 13
+#define LEFT_PWM_PIN 0
+#define FRONT_PWM_PIN 0
+#define RIGHT_PWM_PIN 0
+#define REAR_PWM_PIN 0
+
+//motor control constants
+#define MIN_PWM 1000
+#define MAX_PWM 2000
+#define KS 0
+#define KV 1
+#define KA 1
 
 
-//GET USING compute_K.py
+// Can comment out for test runs without full platform
+#define ENABLE_BRIDGE
+#define ENABLE_IMU
+#define ENABLE_MOTORS
+//TODO: set motors to hover velocity without requiring signal from linux processor
+// #define COMS_FREE_HOVER
+
+
+//IMPORTANT: These values come from compute_mixer.py in the scripts folder
+// This matrix is used to convert the output of the LQR into motor thrusts
+static const double LQR_MIXER[4][4] = {
+    {0.250000,3.535534,0.000000,-0.250000},
+    {0.250000,0.000000,3.535534,0.250000},
+    {0.250000,-3.535534,-0.000000,-0.250000},
+    {0.250000,-0.000000,-3.535534,0.250000},
+};
+
+//IMPORTANT: These values come from compute_k.py in the scripts folder
+//These matrixes define the constants for the control loop
+//These two arrays are the same but kneg is negated
 static const double LQR_K[4][12] = {
     {-0.000000,-0.000000,6.716873,-0.000000,-0.000000,6.571935,0.000000,-0.000000,-0.000000,0.000000,-0.000000,-0.000000},
     {-0.000000,-1.309546,0.000000,0.000000,-1.638736,0.000000,6.204574,0.000000,0.000000,1.127978,0.000000,0.000000},
@@ -22,28 +58,104 @@ static const double LQR_KNEG[4][12] = {
     {0.000000,0.000000,-0.000000,0.000000,0.000000,0.000000,-0.000000,0.000000,-3.126511,-0.000000,0.000000,-1.978831},
 };
 
-//GET USING compute_mixer.py
-static const double LQR_MIXER[4][4] = {
-    {0.250000,3.535534,0.000000,-0.250000},
-    {0.250000,0.000000,3.535534,0.250000},
-    {0.250000,-3.535534,-0.000000,-0.250000},
-    {0.250000,-0.000000,-3.535534,0.250000},
+
+
+
+
+
+
+
+
+#ifdef ENABLE_BRIDGE
+#include "Arduino_RouterBridge.h"
+#endif
+
+#ifdef ENABLE_IMU
+#include "WT901_IMU.h"
+#endif
+
+
+unsigned long loop_start_time = 0;
+
+
+
+
+
+
+
+
+
+
+//----------- STATUS MONITORING -------------
+/*
+Note - status indicators:
+ - IMU (not connected, up-to-date tilted, up-to-date level, stale)
+ - Loop health (Within loop time, <10ms over, over <100ms, over >200ms)
+ - Linux bridge health (Good, Stale data, No data)
+ - Armed (Armed, disarmed manually, disarmed due to fault)
+ - 
+*/
+
+enum IMUStatus{
+    UP_TO_DATE,
+    STALE_IMU,
+    NO_SIGNAL
 };
 
-// 91 x 2 bytes ==> 182 bytes
-unsigned int isinTable16[] = { 
-  0, 1144, 2287, 3430, 4571, 5712, 6850, 7987, 9121, 10252, 11380, 
-  12505, 13625, 14742, 15854, 16962, 18064, 19161, 20251, 21336, 22414, 
-  23486, 24550, 25607, 26655, 27696, 28729, 29752, 30767, 31772, 32768, 
+enum LoopStatus{
+    NORMAL_LOOP,
+    OVERRUN_10MS,
+    OVERRUN_100MS,
+    OVERRUN_200MS
+};
 
-  33753, 34728, 35693, 36647, 37589, 38521, 39440, 40347, 41243, 42125, 
-  42995, 43851, 44695, 45524, 46340, 47142, 47929, 48702, 49460, 50203, 
-  50930, 51642, 52339, 53019, 53683, 54331, 54962, 55577, 56174, 56755, 
+enum BridgeStatus{
+    NORMAL_BRIDGE,
+    STALE_BRIDGE,
+    NO_DATA_BRIDGE
+};
 
-  57318, 57864, 58392, 58902, 59395, 59869, 60325, 60763, 61182, 61583, 
-  61965, 62327, 62671, 62996, 63302, 63588, 63855, 64103, 64331, 64539, 
-  64728, 64897, 65047, 65176, 65286, 65375, 65445, 65495, 65525, 65535, 
-  };
+enum SafetyStatus{
+    DISARMED_MANUAL,
+    DISARMED_FAULT,
+    ARMED
+};
+
+IMUStatus imu_status = UP_TO_DATE_LEVEL;
+LoopStatus loop_status = NORMAL_LOOP;
+BridgeStatus bridge_status = NORMAL_BRIDGE;
+SafetyStatus safety_status = DISARMED_MANUAL;
+
+#ifdef ENABLE_IMU
+WT901_IMU imu;
+IMUState imu_state = IMUState{
+    Vector3{0,0,0},
+    Vector3{0,0,0},
+    Vector3{0,0,0},
+    Vector3{0,0,0},
+    {0,0,0,0},
+    0,
+    0,
+    false
+}
+#endif
+
+
+
+//these are helper functions to approximate sin/cos much faster
+unsigned int isinTable16[] = {
+    0, 1144, 2287, 3430, 4571, 5712, 6850, 7987, 9121, 10252, 11380, 
+    12505, 13625, 14742, 15854, 16962, 18064, 19161, 20251, 21336, 22414, 
+    23486, 24550, 25607, 26655, 27696, 28729, 29752, 30767, 31772, 32768, 
+
+    33753, 34728, 35693, 36647, 37589, 38521, 39440, 40347, 41243, 42125, 
+    42995, 43851, 44695, 45524, 46340, 47142, 47929, 48702, 49460, 50203, 
+    50930, 51642, 52339, 53019, 53683, 54331, 54962, 55577, 56174, 56755, 
+
+    57318, 57864, 58392, 58902, 59395, 59869, 60325, 60763, 61182, 61583, 
+    61965, 62327, 62671, 62996, 63302, 63588, 63855, 64103, 64331, 64539, 
+    64728, 64897, 65047, 65176, 65286, 65375, 65445, 65495, 65525, 65535, 
+};
 
 double isin(long x){
     bool pos = true;  // positive - keeps an eye on the sign.
@@ -66,15 +178,18 @@ double icos(long x){
 }
 
 
+
+//convert thrust to velocity using magical thrust coefficient
 double thrustToVel(double thrust) {
     return std::sqrt(std::abs(thrust) / THRUST_COEFF) * std::copysign(1.0, thrust);
 }
 
 
-//------------------------------------------------------------
-// Utility vector functions (12-element)
-//------------------------------------------------------------
 
+
+
+
+//----------- VECTOR/MATRIX HELPERS (FOR LQR)
 void subtract12(const double a[12], const double b[12], double out[12]) {
     for (int i = 0; i < 12; i++)
         out[i] = a[i] - b[i];
@@ -84,11 +199,6 @@ void add4(const double a[4], const double b[4], double out[4]) {
     for (int i = 0; i < 4; i++)
         out[i] = a[i] + b[i];
 }
-
-
-//------------------------------------------------------------
-// Matrix utilities
-//------------------------------------------------------------
 
 void negate4x12(const double in[4][12], double out[4][12]) {
     for (int i = 0; i < 4; ++i)
@@ -112,13 +222,7 @@ void mat4x4_vec4(const double mat[4][4], const double vec[4], double out[4]) {
     }
 }
 
-
-//------------------------------------------------------------
-// LQR control step
-//------------------------------------------------------------
-
-double angle_limit = M_PI / 4;
-
+//THE ACTUAL CONTROL MAGIC
 void lqrControlStep(const double current[12], const double reference[12], double out[4]) {
     double error[12];
     subtract12(current, reference, error);
@@ -200,11 +304,9 @@ void lqrControlStep(const double current[12], const double reference[12], double
     add4(feedback, steady_state, out);
 }
 
-
-//------------------------------------------------------------
-// Mixer
-//------------------------------------------------------------
-
+//Convert LQR output to motor velocities.
+//The control matrix (output from LQR) is:
+//{total thrust, roll torque, pitch torque, yaw torque}
 void applyMixer(const double control[4], double out[4]) {
     double thrusts[4];
     mat4x4_vec4(LQR_MIXER, control, thrusts);
@@ -215,10 +317,35 @@ void applyMixer(const double control[4], double out[4]) {
     out[3] = thrustToVel(thrusts[2]);   // back
 }
 
-//{position x, position y, position z, velocity x, velocity y, velocity z, roll, pitch, yaw, roll rate, pitch rate, yaw rate}
-double ref[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-double cur[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+
+
+
+
+
+
+
+
+
+/* Order of state vectors:
+    0: position x,
+    1: position y,
+    2: position z,
+    3: velocity x,
+    4: velocity y,
+    5: velocity z,
+    6: roll,
+    7: pitch,
+    8: yaw,
+    9: roll rate,
+    10: pitch rate,
+    11: yaw rate
+*/
+double reference_state[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+double current_state[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+
+// {left, front, right, back}
 double motor_velocities[4] = {0,0,0,0};
+double previous_motor_velocities[4] = {0,0,0,0};
 
 
 void setup() {
@@ -226,59 +353,99 @@ void setup() {
 
     //https://www.youtube.com/watch?v=vWpq636f1Z4
     //Higher bridge baud rate requires changing /etc/systemd/system/arduino-bridge
+    #ifdef ENABLE_BRIDGE
     Bridge.begin(460800);
 
     //single letter names for speed
     Bridge.provide("p", recieve_reference_pos);
     Bridge.provide("v", recieve_reference_vel);
     Bridge.provide("s", recieve_current_state);
+    #endif
+
+    #ifdef ENABLE_IMU
+    imu.begin();
+    #endif
+
+    loop_start_time = millis();
 }
 
 bool state = false;
 
 void loop() {
-    // (Eventually) get IMU data, store in "cur" array (current state)
+    // Get IMU data, store in current state
+    #ifdef ENABLE_IMU
+    if(!imu.update()) {
+        imu_status = NO_SIGNAL;
+    } else {
+        if(millis() - imu_state.timestamp_ms > 0.2) {
+            imu_status = STALE_IMU;
+        }
+    }
+
+    if(imu.fetch()) {
+        imu_state = getState();
+        if(imu_state.is_new) imu_status = UP_TO_DATE
+    }
+
+    current_state[6] = imu_state.angles.x;
+    current_state[7] = imu_state.angles.y;
+    current_state[8] = imu_state.angles.z;
+    current_state[9] = imu_state.gyro.x;
+    current_state[10] = imu_state.gyro.y;
+    current_state[11] = imu_state.gyro.z;
+    #endif
 
     double LQR_result[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-    lqrControlStep(cur, ref, LQR_result);
+    lqrControlStep(current_state, reference_state, LQR_result);
     applyMixer(LQR_result, motor_velocities);
 
     state = !state;
-    set_led_state(state);
+    digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
     // Transmit data to linux loop
+    #ifdef ENABLE_BRIDGE
     Bridge.call(
         "r",
         getLeft(),
         getFront(),
         getRight(),
         getBack(),
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
+        current_state[8],
+        current_state[7],
+        current_state[6],
+        current_state[11],
+        current_state[10],
+        current_state[9]
     );
+    #endif
     // todo imu data
+
+
+    //maintain loop time:
+    while(millis() - loop_start_time < loop_time){}
+    loop_start_time = millis();
 }
 
-void set_led_state(bool state) {
-    // LOW state means LED is ON
-    digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
-}
 
+
+
+
+
+//--------BRIDGE FUNCTIONS--------
+//These functions are exposed to the bridge
+//and are how this program recieves values
+//from the linux loop.
 void recieve_reference_pos(double pos_x,
                         double pos_y,
                         double pos_z,
                         double ang_pos_x,
                         double ang_pos_y,
                         double ang_pos_z) {
-    ref[0]  = pos_x;
-    ref[1]  = pos_y;
-    ref[2]  = pos_z;
-    ref[6]  = ang_pos_x;
-    ref[7]  = ang_pos_y;
-    ref[8]  = ang_pos_z;
+    reference_state[0]  = pos_x;
+    reference_state[1]  = pos_y;
+    reference_state[2]  = pos_z;
+    reference_state[6]  = ang_pos_x;
+    reference_state[7]  = ang_pos_y;
+    reference_state[8]  = ang_pos_z;
 }
 
 void recieve_reference_vel(
@@ -288,13 +455,13 @@ void recieve_reference_vel(
                         double ang_vel_x,
                         double ang_vel_y,
                         double ang_vel_z) {
-    ref[3]  = vel_x;
-    ref[4]  = vel_y;
-    ref[5]  = vel_z;
+    reference_state[3]  = vel_x;
+    reference_state[4]  = vel_y;
+    reference_state[5]  = vel_z;
 
-    ref[9]  = ang_vel_x;
-    ref[10] = ang_vel_y;
-    ref[11] = ang_vel_z;
+    reference_state[9]  = ang_vel_x;
+    reference_state[10] = ang_vel_y;
+    reference_state[11] = ang_vel_z;
 }
 
 
@@ -305,14 +472,13 @@ void recieve_current_state(
                         double cur_vel_x,
                         double cur_vel_y,
                         double cur_vel_z) {
+    current_state[0]  = cur_pos_x;
+    current_state[1]  = cur_pos_y;
+    current_state[2]  = cur_pos_z;
 
-    cur[0]  = cur_pos_x;
-    cur[1]  = cur_pos_y;
-    cur[2]  = cur_pos_z;
-
-    cur[3]  = cur_vel_x;
-    cur[4]  = cur_vel_y;
-    cur[5]  = cur_vel_z;
+    current_state[3]  = cur_vel_x;
+    current_state[4]  = cur_vel_y;
+    current_state[5]  = cur_vel_z;
 }
 
 double getLeft() {

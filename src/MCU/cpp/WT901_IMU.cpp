@@ -147,7 +147,6 @@ bool WT901_IMU::fetch() {
 
 IMUState WT901_IMU::getState() {
     IMUState copy = state;
-    copy.is_new = false;
     state.is_new = false;
     return copy;
 }
