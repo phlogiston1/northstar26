@@ -284,6 +284,8 @@ def recieve_data(left, front, right, rear, y,p,r,yr,pr,rr):
 
 Bridge.provide("r", recieve_data)
 
+# wait to make sure arduino loop is running
+time.sleep(5)
 
 # Initialization
 qc = Quadcopter()

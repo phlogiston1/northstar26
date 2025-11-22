@@ -225,7 +225,10 @@ void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
     //https://www.youtube.com/watch?v=vWpq636f1Z4
+    //Higher bridge baud rate requires changing /etc/systemd/system/arduino-bridge
     Bridge.begin(460800);
+
+    //single letter names for speed
     Bridge.provide("p", recieve_reference_pos);
     Bridge.provide("v", recieve_reference_vel);
     Bridge.provide("s", recieve_current_state);
