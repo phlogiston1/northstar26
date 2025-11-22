@@ -1,4 +1,4 @@
-#include "Arduino_RouterBridge.h"
+// #include "Arduino_RouterBridge.h"
 #include <cmath>
 
 #define THRUST_COEFF 0.0001
@@ -224,8 +224,11 @@ double motor_velocities[4] = {0,0,0,0};
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
+    //https://www.youtube.com/watch?v=vWpq636f1Z4
     Bridge.begin(460800);
-    Bridge.provide("s", recieve_data);
+    Bridge.provide("p", recieve_reference_pos);
+    Bridge.provide("v", recieve_reference_vel);
+    Bridge.provide("s", recieve_current_state);
 }
 
 bool state = false;
@@ -245,7 +248,7 @@ void loop() {
         getLeft(),
         getFront(),
         getRight(),
-        getRear(),
+        getBack(),
         0,
         0,
         0,
@@ -261,32 +264,44 @@ void set_led_state(bool state) {
     digitalWrite(LED_BUILTIN, state ? LOW : HIGH);
 }
 
-void recieve_data(double pos_x, double pos_y, double pos_z,
-                   double vel_x, double vel_y, double vel_z,
-                   double ang_pos_x, double ang_pos_y, double ang_pos_z,
-                   double ang_vel_x, double ang_vel_y, double ang_vel_z)
-
-void set_reference(double pos_x, double pos_y, double pos_z, 
-                    double vel_x, double vel_y, double vel_z, 
-                    double ang_pos_x, double ang_pos_y, double ang_pos_z,
-                    double ang_vel_x, double ang_vel_y, double ang_vel_z,
-                    double cur_pos_x, double cur_pos_y, double cur_pos_z, 
-                    double cur_vel_x, double cur_vel_y, double cur_vel_z) {
+void recieve_reference_pos(double pos_x,
+                        double pos_y,
+                        double pos_z,
+                        double ang_pos_x,
+                        double ang_pos_y,
+                        double ang_pos_z) {
     ref[0]  = pos_x;
     ref[1]  = pos_y;
     ref[2]  = pos_z;
+    ref[6]  = ang_pos_x;
+    ref[7]  = ang_pos_y;
+    ref[8]  = ang_pos_z;
+}
 
+void recieve_reference_vel(
+                        double vel_x,
+                        double vel_y,
+                        double vel_z,
+                        double ang_vel_x,
+                        double ang_vel_y,
+                        double ang_vel_z) {
     ref[3]  = vel_x;
     ref[4]  = vel_y;
     ref[5]  = vel_z;
 
-    ref[6]  = ang_pos_x;
-    ref[7]  = ang_pos_y;
-    ref[8]  = ang_pos_z;
-
     ref[9]  = ang_vel_x;
     ref[10] = ang_vel_y;
     ref[11] = ang_vel_z;
+}
+
+
+void recieve_current_state(
+                        double cur_pos_x,
+                        double cur_pos_y,
+                        double cur_pos_z,
+                        double cur_vel_x,
+                        double cur_vel_y,
+                        double cur_vel_z) {
 
     cur[0]  = cur_pos_x;
     cur[1]  = cur_pos_y;
@@ -295,16 +310,6 @@ void set_reference(double pos_x, double pos_y, double pos_z,
     cur[3]  = cur_vel_x;
     cur[4]  = cur_vel_y;
     cur[5]  = cur_vel_z;
-}
-
-void set_current(double pos_x, double pos_y, double pos_z, double vel_x, double vel_y, double vel_z) {
-    cur[0]  = pos_x;
-    cur[1]  = pos_y;
-    cur[2]  = pos_z;
-
-    cur[3]  = vel_x;
-    cur[4]  = vel_y;
-    cur[5]  = vel_z;
 }
 
 double getLeft() {
