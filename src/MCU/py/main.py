@@ -347,7 +347,8 @@ def main():
             cur_pos.z(),
             cur_vel.x(),
             cur_vel.y(),
-            cur_vel.z())
+            cur_vel.z(),
+            True)
         #logging for debug:
         print("REQUEST POSITION:")
         print(request.position().translation().x())
