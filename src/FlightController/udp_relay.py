@@ -1,19 +1,37 @@
 import socket
 import threading
+import subprocess
+import json
 
 # ---- CONFIG ----
 HOST_IN_PORT = 9100       # Port the ground station sends to (host side)
-CONTAINER_IP = "172.17.0.2"  # Replace with your App Lab container IP
+# CONTAINER_IP = "172.18.0.2"  # Replace with your App Lab container IP
 CONTAINER_PORT = 9100     # Port your Python app listens on
 
-CONTAINER_IN_PORT = 9000  # Port Python app sends from
+CONTAINER_IN_PORT = 8100  # Port Python app sends from
 GROUND_IP = "10.12.34.1"  # Ground station
-GROUND_PORT = 9000        # Port ground station listens on
+GROUND_PORT = 8100        # Port ground station listens on
 
 # sudo docker ps -a
 # sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container-id>
 
+def find_container_ip():
+    container_ids = subprocess.check_output([
+        "sudo", "docker", "ps",
+        "--filter", "name=flightcontroller",
+        "--format", "{{.ID}}"
+    ]).decode().strip().splitlines()
 
+    if not container_ids:
+        raise RuntimeError("No App Lab container found")
+
+    info = subprocess.check_output(
+        ["sudo", "docker", "inspect", container_ids[0]]
+    )
+    return json.loads(info)[0]["NetworkSettings"]["IPAddress"]
+
+CONTAINER_IP = find_container_ip()
+print("Found container IP: ", CONTAINER_IP)
 
 def forward_host_to_container():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
