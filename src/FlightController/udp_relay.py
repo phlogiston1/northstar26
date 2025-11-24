@@ -28,7 +28,10 @@ def find_container_ip():
     info = subprocess.check_output(
         ["sudo", "docker", "inspect", container_ids[0]]
     )
-    return json.loads(info)[0]["NetworkSettings"]["IPAddress"]
+    networks = json.loads(info)[0]["NetworkSettings"]["Networks"]
+    keys = networks.keys()
+    for key in keys:
+        return networks[key]["IPAddress"]
 
 CONTAINER_IP = find_container_ip()
 print("Found container IP: ", CONTAINER_IP)
