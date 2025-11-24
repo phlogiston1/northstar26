@@ -413,8 +413,7 @@ void recieve_current_state(
                         double cur_pos_z,
                         double cur_vel_x,
                         double cur_vel_y,
-                        double cur_vel_z,
-                        bool arm) {
+                        double cur_vel_z) {
     current_state[0]  = cur_pos_x;
     current_state[1]  = cur_pos_y;
     current_state[2]  = cur_pos_z;
@@ -423,7 +422,7 @@ void recieve_current_state(
     current_state[4]  = cur_vel_y;
     current_state[5]  = cur_vel_z;
 
-    python_arm_flag = arm;
+    python_arm_flag = true;
 }
 
 
@@ -487,7 +486,7 @@ void loop() {
     //SAFETY CHECKS:
     bool loop_ok = loop_status != OVERRUN_200MS;
     #ifdef ENABLE_BRIDGE
-        unsigned long bridge_delay = millis() - bridge_recieve_timestamp
+        unsigned long bridge_delay = millis() - bridge_recieve_timestamp;
         if(bridge_delay > BRIDGE_NO_DATA_MS) bridge_status = NO_DATA_BRIDGE;
         else if (bridge_delay > BRIDGE_STALE_MS) bridge_status = STALE_BRIDGE;
         else bridge_status = NORMAL_BRIDGE;
@@ -577,7 +576,7 @@ void loop() {
         double left = KV * getLeft();
         double front = KV * getFront();
         double right = KV * getRight();
-        double rear = KV * getRear();
+        double rear = KV * getBack();
 
         left += (motor_velocities[0] - previous_motor_velocities[0]) * (millis() - loop_start_time) * KA;
         front += (motor_velocities[1] - previous_motor_velocities[1]) * (millis() - loop_start_time) * KA;

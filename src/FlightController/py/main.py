@@ -17,9 +17,9 @@ from communication import *
 ##### CONFIGURATION STUFF:
 LOOP_TIME = 0.05
 
-GROUND_STATION_IP = "192.168.4.2"
+GROUND_STATION_IP = "10.12.34.1"
 GROUND_STATION_PORT = 9000
-QUADCOPTER_PORT = 9001
+QUADCOPTER_PORT = 9100
 
 
 
@@ -130,8 +130,7 @@ def main():
             cur_pos.z(),
             cur_vel.x(),
             cur_vel.y(),
-            cur_vel.z(),
-            True)
+            cur_vel.z())
         
 
 
