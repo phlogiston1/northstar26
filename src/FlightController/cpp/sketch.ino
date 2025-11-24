@@ -641,3 +641,5 @@ void loop() {
     ledstate = !ledstate;
     digitalWrite(LED_BUILTIN, ledstate ? LOW : HIGH);
 }
+
+//2906 lines w/o headers, 3589 w headers.

@@ -9,7 +9,7 @@ import time
 import numpy as np
 import cv2 as cv
 from KalmanFilter import KalmanFilter
-from pseyepy import Camera
+from pseyepy import Camera # type: ignore
 from Singleton import Singleton
 
 
