@@ -21,6 +21,10 @@ GROUND_STATION_IP = "10.12.34.1"
 GROUND_STATION_PORT = 9000
 QUADCOPTER_PORT = 9100
 
+HAS_MOCAP = False
+FULL_POSITION_SIM = True
+HAS_IMU = False
+
 
 
 ##### START OF ACTUAL CONTROL CODE
@@ -64,8 +68,8 @@ def recieve_data(left, front, right, rear, y,p,r,yr,pr,rr):
 
 Bridge.provide("r", recieve_data) # type: ignore
 
-coms = Communication(QUADCOPTER_PORT, GROUND_STATION_PORT, GROUND_STATION_IP)
-coms.begin()
+ground_station = Communication(QUADCOPTER_PORT, GROUND_STATION_PORT, GROUND_STATION_IP)
+ground_station.begin()
 
 # wait to make sure arduino loop is running
 time.sleep(5)
@@ -80,6 +84,17 @@ qc.addWaypoint(0,0)
 qc.beginPath()
 led_state = False
 
+packet_out_index = 0
+
+last_waypoints = []
+last_height = 0
+last_packet_in_index = 0
+arm = False
+
+total_dropped_packets = 0
+
+
+
 def main():
     while(True):
         start_time = time.perf_counter()
@@ -89,12 +104,43 @@ def main():
         # Bridge.call("set_led_state", led_state)
         # time.sleep(0.5)
 
+        # Pass request from Ground Station to quadcopter control loop:
+        (command, new) = ground_station.get_command()
+        if new:
+            arm = command.arm;
+            if command.use_manual:
+                if not qc.isManual(): qc.beginManualControl()
+                qc.setVelocity(command.velocity)
+
+            if command.has_waypoints:
+                if command.waypoints != last_waypoints:
+                    for i in command.waypoints:
+                        qc.addWaypoint(i["x"], i["y"])
+                    qc.beginPath()
+                    last_waypoints = command.waypoints
+
+            if command.height != last_height:
+                qc.setHeight(command.height)
+                last_height = command.height
+
+            if command.pose is not None and HAS_MOCAP:
+                qc.addVisionMeasurement(command.pose.translation, qc.getTime() - command.pose_latency)
+
+            index = command.packet_index
+            dropped = index - last_packet_in_index
+            if last_packet_in_index > index: dropped = (100-last_packet_in_index) + index
+            print("Dropped ", dropped, " packets")
+            total_dropped_packets += dropped
+
+
         # Pass MCU data to C++ Loop
-        # qc.addIMUMeasurement(Quaternion(imu_yaw,imu_pitch,imu_roll), Vector3D(imu_roll_rate, imu_pitch_rate, imu_yaw_rate))
+        if HAS_IMU: qc.addIMUMeasurement(Quaternion(imu_yaw,imu_pitch,imu_roll), Vector3D(imu_roll_rate, imu_pitch_rate, imu_yaw_rate))
         qc.setMotorVelocities(left_vel, front_vel, right_vel, rear_vel)
 
-        # Call C++ Main Loop
-        qc.updateSimulation();
+        if FULL_POSITION_SIM:
+            qc.updateSimulation();
+        else:
+            qc.updateKinematics();
 
 
         # Pass C++ data to MCU
@@ -104,34 +150,45 @@ def main():
         ref_vel = request.velocity().translation()
         ref_ang_pos = request.position().rotation()
         ref_ang_vel = request.velocity().rotation()
-        Bridge.call( # type: ignore
-            "p",
-            ref_pos.x(),
-            ref_pos.y(),
-            ref_pos.z(),
-            ref_ang_pos.getRoll(),
-            ref_ang_pos.getPitch(),
-            ref_ang_pos.getYaw())
-        Bridge.call( # type: ignore
-            "v",
-            ref_vel.x(),
-            ref_vel.y(),
-            ref_vel.z(),
-            ref_ang_vel.getRoll(),
-            ref_ang_vel.getPitch(),
-            ref_ang_vel.getYaw())
+
+
+
 
         cur_pos = qc.getTranslation()
         cur_vel = qc.getVelocity()
-        Bridge.call( # type: ignore
-            "s",
-            cur_pos.x(),
-            cur_pos.y(),
-            cur_pos.z(),
-            cur_vel.x(),
-            cur_vel.y(),
-            cur_vel.z())
-        
+
+        try:
+            Bridge.call(
+                "a",
+                arm)
+            Bridge.call( # type: ignore
+                "p",
+                ref_pos.x(),
+                ref_pos.y(),
+                ref_pos.z(),
+                ref_ang_pos.getRoll(),
+                ref_ang_pos.getPitch(),
+                ref_ang_pos.getYaw())
+            Bridge.call( # type: ignore
+                "v",
+                ref_vel.x(),
+                ref_vel.y(),
+                ref_vel.z(),
+                ref_ang_vel.getRoll(),
+                ref_ang_vel.getPitch(),
+                ref_ang_vel.getYaw())
+            Bridge.call( # type: ignore
+                "s",
+                cur_pos.x(),
+                cur_pos.y(),
+                cur_pos.z(),
+                cur_vel.x(),
+                cur_vel.y(),
+                cur_vel.z())
+        except:
+            print("WARNING: BRIDGE CALL FAILED")
+            pass
+
 
 
         #send data to ground station:
@@ -139,34 +196,40 @@ def main():
             "motor_speeds": [left_vel, front_vel, right_vel, rear_vel],
             "busy": qc.busy(),
             "target_translation": ref_pos,
-            "target_velocity": ref_vel,
-            "target_angle": ref_ang_pos,
-            "target_angular_rate": ref_ang_vel,
+            "target_velocity": {
+                "x",ref_vel.x(),
+                "y",ref_vel.y(),
+                "z",ref_vel.z()
+            },
+            "target_angle": {
+                "x",ref_ang_pos.x(),
+                "y",ref_ang_pos.y(),
+                "z",ref_ang_pos.z()
+            },
+            "target_angular_rate": {
+                "x",ref_ang_vel.x(),
+                "y",ref_ang_vel.y(),
+                "z",ref_ang_vel.z()
+            },
             "actual_angle": {
                 "x": imu_roll,
                 "y": imu_pitch,
                 "z": imu_yaw
             },
             "message": "hi",
-            "packet_index": 0 #todo
+            "packet_index": packet_index
         }
 
-        coms.send_message(message)
+        ground_station.send_message(message)
 
+        packet_index += 1
+        if packet_index > 100: packet_index = 0
 
 
         #logging for debug:
-        print("REQUEST POSITION:")
-        print(request.position().translation().x())
-        print(request.position().translation().y())
-        print(request.position().translation().z())
-        print("MOTOR SPEED FROM PY:")
-        print("front: ", front_vel)
-        print("right: ", right_vel)
-        print("rear: ", rear_vel)
-        print("left: ",left_vel)
-        print("message:")
-        print(coms.get_message())
+        print("REQUEST POSITION - x:", request.position().translation().x(), " y: ", request.position().translation().y(), " z: ", request.position().translation().z())
+        print("MESSAGE FROM GS:")
+        print(ground_station.get_message_json())
 
         # manage loop time:
         end_time = time.perf_counter()

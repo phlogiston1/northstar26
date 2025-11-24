@@ -116,3 +116,7 @@ void Quadcopter::updateKinematics() {
 void Quadcopter::setMotorVelocities(MotorVelocities vels) {
     state.motor_velocities = vels;
 }
+
+bool Quadcopter::isManual() {
+    return manual;
+}

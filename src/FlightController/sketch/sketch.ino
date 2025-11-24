@@ -421,8 +421,10 @@ void recieve_current_state(
     current_state[3]  = cur_vel_x;
     current_state[4]  = cur_vel_y;
     current_state[5]  = cur_vel_z;
+}
 
-    python_arm_flag = true;
+void recieve_arm(bool arm) {
+    python_arm_flag = arm;
 }
 
 
@@ -460,6 +462,7 @@ void setup() {
     Bridge.provide("p", recieve_reference_pos);
     Bridge.provide("v", recieve_reference_vel);
     Bridge.provide("s", recieve_current_state);
+    Bridge.provide("a", recieve_arm);
     #endif
 
     #ifdef ENABLE_IMU

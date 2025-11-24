@@ -61,6 +61,7 @@ class Quadcopter {
         void setMotorVelocities(MotorVelocities vels);
         double getTime();
         MotorVelocities getMotorVels();
+        bool isManual();
 };
 
 
@@ -131,4 +132,5 @@ extern "C" {
     }
 
     bool Quadcopter_busy(Quadcopter* obj) {return obj->busy();}
+    bool Quadcopter_isManual(Quadcopter* obj) {return obj->isManual();}
 };

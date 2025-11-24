@@ -91,6 +91,8 @@ lib.Quadcopter_addIMUMeasurement.argtypes = [c_void_p, c_void_p, c_void_p]
 lib.Quadcopter_addIMUMeasurement.restype = None
 lib.Quadcopter_busy.argtypes = [c_void_p]
 lib.Quadcopter_busy.restype = c_bool
+lib.Quadcopter_isManual.argtypes = [c_void_p]
+lib.Quadcopter_isManual.restype = c_bool
 
 
 ##### BINDING CLASSES
@@ -225,3 +227,6 @@ class Quadcopter(object):
 
     def busy(self):
         return lib.Quadcopter_busy(self.ptr)
+
+    def isManual(self):
+        return lib.Quadcopter_isManual(self.ptr)
