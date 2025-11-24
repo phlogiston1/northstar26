@@ -18,12 +18,12 @@ from communication import *
 LOOP_TIME = 0.05
 
 GROUND_STATION_IP = "10.12.34.1"
-GROUND_STATION_PORT = 9000
+GROUND_STATION_PORT = 8100
 QUADCOPTER_PORT = 9100
 
 HAS_MOCAP = False
 FULL_POSITION_SIM = True
-HAS_IMU = False
+HAS_IMU = True
 
 
 
@@ -82,24 +82,24 @@ qc.addWaypoint(1,1)
 qc.addWaypoint(2,1)
 qc.addWaypoint(0,0)
 qc.beginPath()
-led_state = False
-
-packet_out_index = 0
-
-last_waypoints = []
-last_height = 0
-last_packet_in_index = 0
-arm = False
-
-total_dropped_packets = 0
 
 
 
 def main():
+
+    led_state = False
+    
+    
+    last_waypoints = []
+    last_height = 0
+    last_packet_in_index = 0
+    arm = False
+    
+    total_dropped_packets = 0
+    packet_out_index = 0
     while(True):
         start_time = time.perf_counter()
         # toggle led for debugging
-        global led_state
         led_state = not led_state
         # Bridge.call("set_led_state", led_state)
         # time.sleep(0.5)
@@ -195,35 +195,35 @@ def main():
         message = {
             "motor_speeds": [left_vel, front_vel, right_vel, rear_vel],
             "busy": qc.busy(),
-            "target_translation": ref_pos,
-            "target_velocity": {
-                "x",ref_vel.x(),
-                "y",ref_vel.y(),
-                "z",ref_vel.z()
-            },
-            "target_angle": {
-                "x",ref_ang_pos.x(),
-                "y",ref_ang_pos.y(),
-                "z",ref_ang_pos.z()
-            },
-            "target_angular_rate": {
-                "x",ref_ang_vel.x(),
-                "y",ref_ang_vel.y(),
-                "z",ref_ang_vel.z()
-            },
-            "actual_angle": {
-                "x": imu_roll,
-                "y": imu_pitch,
-                "z": imu_yaw
-            },
+            #"target_translation": ref_pos,
+            #"target_velocity": {
+            #    "x",ref_vel.x(),
+            #    "y",ref_vel.y(),
+            #    "z",ref_vel.z()
+            #},
+            #"target_angle": {
+            #    "x",ref_ang_pos.x(),
+            #    "y",ref_ang_pos.y(),
+            #    "z",ref_ang_pos.z()
+            #},
+            #"target_angular_rate": {
+            #    "x",ref_ang_vel.x(),
+            #    "y",ref_ang_vel.y(),
+            #    "z",ref_ang_vel.z()
+            #},
+            #"actual_angle": {
+            #    "x": imu_roll,
+            #    "y": imu_pitch,
+            #    "z": imu_yaw
+            #},
             "message": "hi",
-            "packet_index": packet_index
+            "packet_index": packet_out_index
         }
 
         ground_station.send_message(message)
 
-        packet_index += 1
-        if packet_index > 100: packet_index = 0
+        packet_out_index += 1
+        if packet_out_index > 100: packet_out_index = 0
 
 
         #logging for debug:

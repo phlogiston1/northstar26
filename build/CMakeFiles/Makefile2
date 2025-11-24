@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/arduino/Documents/northstar26
+CMAKE_SOURCE_DIR = /home/arduino/Desktop/northstar26
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/arduino/Documents/northstar26/build
+CMAKE_BINARY_DIR = /home/arduino/Desktop/northstar26/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -85,14 +85,14 @@ clean: CMakeFiles/quadcopter.dir/clean
 CMakeFiles/quadcopter.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/arduino/Documents/northstar26/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Built target quadcopter"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/arduino/Desktop/northstar26/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Built target quadcopter"
 .PHONY : CMakeFiles/quadcopter.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/quadcopter.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/arduino/Documents/northstar26/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/arduino/Desktop/northstar26/build/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/quadcopter.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/arduino/Documents/northstar26/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/arduino/Desktop/northstar26/build/CMakeFiles 0
 .PHONY : CMakeFiles/quadcopter.dir/rule
 
 # Convenience name for target.
@@ -102,7 +102,7 @@ quadcopter: CMakeFiles/quadcopter.dir/rule
 # codegen rule for target.
 CMakeFiles/quadcopter.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/quadcopter.dir/build.make CMakeFiles/quadcopter.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/arduino/Documents/northstar26/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Finished codegen for target quadcopter"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/arduino/Desktop/northstar26/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Finished codegen for target quadcopter"
 .PHONY : CMakeFiles/quadcopter.dir/codegen
 
 # clean rule for target.
