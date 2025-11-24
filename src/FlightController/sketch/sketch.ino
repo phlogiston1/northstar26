@@ -11,16 +11,16 @@ double loop_time = 0.01*1000; //convert to millis
 
 //pin numbers
 #define HARDWARE_SAFETY_PIN 13
-#define LEFT_PWM_PIN 0
-#define FRONT_PWM_PIN 0
-#define RIGHT_PWM_PIN 0
-#define REAR_PWM_PIN 0
+#define LEFT_PWM_PIN 5
+#define FRONT_PWM_PIN 6
+#define RIGHT_PWM_PIN 9
+#define REAR_PWM_PIN 10
 
 //motor control constants
 #define MIN_PULSE 1000
 #define MAX_PULSE 2000
 #define KV 1
-#define KA 1
+#define KA 0
 
 //safety constants:
 #define BRIDGE_STALE_MS 200
@@ -31,9 +31,9 @@ double loop_time = 0.01*1000; //convert to millis
 
 // Can comment out for test runs on different platforms
 // (which may not support these libraries/hardware)
-// #define ENABLE_BRIDGE
+#define ENABLE_BRIDGE
 // #define ENABLE_IMU
-// #define ENABLE_MOTORS
+#define ENABLE_MOTORS
 // #define ENABLE_SERIAL_DEBUGGING
 //TODO: set motors to hover velocity without requiring signal from linux processor
 // #define COMS_FREE_HOVER
