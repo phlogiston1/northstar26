@@ -32,7 +32,7 @@ double loop_time = 0.01*1000; //convert to millis
 // Can comment out for test runs on different platforms
 // (which may not support these libraries/hardware)
 #define ENABLE_BRIDGE
-// #define ENABLE_IMU
+#define ENABLE_IMU
 #define ENABLE_MOTORS
 // #define ENABLE_SERIAL_DEBUGGING
 //TODO: set motors to hover velocity without requiring signal from linux processor
@@ -500,7 +500,7 @@ void loop() {
         bool bridge_ok = true;
     #endif
     #ifdef ENABLE_IMU
-        unsigned long IMU_delay = millis() - imu_state.timestamp;
+        unsigned long IMU_delay = millis() - imu_state.timestamp_ms;
         if(IMU_delay > IMU_NO_DATA_MS) imu_status = NO_SIGNAL;
         else if(IMU_delay > IMU_STALE_MS) imu_status = STALE_IMU;
         else imu_status = STALE_IMU;
@@ -540,7 +540,7 @@ void loop() {
         }
 
         if(imu.fetch()) {
-            imu_state = getState();
+            imu_state = imu.getState();
             if(imu_state.is_new) imu_status = UP_TO_DATE
         }
 

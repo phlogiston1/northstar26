@@ -1,59 +1,87 @@
 #ifndef WT901_IMU_H
 #define WT901_IMU_H
 
+
 #include <Arduino.h>
 #include <Wire.h>
+
+
+// ================= Register Map =================
+namespace WT901Reg {
+    static const uint8_t ANGLE = 0x3D; // 6 bytes
+    static const uint8_t GYRO = 0x43; // 6 bytes
+    static const uint8_t ACCEL = 0x35; // 6 bytes
+    static const uint8_t MAG = 0x4B; // 6 bytes
+    static const uint8_t QUAT = 0x51; // 8 bytes
+    static const uint8_t TEMP = 0x41; // 2 bytes
+    static const uint8_t BULK_START = 0x35; // Bulk begins at Accel X L
+};
+
 
 struct Vector3 {
     float x, y, z;
 };
 
+
 struct IMUState {
-    Vector3 angles;    // deg
-    Vector3 gyro;      // deg/s
-    Vector3 accel;     // g
-    Vector3 mag;       // uT (raw scale)
-    float quaternion[4]; // w,x,y,z (unitless)
-    float temperature; // C
-    unsigned long timestamp_ms; // millis()
-    bool is_new;       // true if state updated since last get
+    Vector3 angles;
+    Vector3 gyro;
+    Vector3 accel;
+    Vector3 mag;
+    float quaternion[4];
+    float temperature;
+    unsigned long timestamp_ms;
+    bool is_new;
 };
+
 
 class WT901_IMU {
-public:
-    WT901_IMU(uint8_t address = 0x50);
-    bool begin();
+    public:
+        // ===== Configuration API =====
+        bool setBaudRate(uint16_t baud);
+        bool setOutputRate(uint8_t hz);
+        bool saveConfig();
+        bool restoreFactory();
 
-    // Blocking reads
-    bool readAngles(Vector3 &ang);       // Roll, Pitch, Yaw (deg)
-    bool readGyro(Vector3 &gyro);        // deg/sec
-    bool readAccel(Vector3 &accel);      // g
-    bool readMag(Vector3 &mag);          // uT (raw)
-    bool readQuaternion(float q[4]);     // w,x,y,z (unitless)
-    bool readTemperature(float &temp);   // Celsius
+        WT901_IMU(uint8_t address = 0x50);
+        bool begin();
 
-    // Non-blocking API
-    // Call update() periodically (e.g. every sample period). It will issue the I2C read request.
-    // Then call fetch() repeatedly (or in the next loop) until it returns true, which means the
-    // requested bytes have been received and decoded into the internal state.
-    bool update(); // request a bulk read (does not copy into state)
-    bool fetch();  // returns true when new state available (decodes into internal state)
 
-    // Access latest decoded state (copy). After calling getState(), is_new will be cleared.
-    IMUState getState();
+        // Blocking reads
+        bool readAngles(Vector3 &ang);
+        bool readGyro(Vector3 &gyro);
+        bool readAccel(Vector3 &accel);
+        bool readMag(Vector3 &mag);
+        bool readQuaternion(float q[4]);
+        bool readTemperature(float &temp);
 
-private:
-    uint8_t addr;
-    float scale;
 
-    // low-level helpers
-    bool readVector(uint8_t reg, Vector3 &out, float scale);
-    bool readRawBytes(uint8_t reg, uint8_t *buf, uint8_t len);
+        // Non-blocking bulk read interface
+        bool update();
+        bool fetch();
 
-    // internal non-blocking buffer & state
-    static const uint8_t BULK_LEN = 33; // full accel+gyro+angle+temp+quat (example)
-    uint8_t nb_buf[BULK_LEN];
-    IMUState state;
+
+        IMUState getState();
+
+
+    private:
+        // Low‑level config writer
+        bool writeConfigCmd(uint8_t cmd, uint16_t value = 0);
+
+
+
+
+        uint8_t addr;
+
+
+        bool readVector(uint8_t reg, Vector3 &out, float scale);
+        bool readRawBytes(uint8_t reg, uint8_t *buf, uint8_t len);
+
+
+        static const uint8_t BULK_LEN = 33;
+        uint8_t nb_buf[BULK_LEN];
+        IMUState state;
 };
+
 
 #endif
