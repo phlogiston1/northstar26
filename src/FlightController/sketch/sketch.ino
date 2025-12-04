@@ -81,7 +81,7 @@ const double LQR_KNEG[4][12] = {
 #endif
 
 #ifdef ENABLE_IMU
-#include "WT901_IMU.h"
+#include "IMU.h"
 #endif
 
 #ifdef ENABLE_MOTORS
@@ -169,17 +169,15 @@ double motor_velocities[4] = {0,0,0,0};
 double previous_motor_velocities[4] = {0,0,0,0};
 
 #ifdef ENABLE_IMU
-WT901_IMU imu;
-IMUState imu_state = IMUState{
-    Vector3{0,0,0},
-    Vector3{0,0,0},
-    Vector3{0,0,0},
-    Vector3{0,0,0},
-    {0,0,0,0},
+WT901 imu;
+WT901::Data imu_state = WT901::Data{
+    0,0,0,
+    0,0,0,
+    0,0,0,
+    0,0,0,
     0,
-    0,
-    false
-}
+    0
+};
 #endif
 
 #ifdef ENABLE_MOTORS
@@ -531,25 +529,28 @@ void loop() {
 
     // Get IMU data, store in current state
     #ifdef ENABLE_IMU
-        if(!imu.update()) {
-            imu_status = NO_SIGNAL;
+        // if(!imu.update()) {
+        //     imu_status = NO_SIGNAL;
+        // } if {
+        imu.requestData();
+        if(millis() - imu_state.timestamp_ms > 0.2) {
+            imu_status = STALE_IMU;
         } else {
-            if(millis() - imu_state.timestamp_ms > 0.2) {
-                imu_status = STALE_IMU;
-            }
+            imu_status = UP_TO_DATE
         }
+        // }
 
-        if(imu.fetch()) {
+        if(imu.update()) {
             imu_state = imu.getState();
-            if(imu_state.is_new) imu_status = UP_TO_DATE
+            // if(imu_state.is_new) imu_status = UP_TO_DATE;
         }
 
-        current_state[6] = imu_state.angles.x;
-        current_state[7] = imu_state.angles.y;
-        current_state[8] = imu_state.angles.z;
-        current_state[9] = imu_state.gyro.x;
-        current_state[10] = imu_state.gyro.y;
-        current_state[11] = imu_state.gyro.z;
+        current_state[6] = imu_state.roll;
+        current_state[7] = imu_state.pitch;
+        current_state[8] = imu_state.yaw;
+        current_state[9] = imu_state.gyro_x;
+        current_state[10] = imu_state.gyro_y;
+        current_state[11] = imu_state.gyro_z;
     #endif
 
     if(safety_status = GENTLE_CRASH_FAULT) {
